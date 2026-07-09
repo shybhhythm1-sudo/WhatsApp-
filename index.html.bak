@@ -6,12 +6,12 @@
 <title>Heye - هي</title>
 
 <!-- PWA -->
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E0B14">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="هيي">
-<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -369,7 +369,13 @@
       <div class="nav-item" data-nav="profile" style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 20px;cursor:pointer;"><svg viewBox="0 0 24 24" fill="none" style="width:24px;height:24px;"><circle cx="12" cy="8" r="4" stroke="#8A7F99" stroke-width="2"/><path d="M4 20c0-3.5 3.5-6 8-6s8 2.5 8 6" stroke="#8A7F99" stroke-width="2" stroke-linecap="round"/></svg><span style="font-size:11px;color:var(--mute-2);font-weight:600;">حسابي</span></div>
     </div>
 
-    <!-- تم حذف بانر تفعيل الإشعارات من هنا -->
+    <!-- بانر تفعيل الإشعارات -->
+    <div class="notif-banner" id="notif-banner">
+      <div class="ib-icon">🔔</div>
+      <div class="ib-text"><div class="ib-title">فعّل الإشعارات</div><div class="ib-sub">عشان توصلك أي رسالة جديدة فورًا</div></div>
+      <button class="ib-btn" id="btn-enable-notif">تفعيل</button>
+      <button class="ib-close" id="btn-close-notif-banner">✕</button>
+    </div>
 
     <!-- بانر التثبيت (PWA) -->
     <div class="install-banner" id="install-banner">
@@ -531,7 +537,7 @@ function generateUsernameSync(n){ return `${generateUsernameBase(n)}${Math.floor
 async function registerServiceWorker(){
   if (!('serviceWorker' in navigator)) return null;
   try {
-    const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    const reg = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
     state.swRegistration = reg;
     return reg;
   } catch(e){ console.error('SW registration failed', e); return null; }
@@ -587,33 +593,20 @@ async function saveFcmToken(){
   } catch(e){ console.error('FCM token error', e); return null; }
 }
 
-async function requestNotificationPermissionDirectly(){
-  if (!('Notification' in window)) {
-    showToast('المتصفح ده مش بيدعم الإشعارات', 'error');
-    return false;
-  }
+async function enableNotifications(){
+  if (!('Notification' in window)) { showToast('المتصفح ده مش بيدعم الإشعارات', 'error'); return; }
   try {
     const perm = await Notification.requestPermission();
     if (perm === 'granted') {
       await saveFcmToken();
-      showToast('✅ تم تفعيل الإشعارات بنجاح', 'success');
+      showToast('✅ تم تفعيل الإشعارات', 'success');
+      hideNotifBanner();
       updateNotifStatusCard();
-      return true;
     } else if (perm === 'denied') {
-      showToast('تم رفض الإذن بالإشعارات', 'error');
+      showToast('تم رفض الإذن. ممكن تفعّله من إعدادات المتصفح', 'error');
       updateNotifStatusCard();
-      return false;
-    } else {
-      // 'default' - المستخدم اختار يتجاهل أو يقفل الـ popup
-      showToast('لم يتم تفعيل الإشعارات بعد، يمكنك تفعيلها لاحقاً من حسابي', '');
-      updateNotifStatusCard();
-      return false;
     }
-  } catch(e) {
-    console.error('Notification request failed', e);
-    showToast('حصل خطأ أثناء طلب إذن الإشعارات', 'error');
-    return false;
-  }
+  } catch(e){ console.error(e); showToast('حصل خطأ أثناء تفعيل الإشعارات', 'error'); }
 }
 
 // استقبال رسالة foreground (التطبيق مفتوح وواقف عليه) - بنعرضها كـ toast بدل الإشعار المكرر
@@ -629,7 +622,20 @@ function listenForegroundMessages(){
   });
 }
 
-// ============ NOTIF BANNER (تم إلغاؤه واستبداله بطلب مباشر عند الدخول) ============
+// ============ NOTIF BANNER (طلب الإذن بشكل ودي بدل popup مفاجئ) ============
+function maybeShowNotifBanner(){
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'default') return;
+  if (localStorage.getItem('heye_notif_banner_dismissed') === '1') return;
+  document.getElementById('notif-banner').classList.add('show');
+}
+
+function hideNotifBanner(){ document.getElementById('notif-banner').classList.remove('show'); }
+
+document.getElementById('btn-enable-notif').addEventListener('click', enableNotifications);
+document.getElementById('btn-close-notif-banner').addEventListener('click', ()=>{
+  hideNotifBanner(); localStorage.setItem('heye_notif_banner_dismissed', '1');
+});
 
 function updateNotifStatusCard(){
   getNotificationPermissionState().then(perm => {
@@ -643,14 +649,9 @@ function updateNotifStatusCard(){
 
 document.getElementById('notif-status-card').addEventListener('click', async ()=>{
   const perm = await getNotificationPermissionState();
-  if (perm === 'default' || perm === 'denied') {
-    // لو الإذن لسه متطلبش أو اترفض، نحاول نطلبه تاني مباشر
-    await requestNotificationPermissionDirectly();
-  } else if (perm === 'granted') {
-    showToast('الإشعارات شغالة بالفعل ✅', 'success');
-  } else {
-    showToast('المتصفح لا يدعم الإشعارات', '');
-  }
+  if (perm === 'default') enableNotifications();
+  else if (perm === 'denied') showToast('لازم تفعّل الإشعارات من إعدادات المتصفح يدويًا', '');
+  else showToast('الإشعارات شغالة بالفعل ✅', 'success');
 });
 
 // ============ PWA INSTALL PROMPT ============
@@ -735,8 +736,9 @@ function enterApp(){
   document.getElementById('pc-name').textContent=state.displayName; document.getElementById('pc-username').textContent='@'+state.username;
   goTo('main'); setupOnlinePresence(); listenToOnlineUsers(); listenToChatList();
   listenForegroundMessages();
-  // أهم تعديل: طلب إذن الإشعارات مباشرة بعد الدخول
-  requestNotificationPermissionDirectly();
+  maybeShowNotifBanner();
+  // لو الإذن أصلاً متاح من قبل، سجل التوكن تلقائي (مثلاً بعد تحديث الصفحة)
+  getNotificationPermissionState().then(perm => { if (perm === 'granted') saveFcmToken(); });
 }
 
 // ============ ONLINE PRESENCE ============
@@ -876,29 +878,11 @@ async function sendMessage(){
   clearTimeout(state.typingTimeout);
   try {
     const { db, rtdb } = fb;
-    const now = Date.now(); // استخدام timestamp بصيغة milliseconds للتوافق مع الكود الجديد
-
-    // 1. حفظ الرسالة في مسار messages/{chatId} باستخدام push
-    const messageData = {
-      text: val,
-      senderId: state.uid,
-      receiverId: state.currentChatUser.id,
-      senderName: state.displayName,
-      senderUsername: state.username,
-      timestamp: now,
-      delivered: false,
-      read: false
-    };
-    await rtdb.push(rtdb.ref(db, "messages/" + state.currentChatId), messageData);
-
-    // 2. تحديث معلومات المحادثة في مسار chats/{chatId}
-    const chatUpdate = {
-      lastMessage: val,
-      lastMessageAt: now,
-      lastSender: state.uid
-    };
-    await rtdb.update(rtdb.ref(db, "chats/" + state.currentChatId), chatUpdate);
-
+    const now = new Date().toISOString();
+    const newMsgRef = rtdb.push(rtdb.ref(db, `chats/${state.currentChatId}/messages`));
+    await rtdb.set(newMsgRef, { senderId: state.uid, senderName: state.displayName, text: val, createdAt: now, deliveredAt: now });
+    await rtdb.update(rtdb.ref(db, `chats/${state.currentChatId}`), { lastMessage: val, lastMessageAt: now, lastSenderId: state.uid });
+    // ملحوظة: إرسال الـ Push الفعلي بيحصل من Cloud Function بتراقب المسار ده تلقائيًا
     state.msgCount++; updateProfileStats();
   } catch(e) { console.error('Send failed:', e); showToast('الرسالة متبعتتش، جرب تاني', 'error'); }
   finally { sendBtnEl.disabled = false; composerInputEl.focus(); }
@@ -937,8 +921,8 @@ document.getElementById('delete-for-all').addEventListener('click', async ()=>{
   hideDeleteMenu();
   try {
     const { db, rtdb } = fb;
-    // حذف الرسالة نهائياً من المسار الجديد messages/{chatId}/{msgId}
-    await rtdb.remove(rtdb.ref(db, `messages/${state.currentChatId}/${state.selectedMsgId}`));
+    // حذف الرسالة نهائياً من قاعدة البيانات
+    await rtdb.remove(rtdb.ref(db, `chats/${state.currentChatId}/messages/${state.selectedMsgId}`));
     showToast('🗑️ تم حذف الرسالة للجميع', 'success');
   } catch(e){ console.error('Delete failed:', e); showToast('مش قادرين نحذف الرسالة', 'error'); }
 });
@@ -949,8 +933,8 @@ document.getElementById('delete-for-me').addEventListener('click', async ()=>{
   hideDeleteMenu();
   try {
     const { db, rtdb } = fb;
-    // إضافة معرف المستخدم لقائمة المحذوف عنده فقط في المسار الجديد
-    await rtdb.update(rtdb.ref(db, `messages/${state.currentChatId}/${state.selectedMsgId}`), {
+    // إضافة معرف المستخدم لقائمة المحذوف عنده فقط
+    await rtdb.update(rtdb.ref(db, `chats/${state.currentChatId}/messages/${state.selectedMsgId}`), {
       [`deletedFor.${state.uid}`]: true
     });
     showToast('🙈 تم حذف الرسالة عندك فقط', 'success');
@@ -959,54 +943,40 @@ document.getElementById('delete-for-me').addEventListener('click', async ()=>{
 
 // ============ READ RECEIPTS ============
 async function markMessagesAsRead(chatId){
-  const {db,rtdb}=fb;
-  const snap=await rtdb.get(rtdb.ref(db,`messages/${chatId}`));
-  if(!snap.exists()) return;
-  const messages=snap.val();
-  const now=Date.now(); // استخدام timestamp بصيغة milliseconds للتوافق
-  const updates={};
-  for(const[msgId,msg]of Object.entries(messages)){
-    if(msg.senderId!==state.uid && !msg.read) {
-      updates[`messages/${chatId}/${msgId}/read`]=true;
-      updates[`messages/${chatId}/${msgId}/readAt`]=now;
-    }
-  }
+  const {db,rtdb}=fb; const snap=await rtdb.get(rtdb.ref(db,`chats/${chatId}/messages`));
+  if(!snap.exists()) return; const messages=snap.val(); const now=new Date().toISOString(); const updates={};
+  for(const[msgId,msg]of Object.entries(messages)){ if(msg.senderId!==state.uid&&!msg.readAt) updates[`chats/${chatId}/messages/${msgId}/readAt`]=now; }
   if(Object.keys(updates).length>0) await rtdb.update(rtdb.ref(db),updates);
 }
 
 function getMessageStatusIcon(msg){
-  if(msg.read){ return `<span class="msg-status check-read"><svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="check-icon" viewBox="0 0 24 24" fill="none" style="margin-right:-8px;"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`; }
-  else if(msg.delivered){ return `<span class="msg-status check-delivered"><svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="check-icon" viewBox="0 0 24 24" fill="none" style="margin-right:-8px;"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`; }
+  if(msg.readAt){ return `<span class="msg-status check-read"><svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="check-icon" viewBox="0 0 24 24" fill="none" style="margin-right:-8px;"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`; }
+  else if(msg.deliveredAt){ return `<span class="msg-status check-delivered"><svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="check-icon" viewBox="0 0 24 24" fill="none" style="margin-right:-8px;"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`; }
   else { return `<span class="msg-status check-sent"><svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`; }
 }
 
 function listenToMessages(chatId){
-  if(state.unsubMessages){ fb.rtdb.off(fb.rtdb.ref(fb.db,`messages/${chatId}`)); state.unsubMessages=null; }
+  if(state.unsubMessages){ fb.rtdb.off(fb.rtdb.ref(fb.db,`chats/${chatId}/messages`)); state.unsubMessages=null; }
   const {db,rtdb}=fb; const container=document.getElementById('messages-container');
   const otherName=state.currentChatUser?.displayName||'الشخص';
   container.innerHTML=`<div class="chat-empty"><div class="empty-avatar">${otherName.charAt(0).toUpperCase()}</div><h3>${escapeHtml(otherName)}</h3><p>دي بداية محادثتكم. قول حلوة وابدأ 👋</p></div>`;
-  const msgsRef=rtdb.query(rtdb.ref(db,`messages/${chatId}`),rtdb.limitToLast(100));
+  const msgsRef=rtdb.query(rtdb.ref(db,`chats/${chatId}/messages`),rtdb.limitToLast(100));
   state.unsubMessages=rtdb.onValue(msgsRef,(snap)=>{
     if(!snap.exists()){ container.innerHTML=`<div class="chat-empty"><div class="empty-avatar">${otherName.charAt(0).toUpperCase()}</div><h3>${escapeHtml(otherName)}</h3><p>دي بداية محادثتكم. قول حلوة وابدأ 👋</p></div>`; return; }
     markMessagesAsRead(chatId);
     const messages=snap.val(); let lastDate='',html='';
-    const sorted=Object.entries(messages).sort((a,b)=>{
-      const tsA = a[1].timestamp || a[1].createdAt || '';
-      const tsB = b[1].timestamp || b[1].createdAt || '';
-      return tsA.toString().localeCompare(tsB.toString());
-    });
+    const sorted=Object.entries(messages).sort((a,b)=>(a[1].createdAt||'').localeCompare(b[1].createdAt||''));
     sorted.forEach(([msgId,m])=>{
       // تخطي الرسائل المحذوفة عندي فقط
       const isDeletedForMe = m.deletedFor && m.deletedFor[state.uid] === true;
       if(isDeletedForMe) return;
       
-      const msgTimestamp = m.timestamp || m.createdAt;
-      const msgDate = msgTimestamp ? new Date(msgTimestamp).toLocaleDateString('ar-EG',{month:'long',day:'numeric'}) : '';
+      const msgDate=m.createdAt?new Date(m.createdAt).toLocaleDateString('ar-EG',{month:'long',day:'numeric'}):'';
       if(msgDate&&msgDate!==lastDate){ html+=`<div class="day-chip">${msgDate}</div>`; lastDate=msgDate; }
       const mine=m.senderId===state.uid;
-      const time=msgTimestamp ? new Date(msgTimestamp).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'}):'';
+      const time=m.createdAt?new Date(m.createdAt).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'}):'';
       const statusIcon=mine?getMessageStatusIcon(m):'';
-      html+=`<div class="bubble-row ${mine?'me':'them'}"><div class="bubble ${mine?'me':'them'}" data-msgid="${msgId}" data-sent="${msgTimestamp||''}" data-delivered="${m.delivered||''}" data-read="${m.read||''}" data-sender="${m.senderId}" data-mine="${mine}">${escapeHtml(m.text)}<div class="msg-footer"><span class="msg-time">${time}</span>${statusIcon}</div></div></div>`;
+      html+=`<div class="bubble-row ${mine?'me':'them'}"><div class="bubble ${mine?'me':'them'}" data-msgid="${msgId}" data-sent="${m.createdAt||''}" data-delivered="${m.deliveredAt||''}" data-read="${m.readAt||''}" data-sender="${m.senderId}" data-mine="${mine}">${escapeHtml(m.text)}<div class="msg-footer"><span class="msg-time">${time}</span>${statusIcon}</div></div></div>`;
     });
     container.innerHTML=html; container.scrollTop=container.scrollHeight;
     
@@ -1037,16 +1007,16 @@ function listenToMessages(chatId){
 }
 
 function showMessageInfo(bubbleElement){
-  document.getElementById('info-sent').textContent=bubbleElement.dataset.sent?new Date(parseInt(bubbleElement.dataset.sent)).toLocaleString('ar-EG',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'}):'-';
-  document.getElementById('info-delivered').textContent=bubbleElement.dataset.delivered==='true'?'تم التسليم':'لم يتم التسليم';
-  document.getElementById('info-read').textContent=bubbleElement.dataset.read==='true'?'تمت القراءة':'لم تُقرأ بعد';
+  document.getElementById('info-sent').textContent=bubbleElement.dataset.sent?new Date(bubbleElement.dataset.sent).toLocaleString('ar-EG',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'}):'-';
+  document.getElementById('info-delivered').textContent=bubbleElement.dataset.delivered?new Date(bubbleElement.dataset.delivered).toLocaleString('ar-EG',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'}):'لم يتم التسليم';
+  document.getElementById('info-read').textContent=bubbleElement.dataset.read?new Date(bubbleElement.dataset.read).toLocaleString('ar-EG',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'}):'لم تُقرأ بعد';
   document.getElementById('message-info-popup').classList.add('show'); document.getElementById('popup-overlay').classList.add('show');
 }
 
 document.getElementById('popup-overlay').addEventListener('click',()=>{ document.getElementById('message-info-popup').classList.remove('show'); document.getElementById('popup-overlay').classList.remove('show'); });
 
 document.getElementById('btn-back-chat').addEventListener('click',()=>{
-  if(state.unsubMessages){ fb.rtdb.off(fb.rtdb.ref(fb.db,`messages/${state.currentChatId}`)); state.unsubMessages=null; }
+  if(state.unsubMessages){ fb.rtdb.off(fb.rtdb.ref(fb.db,`chats/${state.currentChatId}/messages`)); state.unsubMessages=null; }
   if(state.unsubTyping){ fb.rtdb.off(fb.rtdb.ref(fb.db,`chats/${state.currentChatId}/typing`)); state.unsubTyping=null; }
   state.currentChatUser=null; state.currentChatId=null; goTo('main');
 });
@@ -1057,14 +1027,13 @@ function listenToChatList(){
   const {db,rtdb}=fb; const listEl=document.getElementById('chat-list');
   state.unsubChats=rtdb.onValue(rtdb.query(rtdb.ref(db,'chats'),rtdb.limitToFirst(100)),(snap)=>{
     if(!snap.exists()){ listEl.innerHTML=`<div class="empty-state"><svg class="e-icon" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="#8A7F99" stroke-width="1.5"/></svg><h3>📭 مفيش محادثات لسه</h3><p>دور على صديق من فوق وابدأ محادثة جديدة</p></div>`; state.chatCount=0; updateProfileStats(); return; }
-    const chats=snap.val(); const myChats=Object.entries(chats).filter(([id,c])=>c.participants?.[state.uid]).sort((a,b)=>(b[1].lastMessageAt||'').toString().localeCompare((a[1].lastMessageAt||'').toString()));
+    const chats=snap.val(); const myChats=Object.entries(chats).filter(([id,c])=>c.participants?.[state.uid]).sort((a,b)=>(b[1].lastMessageAt||'').localeCompare(a[1].lastMessageAt||''));
     state.chatCount=myChats.length; updateProfileStats();
     if(!myChats.length){ listEl.innerHTML=`<div class="empty-state"><svg class="e-icon" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="#8A7F99" stroke-width="1.5"/></svg><h3>📭 مفيش محادثات لسه</h3><p>دور على صديق من فوق وابدأ محادثة جديدة</p></div>`; return; }
     let html='<div class="section-header">المحادثات الأخيرة</div>';
     myChats.forEach(([chatId,c])=>{
       const otherUid=Object.keys(c.participants).find(p=>p!==state.uid), otherName=c.participantNames?.[otherUid]||'مستخدم';
-      const time=c.lastMessageAt?formatTime(c.lastMessageAt):'';
-      const isUnread=c.lastSender && c.lastSender !== state.uid; // استخدام lastSender بدلاً من lastSenderId
+      const time=c.lastMessageAt?formatTime(c.lastMessageAt):'', isUnread=c.lastSenderId&&c.lastSenderId!==state.uid;
       const isOnline=state.onlineUsers[otherUid]?.online||false;
       html+=`<div class="chat-row ${isUnread?'unread':''}" data-uid="${otherUid}" data-name="${escapeAttr(otherName)}"><div class="chat-avatar-wrapper"><div class="chat-avatar">${otherName.charAt(0).toUpperCase()}</div><div class="online-indicator ${isOnline?'show':''}"></div></div><div class="chat-info"><div class="chat-info-top"><span class="chat-name">${escapeHtml(otherName)}</span><span class="chat-time">${time}</span></div><div class="chat-info-bottom"><span class="chat-preview">${escapeHtml(c.lastMessage||'ابدأ المحادثة 👋')}</span>${isUnread?'<span class="chat-badge">جديد</span>':''}</div></div></div>`;
     });
