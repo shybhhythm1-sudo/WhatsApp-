@@ -6,12 +6,12 @@
 <title>Heye - هي</title>
 
 <!-- PWA -->
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E0B14">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="هيي">
-<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -537,7 +537,7 @@ function generateUsernameSync(n){ return `${generateUsernameBase(n)}${Math.floor
 async function registerServiceWorker(){
   if (!('serviceWorker' in navigator)) return null;
   try {
-    const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    const reg = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
     state.swRegistration = reg;
     return reg;
   } catch(e){ console.error('SW registration failed', e); return null; }
