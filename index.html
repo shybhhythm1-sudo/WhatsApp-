@@ -388,7 +388,7 @@
   .composer-input-shell .composer-input{border:none;background:transparent;padding:8px 0;min-height:24px;}
   .composer-input-shell .composer-input:focus{border:none;box-shadow:none;}
 
-  .mic-btn{width:44px;height:44px;border-radius:50%;border:none;flex-shrink:0;background:linear-gradient(160deg, var(--gold-soft), var(--gold));display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 15px rgba(201,162,75,.4);transition:transform .15s ease;}
+  .mic-btn{width:44px;height:44px;border-radius:50%;border:none;flex-shrink:0;background:linear-gradient(160deg, var(--gold-soft), var(--gold));display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 15px rgba(201,162,75,.4);transition:transform .15s ease;touch-action:none;user-select:none;-webkit-user-select:none;}
   .mic-btn svg{width:19px;height:19px;}
   .mic-btn.recording{background:linear-gradient(160deg, var(--danger), #B54B39);animation:micPulse 1.4s ease-in-out infinite;}
   @keyframes micPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
@@ -400,6 +400,7 @@
   .voice-rec-timer{font-size:14px;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;flex-shrink:0;}
   .voice-rec-hint{flex:1;font-size:12.5px;color:var(--mute);text-align:center;}
   .voice-rec-cancel{flex-shrink:0;font-size:13px;color:var(--danger);font-weight:700;background:none;border:none;padding:4px 8px;}
+  .voice-rec-sending{flex:1;font-size:12.5px;color:var(--gold-soft);text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;}
 
   /* Voice message bubble */
   .voice-msg{display:flex;align-items:center;gap:10px;min-width:190px;padding:4px 2px;}
@@ -651,9 +652,9 @@
 
       <div class="voice-recording-bar" id="voice-recording-bar">
         <button class="voice-rec-cancel" id="voice-rec-cancel">إلغاء</button>
-        <div class="voice-rec-hint">اسحب لأعلى للإلغاء</div>
+        <div class="voice-rec-hint" id="voice-rec-hint">اسحب لأعلى للإلغاء</div>
         <div class="voice-rec-timer" id="voice-rec-timer">0:00</div>
-        <div class="voice-rec-dot"></div>
+        <div class="voice-rec-dot" id="voice-rec-dot"></div>
       </div>
 
       <button class="mic-btn" id="btn-send" data-mode="mic">
@@ -706,8 +707,6 @@
   window.__heye = { db, storage, rtdb: { ref, set, get, update, push, onValue, off, query, limitToFirst, limitToLast, onDisconnect, serverTimestamp, remove }, storageApi: { storageRef, uploadBytes, getDownloadURL } };
 
   // ============ FCM (الإشعارات) ============
-  // 🔑 غيّر القيمة دي بمفتاح الـ VAPID بتاعك من Firebase Console
-  // Project settings -> Cloud Messaging -> Web Push certificates -> Generate key pair
   window.__HEYE_VAPID_KEY__ = "BAzZbRuwIHTBdFwHtD3JVXg-1Ku18Hy3uZFGv_Qvz6Y3nONEhPrgEpviK4Yr2BjJOReqX1CeYJP7AFZnILjN7j8";
 
   isSupported().then((supported) => {
@@ -791,10 +790,8 @@ async function registerServiceWorker(){
   } catch(e){ console.error('SW registration failed', e); return null; }
 }
 
-// استقبال رسالة من الـ Service Worker لما يدوس المستخدم على إشعار
 navigator.serviceWorker?.addEventListener('message', (event) => {
   if (event.data?.type === 'OPEN_CHAT' && event.data.chatId) {
-    // هنحاول نفتح المحادثة لو عندنا بيانات المستخدم التاني محفوظة
     tryOpenChatFromNotification(event.data.chatId);
   }
 });
@@ -817,7 +814,7 @@ async function tryOpenChatFromNotification(chatId){
 // ============ NOTIFICATIONS PERMISSION + FCM TOKEN ============
 async function getNotificationPermissionState(){
   if (!('Notification' in window)) return 'unsupported';
-  return Notification.permission; // 'default' | 'granted' | 'denied'
+  return Notification.permission;
 }
 
 async function saveFcmToken(){
@@ -857,20 +854,18 @@ async function enableNotifications(){
   } catch(e){ console.error(e); showToast('حصل خطأ أثناء تفعيل الإشعارات', 'error'); }
 }
 
-// استقبال رسالة foreground (التطبيق مفتوح وواقف عليه) - بنعرضها كـ toast بدل الإشعار المكرر
 function listenForegroundMessages(){
   if (!fb.messaging) return;
   fb.onMessage(fb.messaging, (payload) => {
     const body = payload.notification?.body || 'رسالة جديدة';
     const title = payload.notification?.title || 'هيي';
-    // لو مش واقف في نفس المحادثة، اظهرله toast
     const chatId = payload.data?.chatId;
-    if (chatId && chatId === state.currentChatId) return; // هو أصلاً شايف الرسالة
+    if (chatId && chatId === state.currentChatId) return;
     showToast(`💬 ${title}: ${body}`, 'success');
   });
 }
 
-// ============ NOTIF BANNER (طلب الإذن بشكل ودي بدل popup مفاجئ) ============
+// ============ NOTIF BANNER ============
 function maybeShowNotifBanner(){
   if (!('Notification' in window)) return;
   if (Notification.permission !== 'default') return;
@@ -985,9 +980,7 @@ function enterApp(){
   goTo('main'); setupOnlinePresence(); listenToOnlineUsers(); listenToChatList();
   listenForegroundMessages();
   maybeShowNotifBanner();
-  // لو الإذن أصلاً متاح من قبل، سجل التوكن تلقائي (مثلاً بعد تحديث الصفحة)
   getNotificationPermissionState().then(perm => { if (perm === 'granted') saveFcmToken(); });
-  // اطلب إذن الميكروفون على طول عند الدخول، عشان الرسائل الصوتية تشتغل من غير تأخير
   requestMicPermissionOnce();
 }
 
@@ -997,10 +990,9 @@ async function requestMicPermissionOnce(){
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    stream.getTracks().forEach(t => t.stop()); // بس عشان ناخد الإذن، مش هنسجل فعليًا دلوقتي
+    stream.getTracks().forEach(t => t.stop());
     localStorage.setItem('heye_mic_permission_asked', '1');
   } catch(e){
-    // المستخدم رفض أو المتصفح مش بيدعم - هيتطلب تاني وقت أول تسجيل فعلي
     localStorage.setItem('heye_mic_permission_asked', '1');
   }
 }
@@ -1126,6 +1118,9 @@ const sendBtnEl = document.getElementById('btn-send');
 const sendBtnIcon = document.getElementById('btn-send-icon');
 const voiceRecordingBar = document.getElementById('voice-recording-bar');
 const voiceRecTimer = document.getElementById('voice-rec-timer');
+const voiceRecHint = document.getElementById('voice-rec-hint');
+const voiceRecDot = document.getElementById('voice-rec-dot');
+const voiceRecCancelBtn = document.getElementById('voice-rec-cancel');
 const composerInputShell = document.getElementById('composer-input-shell');
 
 const ICON_MIC = '<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
@@ -1173,35 +1168,71 @@ async function sendMessage(){
 
 composerInputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
 
-// --- زرار مايك/إرسال: نضغط عادي (click) للإرسال لو فيه نص، أو نمسك (press&hold) للتسجيل ---
-let voiceRecorder = null, voiceChunks = [], voiceStream = null, voiceStartTime = 0, voiceTimerInterval = null, voiceCancelled = false, voicePressTimer = null;
+/* ==========================================================================
+   VOICE RECORDING — نسخة مُصلَّحة
+   المشكلة الأصلية: على الموبايل، حدث touchstart بيتبعه تلقائيًا حدث mousedown
+   وهمي (ghost event) من المتصفح نفسه بعد ما الإصبع يتشال. ده كان بيسبب
+   استدعاء startVoiceRecording/stopVoiceRecording مرتين متضاربتين، فأحيانًا
+   كانت الرسالة بتتسجل لكن onstop مكنش بيوصل لحالة "خلصنا" صح، أو كان
+   بيتقفل التسجيل من غير ما نستنى آخر chunk يتجمع فعليًا قبل الرفع.
+   الحل: تتبع صريح لمصدر الحدث (touch/mouse) + انتظار حقيقي لاكتمال
+   MediaRecorder.stop() قبل محاولة الرفع، مع تعطيل الزرار أثناء الرفع
+   ومؤشر واضح "جاري الإرسال" للمستخدم.
+========================================================================== */
 
-sendBtnEl.addEventListener('click', ()=>{
-  if(sendBtnEl.dataset.mode === 'send') sendMessage();
-});
+let voiceRecorder = null, voiceChunks = [], voiceStream = null, voiceStartTime = 0, voiceTimerInterval = null, voiceCancelled = false;
+let voiceUsingTouch = false;      // true لو التسجيل بدأ بلمسة، عشان نتجاهل mousedown/mouseup الوهميين اللي بيبعتهم المتصفح بعدها
+let voiceIsBusy = false;          // true من لحظة الضغط لحد ما يخلص الإرسال أو الإلغاء بالكامل
 
-async function startVoiceRecording(){
-  if(!state.currentChatId) return;
-  if(sendBtnEl.dataset.mode === 'send') return; // فيه نص، الزرار ده للإرسال مش التسجيل
+function setRecordingUI(active){
+  sendBtnEl.classList.toggle('recording', active);
+  voiceRecordingBar.classList.toggle('show', active);
+  composerInputShell.style.display = active ? 'none' : 'flex';
+  document.getElementById('btn-camera-inline').style.display = active ? 'none' : 'flex';
+}
+
+function setSendingUI(isSending){
+  if(isSending){
+    voiceRecordingBar.classList.add('show');
+    voiceRecCancelBtn.style.display = 'none';
+    voiceRecDot.style.display = 'none';
+    voiceRecHint.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;"><span style="width:14px;height:14px;border-radius:50%;border:2px solid rgba(228,199,122,.3);border-top-color:var(--gold-soft);display:inline-block;animation:spin .7s linear infinite;"></span> جاري إرسال الرسالة الصوتية...</span>';
+    voiceRecTimer.style.display = 'none';
+  } else {
+    voiceRecCancelBtn.style.display = '';
+    voiceRecDot.style.display = '';
+    voiceRecHint.textContent = 'اسحب لأعلى للإلغاء';
+    voiceRecTimer.style.display = '';
+    voiceRecordingBar.classList.remove('show');
+  }
+}
+
+async function startVoiceRecording(fromTouch){
+  if(!state.currentChatId){ showToast('افتح محادثة الأول', 'error'); return; }
+  if(sendBtnEl.dataset.mode === 'send') return; // فيه نص مكتوب، الزرار للإرسال مش للتسجيل
+  if(voiceIsBusy) return; // تسجيل شغال بالفعل، امنع البدء مرة تانية
+
+  voiceUsingTouch = !!fromTouch;
+  voiceIsBusy = true;
+
   try {
     voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true });
   } catch(e){
     showToast('محتاجين إذن الميكروفون عشان نسجل رسالة صوتية', 'error');
+    voiceIsBusy = false;
+    voiceUsingTouch = false;
     return;
   }
+
   voiceCancelled = false;
   voiceChunks = [];
   const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : (MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '');
   voiceRecorder = mimeType ? new MediaRecorder(voiceStream, { mimeType }) : new MediaRecorder(voiceStream);
-  voiceRecorder.ondataavailable = (e) => { if(e.data.size > 0) voiceChunks.push(e.data); };
-  voiceRecorder.onstop = handleVoiceRecordingStop;
+  voiceRecorder.ondataavailable = (e) => { if(e.data && e.data.size > 0) voiceChunks.push(e.data); };
   voiceRecorder.start();
   voiceStartTime = Date.now();
 
-  sendBtnEl.classList.add('recording');
-  voiceRecordingBar.classList.add('show');
-  composerInputShell.style.display = 'none';
-  document.getElementById('btn-camera-inline').style.display = 'none';
+  setRecordingUI(true);
 
   voiceTimerInterval = setInterval(()=>{
     const elapsed = Math.floor((Date.now() - voiceStartTime) / 1000);
@@ -1210,26 +1241,56 @@ async function startVoiceRecording(){
   }, 200);
 }
 
-function stopVoiceRecording(cancel){
-  voiceCancelled = !!cancel;
-  if(voiceRecorder && voiceRecorder.state !== 'inactive') voiceRecorder.stop();
-  if(voiceStream) voiceStream.getTracks().forEach(t=>t.stop());
-  clearInterval(voiceTimerInterval);
-  sendBtnEl.classList.remove('recording');
-  voiceRecordingBar.classList.remove('show');
-  composerInputShell.style.display = 'flex';
-  document.getElementById('btn-camera-inline').style.display = 'flex';
+// بيرجع Promise بيتحل لما MediaRecorder فعليًا يخلص ويجمع آخر chunk
+function stopRecorderAndWait(){
+  return new Promise((resolve)=>{
+    if(!voiceRecorder || voiceRecorder.state === 'inactive'){ resolve(); return; }
+    voiceRecorder.addEventListener('stop', ()=> resolve(), { once: true });
+    voiceRecorder.stop();
+  });
 }
 
-async function handleVoiceRecordingStop(){
-  const durationSec = Math.floor((Date.now() - voiceStartTime) / 1000);
-  if(voiceCancelled || durationSec < 1 || !voiceChunks.length){ voiceChunks = []; return; }
+async function stopVoiceRecording(cancel){
+  if(!voiceIsBusy) return;
+  voiceCancelled = !!cancel;
+
+  clearInterval(voiceTimerInterval);
+  const durationSec = Math.max(0, Math.floor((Date.now() - voiceStartTime) / 1000));
+
+  // استنى MediaRecorder يخلص فعليًا ويجمع آخر جزء من الصوت قبل ما نكمل
+  await stopRecorderAndWait();
+
+  if(voiceStream){ voiceStream.getTracks().forEach(t=>t.stop()); voiceStream = null; }
+
+  if(voiceCancelled || durationSec < 1 || !voiceChunks.length){
+    voiceChunks = [];
+    setRecordingUI(false);
+    voiceIsBusy = false;
+    voiceUsingTouch = false;
+    return;
+  }
+
+  // فيه تسجيل صالح للإرسال: اعرض حالة "جاري الإرسال" فورًا (بدل ما الشريط يختفي فجأة والمستخدم يحس إن حاجة اتلخبطت)
+  setSendingUI(true);
+
   try {
-    const blob = new Blob(voiceChunks, { type: voiceRecorder.mimeType || 'audio/webm' });
+    await uploadAndSendVoiceMessage(voiceRecorder.mimeType || 'audio/webm', durationSec);
+  } finally {
+    setSendingUI(false);
+    setRecordingUI(false);
+    voiceIsBusy = false;
+    voiceUsingTouch = false;
+    voiceRecorder = null;
+  }
+}
+
+async function uploadAndSendVoiceMessage(mimeType, durationSec){
+  try {
+    const blob = new Blob(voiceChunks, { type: mimeType });
     voiceChunks = [];
     const { storage, storageApi, db, rtdb } = fb;
     const fileId = 'voice_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
-    const ext = (voiceRecorder.mimeType || '').includes('mp4') ? 'm4a' : 'webm';
+    const ext = mimeType.includes('mp4') ? 'm4a' : 'webm';
     const path = `voice_messages/${state.currentChatId}/${fileId}.${ext}`;
     const fileRef = storageApi.storageRef(storage, path);
     await storageApi.uploadBytes(fileRef, blob);
@@ -1250,21 +1311,54 @@ async function handleVoiceRecordingStop(){
   }
 }
 
-// Press & hold على الزرار (مايك) للتسجيل
+sendBtnEl.addEventListener('click', ()=>{
+  if(sendBtnEl.dataset.mode === 'send') sendMessage();
+});
+
+// --- Touch (موبايل): نبدأ عند touchstart وننهي عند touchend/touchcancel لنفس الزرار فقط ---
 sendBtnEl.addEventListener('touchstart', (e)=>{
   if(sendBtnEl.dataset.mode !== 'mic') return;
   e.preventDefault();
-  startVoiceRecording();
-});
-sendBtnEl.addEventListener('touchend', ()=>{ if(voiceRecorder && voiceRecorder.state==='recording') stopVoiceRecording(false); });
-sendBtnEl.addEventListener('mousedown', (e)=>{
-  if(sendBtnEl.dataset.mode !== 'mic') return;
-  startVoiceRecording();
-});
-sendBtnEl.addEventListener('mouseup', ()=>{ if(voiceRecorder && voiceRecorder.state==='recording') stopVoiceRecording(false); });
+  startVoiceRecording(true);
+}, { passive: false });
 
-document.getElementById('voice-rec-cancel').addEventListener('click', ()=>{
-  if(voiceRecorder && voiceRecorder.state==='recording') stopVoiceRecording(true);
+sendBtnEl.addEventListener('touchend', (e)=>{
+  if(!voiceUsingTouch) return;
+  e.preventDefault();
+  stopVoiceRecording(false);
+}, { passive: false });
+
+sendBtnEl.addEventListener('touchcancel', (e)=>{
+  if(!voiceUsingTouch) return;
+  stopVoiceRecording(true);
+});
+
+// --- Mouse (ديسكتوب): بنتجاهله تمامًا لو التسجيل بدأ أصلاً من لمسة (ghost events) ---
+sendBtnEl.addEventListener('mousedown', (e)=>{
+  if(voiceUsingTouch) return;
+  if(sendBtnEl.dataset.mode !== 'mic') return;
+  startVoiceRecording(false);
+});
+
+sendBtnEl.addEventListener('mouseup', ()=>{
+  if(voiceUsingTouch) return;
+  if(voiceIsBusy) stopVoiceRecording(false);
+});
+
+sendBtnEl.addEventListener('mouseleave', ()=>{
+  // لو الإصبع/الماوس خرج برة الزرار وهو لسه ماسك، اعتبرها نية إلغاء فقط لو مكنش touch
+  // (سلوك اختياري تقدر تشيله لو عايزة السحب برة يكمل تسجيل عادي)
+});
+
+voiceRecCancelBtn.addEventListener('click', ()=>{
+  if(voiceIsBusy) stopVoiceRecording(true);
+});
+
+// أمان إضافي: لو المستخدم قفل الشاشة أو غيّر التاب وهو بيسجل، وقفي التسجيل بدل ما يفضل عالق
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden && voiceIsBusy && voiceRecorder && voiceRecorder.state === 'recording'){
+    stopVoiceRecording(true);
+  }
 });
 
 // --- تشغيل رسالة صوتية مستلمة ---
@@ -1344,25 +1438,21 @@ function hideDeleteMenu(){
 
 contextOverlay.addEventListener('click', hideDeleteMenu);
 
-// حذف للجميع - مسح كامل من قاعدة البيانات
 document.getElementById('delete-for-all').addEventListener('click', async ()=>{
   if(!state.selectedMsgId || !state.currentChatId) return;
   hideDeleteMenu();
   try {
     const { db, rtdb } = fb;
-    // حذف الرسالة نهائياً من قاعدة البيانات
     await rtdb.remove(rtdb.ref(db, `chats/${state.currentChatId}/messages/${state.selectedMsgId}`));
     showToast('🗑️ تم حذف الرسالة للجميع', 'success');
   } catch(e){ console.error('Delete failed:', e); showToast('مش قادرين نحذف الرسالة', 'error'); }
 });
 
-// حذف عندي فقط
 document.getElementById('delete-for-me').addEventListener('click', async ()=>{
   if(!state.selectedMsgId || !state.currentChatId) return;
   hideDeleteMenu();
   try {
     const { db, rtdb } = fb;
-    // إضافة معرف المستخدم لقائمة المحذوف عنده فقط
     await rtdb.update(rtdb.ref(db, `chats/${state.currentChatId}/messages/${state.selectedMsgId}`), {
       [`deletedFor.${state.uid}`]: true
     });
@@ -1416,7 +1506,6 @@ function listenToMessages(chatId){
     const messages=snap.val(); let lastDate='',html='';
     const sorted=Object.entries(messages).sort((a,b)=>(a[1].createdAt||'').localeCompare(b[1].createdAt||''));
     sorted.forEach(([msgId,m])=>{
-      // تخطي الرسائل المحذوفة عندي فقط
       const isDeletedForMe = m.deletedFor && m.deletedFor[state.uid] === true;
       if(isDeletedForMe) return;
       
@@ -1562,7 +1651,7 @@ document.getElementById('chat-header-info-click').addEventListener('click',()=>{
 });
 
 // ============ STATUS / UPDATES FEATURE ============
-const STATUS_LIFETIME_MS = 24 * 60 * 60 * 1000; // 24 ساعة
+const STATUS_LIFETIME_MS = 24 * 60 * 60 * 1000;
 let statusState = { pendingFile: null, activeList: [], activeIndex: 0, activeOwnerUid: null, timerHandle: null, unsubStatuses: null };
 
 function openUpdatesPage(){
@@ -1574,7 +1663,6 @@ function openUpdatesPage(){
 
 document.getElementById('updates-avatar-btn').addEventListener('click', ()=>{ updateProfileStats(); updateNotifStatusCard(); goTo('profile'); });
 
-// --- رفع حالة جديدة ---
 document.getElementById('my-status-row').addEventListener('click', ()=>{
   document.getElementById('status-file-input').click();
 });
@@ -1639,12 +1727,10 @@ document.getElementById('status-upload-send').addEventListener('click', async ()
   }
 });
 
-// --- تحميل وعرض قائمة الحالات ---
 async function loadStatuses(){
   const { db, rtdb } = fb;
   if(statusState.unsubStatuses){ rtdb.off(rtdb.ref(db, 'statusOwners')); statusState.unsubStatuses = null; }
 
-  // حالتي أنا
   try {
     const mySnap = await rtdb.get(rtdb.ref(db, `statuses/${state.uid}/items`));
     const myAvatarEl = document.getElementById('my-status-avatar-el');
@@ -1669,7 +1755,6 @@ async function loadStatuses(){
     }
   } catch(e){ console.error(e); }
 
-  // حالات الآخرين
   statusState.unsubStatuses = rtdb.onValue(rtdb.ref(db, 'statusOwners'), async (ownersSnap)=>{
     const listEl = document.getElementById('others-status-list');
     const sectionEl = document.getElementById('others-status-section');
@@ -1718,7 +1803,6 @@ function formatStatusTime(ts){
   return `منذ ${Math.floor(diff/3600000)} ساعة`;
 }
 
-// --- عارض الحالة (Story Viewer) ---
 function openStatusViewer(items, ownerName, ownerUid){
   statusState.activeList = items;
   statusState.activeIndex = 0;
@@ -1748,7 +1832,7 @@ function showStatusAt(index){
 
   const bars = document.querySelectorAll('.status-viewer-bar-fill');
   bars.forEach((b,i)=>{ b.style.transition='none'; b.style.width = i < index ? '100%' : '0%'; });
-  void document.getElementById('status-viewer-progress').offsetWidth; // reflow
+  void document.getElementById('status-viewer-progress').offsetWidth;
   if(bars[index]){
     bars[index].style.transition = 'width 5s linear';
     requestAnimationFrame(()=>{ bars[index].style.width = '100%'; });
