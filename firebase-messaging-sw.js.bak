@@ -37,12 +37,12 @@ messaging.onBackgroundMessage((payload) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const chatId = event.notification.data?.chatId;
-  const urlToOpen = new URL('./', self.location.href).href;
+  const urlToOpen = new URL('/', self.location.origin).href;
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
-        if (client.url.includes(self.registration.scope) && 'focus' in client) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
           if (chatId) client.postMessage({ type: 'OPEN_CHAT', chatId });
           return client.focus();
         }
@@ -50,9 +50,4 @@ self.addEventListener('notificationclick', (event) => {
       if (clients.openWindow) return clients.openWindow(urlToOpen);
     })
   );
-});
-
-// fetch handler بسيط (فاضي) - بعض المتصفحات بتشترط وجوده عشان تعتبر الموقع PWA قابل للتثبيت فعليًا
-self.addEventListener('fetch', (event) => {
-  // نسيب الطلبات تعدي عادي، مفيش تخزين مؤقت مخصص دلوقتي
 });
