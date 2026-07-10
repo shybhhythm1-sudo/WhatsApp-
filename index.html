@@ -303,7 +303,6 @@
   .toast.error{border-color:var(--danger);}
   .toast.success{border-color:var(--ok);}
 
-  /* بانر طلب الإشعارات + بانر التثبيت */
   .install-banner, .notif-banner{
     position:absolute;left:14px;right:14px;bottom:14px;
     background:var(--bg-panel-2);border:1px solid var(--line);
@@ -324,7 +323,6 @@
 
   @media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;}}
 
-  /* ============ STATUS / UPDATES FEATURE ============ */
   .status-section-title{padding:18px 16px 10px;font-size:15px;font-weight:700;color:var(--ink);}
   .my-status-row{display:flex;align-items:center;gap:14px;padding:10px 16px 16px;cursor:pointer;}
   .my-status-avatar-wrap{position:relative;flex-shrink:0;width:54px;height:54px;}
@@ -345,7 +343,6 @@
   .status-row-time{font-size:12px;color:var(--mute);margin-top:2px;}
   .status-fab-camera{position:absolute;left:16px;bottom:calc(74px + max(10px, var(--safe-bottom)));width:50px;height:50px;border-radius:16px;background:linear-gradient(160deg, var(--gold-soft), var(--gold));display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 20px rgba(201,162,75,.4);border:none;font-size:20px;}
 
-  /* Status Viewer (fullscreen story) */
   .status-viewer{position:fixed;inset:0;background:#000;z-index:400;display:none;flex-direction:column;}
   .status-viewer.show{display:flex;}
   .status-viewer-progress{display:flex;gap:4px;padding:10px 10px 0;}
@@ -364,7 +361,6 @@
   .status-viewer-nav.next{right:0;}
   .status-viewer-caption{padding:16px;color:#fff;text-align:center;font-size:14px;background:linear-gradient(0deg, rgba(0,0,0,.5), transparent);}
 
-  /* Status Upload Modal */
   .status-upload-overlay{position:fixed;inset:0;background:#000;z-index:410;display:none;flex-direction:column;}
   .status-upload-overlay.show{display:flex;}
   .status-upload-header{display:flex;align-items:center;justify-content:space-between;padding:14px;}
@@ -380,7 +376,7 @@
   .status-picker-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:#fff;text-align:center;padding:40px;}
   .status-picker-btn{background:linear-gradient(160deg, var(--gold-soft), var(--gold));color:#1A1206;border:none;border-radius:14px;padding:14px 28px;font-family:'Cairo',sans-serif;font-size:14.5px;font-weight:700;}
 
-  /* ============ WHATSAPP-STYLE COMPOSER ============ */
+  /* WhatsApp-Style Voice Recording UI */
   .composer-input-shell{flex:1;display:flex;align-items:center;gap:6px;background:var(--bg-panel);border:1.5px solid var(--line);border-radius:24px;padding:6px 8px 6px 14px;transition:border-color .25s ease;}
   .composer-input-shell:focus-within{border-color:var(--gold);}
   .composer-icon-btn{flex-shrink:0;width:34px;height:34px;border-radius:50%;background:transparent;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--mute);}
@@ -400,9 +396,7 @@
   .voice-rec-timer{font-size:14px;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;flex-shrink:0;}
   .voice-rec-hint{flex:1;font-size:12.5px;color:var(--mute);text-align:center;}
   .voice-rec-cancel{flex-shrink:0;font-size:13px;color:var(--danger);font-weight:700;background:none;border:none;padding:4px 8px;}
-  .voice-rec-sending{flex:1;font-size:12.5px;color:var(--gold-soft);text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;}
 
-  /* Voice message bubble */
   .voice-msg{display:flex;align-items:center;gap:10px;min-width:190px;padding:4px 2px;}
   .voice-msg-play-btn{width:36px;height:36px;border-radius:50%;background:rgba(201,162,75,.18);border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;}
   .voice-msg-play-btn svg{width:16px;height:16px;}
@@ -477,7 +471,6 @@
       </div>
     </div>
 
-    <!-- بانر تفعيل الإشعارات -->
     <div class="notif-banner" id="notif-banner">
       <div class="ib-icon">🔔</div>
       <div class="ib-text"><div class="ib-title">فعّل الإشعارات</div><div class="ib-sub">عشان توصلك أي رسالة جديدة فورًا</div></div>
@@ -485,7 +478,6 @@
       <button class="ib-close" id="btn-close-notif-banner">✕</button>
     </div>
 
-    <!-- بانر التثبيت (PWA) -->
     <div class="install-banner" id="install-banner">
       <div class="ib-icon">📲</div>
       <div class="ib-text"><div class="ib-title">ثبّت التطبيق</div><div class="ib-sub">أضفه للشاشة الرئيسية عشان يفتح زي تطبيق عادي</div></div>
@@ -543,7 +535,6 @@
     </div>
   </div>
 
-  <!-- Status Upload (camera/picker) -->
   <input type="file" id="status-file-input" accept="image/*" style="display:none;">
   <div class="status-upload-overlay" id="status-upload-overlay">
     <div class="status-upload-header">
@@ -558,7 +549,6 @@
     </div>
   </div>
 
-  <!-- Status Viewer (fullscreen story) -->
   <div class="status-viewer" id="status-viewer">
     <div class="status-viewer-progress" id="status-viewer-progress"></div>
     <div class="status-viewer-header">
@@ -706,7 +696,6 @@
   const storage = getStorage(app);
   window.__heye = { db, storage, rtdb: { ref, set, get, update, push, onValue, off, query, limitToFirst, limitToLast, onDisconnect, serverTimestamp, remove }, storageApi: { storageRef, uploadBytes, getDownloadURL } };
 
-  // ============ FCM (الإشعارات) ============
   window.__HEYE_VAPID_KEY__ = "BAzZbRuwIHTBdFwHtD3JVXg-1Ku18Hy3uZFGv_Qvz6Y3nONEhPrgEpviK4Yr2BjJOReqX1CeYJP7AFZnILjN7j8";
 
   isSupported().then((supported) => {
@@ -780,7 +769,6 @@ function generateUsernameBase(n){
 
 function generateUsernameSync(n){ return `${generateUsernameBase(n)}${Math.floor(100+Math.random()*900)}`; }
 
-// ============ SERVICE WORKER REGISTRATION ============
 async function registerServiceWorker(){
   if (!('serviceWorker' in navigator)) return null;
   try {
@@ -811,7 +799,6 @@ async function tryOpenChatFromNotification(chatId){
   });
 }
 
-// ============ NOTIFICATIONS PERMISSION + FCM TOKEN ============
 async function getNotificationPermissionState(){
   if (!('Notification' in window)) return 'unsupported';
   return Notification.permission;
@@ -865,7 +852,6 @@ function listenForegroundMessages(){
   });
 }
 
-// ============ NOTIF BANNER ============
 function maybeShowNotifBanner(){
   if (!('Notification' in window)) return;
   if (Notification.permission !== 'default') return;
@@ -897,7 +883,6 @@ document.getElementById('notif-status-card').addEventListener('click', async ()=
   else showToast('الإشعارات شغالة بالفعل ✅', 'success');
 });
 
-// ============ PWA INSTALL PROMPT ============
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   state.deferredInstallPrompt = e;
@@ -977,6 +962,7 @@ function enterApp(){
   document.getElementById('my-avatar').textContent=initial; document.getElementById('profile-avatar').textContent=initial;
   document.getElementById('profile-name').textContent=state.displayName; document.getElementById('profile-username').textContent='@'+state.username;
   document.getElementById('pc-name').textContent=state.displayName; document.getElementById('pc-username').textContent='@'+state.username;
+  document.getElementById('pc-date').textContent=new Date().toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric'});
   goTo('main'); setupOnlinePresence(); listenToOnlineUsers(); listenToChatList();
   listenForegroundMessages();
   maybeShowNotifBanner();
@@ -984,7 +970,6 @@ function enterApp(){
   requestMicPermissionOnce();
 }
 
-// ============ MICROPHONE PERMISSION (طلب مبكر) ============
 async function requestMicPermissionOnce(){
   if(localStorage.getItem('heye_mic_permission_asked') === '1') return;
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
@@ -1112,7 +1097,7 @@ function listenToTyping(chatId, otherUid){
   });
 }
 
-// ============ SEND MESSAGE (TEXT + VOICE) ============
+// ============ SEND MESSAGE ============
 const composerInputEl = document.getElementById('composer-input');
 const sendBtnEl = document.getElementById('btn-send');
 const sendBtnIcon = document.getElementById('btn-send-icon');
@@ -1168,21 +1153,10 @@ async function sendMessage(){
 
 composerInputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
 
-/* ==========================================================================
-   VOICE RECORDING — نسخة مُصلَّحة
-   المشكلة الأصلية: على الموبايل، حدث touchstart بيتبعه تلقائيًا حدث mousedown
-   وهمي (ghost event) من المتصفح نفسه بعد ما الإصبع يتشال. ده كان بيسبب
-   استدعاء startVoiceRecording/stopVoiceRecording مرتين متضاربتين، فأحيانًا
-   كانت الرسالة بتتسجل لكن onstop مكنش بيوصل لحالة "خلصنا" صح، أو كان
-   بيتقفل التسجيل من غير ما نستنى آخر chunk يتجمع فعليًا قبل الرفع.
-   الحل: تتبع صريح لمصدر الحدث (touch/mouse) + انتظار حقيقي لاكتمال
-   MediaRecorder.stop() قبل محاولة الرفع، مع تعطيل الزرار أثناء الرفع
-   ومؤشر واضح "جاري الإرسال" للمستخدم.
-========================================================================== */
-
+// ============ VOICE RECORDING - FIXED (WhatsApp Style) ============
 let voiceRecorder = null, voiceChunks = [], voiceStream = null, voiceStartTime = 0, voiceTimerInterval = null, voiceCancelled = false;
-let voiceUsingTouch = false;      // true لو التسجيل بدأ بلمسة، عشان نتجاهل mousedown/mouseup الوهميين اللي بيبعتهم المتصفح بعدها
-let voiceIsBusy = false;          // true من لحظة الضغط لحد ما يخلص الإرسال أو الإلغاء بالكامل
+let voiceUsingTouch = false;
+let voiceIsBusy = false;
 
 function setRecordingUI(active){
   sendBtnEl.classList.toggle('recording', active);
@@ -1191,26 +1165,10 @@ function setRecordingUI(active){
   document.getElementById('btn-camera-inline').style.display = active ? 'none' : 'flex';
 }
 
-function setSendingUI(isSending){
-  if(isSending){
-    voiceRecordingBar.classList.add('show');
-    voiceRecCancelBtn.style.display = 'none';
-    voiceRecDot.style.display = 'none';
-    voiceRecHint.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;"><span style="width:14px;height:14px;border-radius:50%;border:2px solid rgba(228,199,122,.3);border-top-color:var(--gold-soft);display:inline-block;animation:spin .7s linear infinite;"></span> جاري إرسال الرسالة الصوتية...</span>';
-    voiceRecTimer.style.display = 'none';
-  } else {
-    voiceRecCancelBtn.style.display = '';
-    voiceRecDot.style.display = '';
-    voiceRecHint.textContent = 'اسحب لأعلى للإلغاء';
-    voiceRecTimer.style.display = '';
-    voiceRecordingBar.classList.remove('show');
-  }
-}
-
 async function startVoiceRecording(fromTouch){
   if(!state.currentChatId){ showToast('افتح محادثة الأول', 'error'); return; }
-  if(sendBtnEl.dataset.mode === 'send') return; // فيه نص مكتوب، الزرار للإرسال مش للتسجيل
-  if(voiceIsBusy) return; // تسجيل شغال بالفعل، امنع البدء مرة تانية
+  if(sendBtnEl.dataset.mode === 'send') return;
+  if(voiceIsBusy) return;
 
   voiceUsingTouch = !!fromTouch;
   voiceIsBusy = true;
@@ -1241,7 +1199,6 @@ async function startVoiceRecording(fromTouch){
   }, 200);
 }
 
-// بيرجع Promise بيتحل لما MediaRecorder فعليًا يخلص ويجمع آخر chunk
 function stopRecorderAndWait(){
   return new Promise((resolve)=>{
     if(!voiceRecorder || voiceRecorder.state === 'inactive'){ resolve(); return; }
@@ -1257,7 +1214,6 @@ async function stopVoiceRecording(cancel){
   clearInterval(voiceTimerInterval);
   const durationSec = Math.max(0, Math.floor((Date.now() - voiceStartTime) / 1000));
 
-  // استنى MediaRecorder يخلص فعليًا ويجمع آخر جزء من الصوت قبل ما نكمل
   await stopRecorderAndWait();
 
   if(voiceStream){ voiceStream.getTracks().forEach(t=>t.stop()); voiceStream = null; }
@@ -1270,18 +1226,85 @@ async function stopVoiceRecording(cancel){
     return;
   }
 
-  // فيه تسجيل صالح للإرسال: اعرض حالة "جاري الإرسال" فورًا (بدل ما الشريط يختفي فجأة والمستخدم يحس إن حاجة اتلخبطت)
-  setSendingUI(true);
+  // ---- WhatsApp style: show voice message immediately in chat using local blob URL ----
+  const mimeType = voiceRecorder.mimeType || 'audio/webm';
+  const localBlob = new Blob(voiceChunks.slice(), { type: mimeType });
+  const localUrl = URL.createObjectURL(localBlob);
 
+  const tempId = 'temp_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  appendLocalVoiceMessage(localUrl, durationSec, tempId);
+
+  setRecordingUI(false);
+  voiceIsBusy = false;
+  voiceUsingTouch = false;
+
+  // Upload in background
   try {
-    await uploadAndSendVoiceMessage(voiceRecorder.mimeType || 'audio/webm', durationSec);
-  } finally {
-    setSendingUI(false);
-    setRecordingUI(false);
-    voiceIsBusy = false;
-    voiceUsingTouch = false;
-    voiceRecorder = null;
+    const realUrl = await uploadAndSendVoiceMessage(mimeType, durationSec);
+    replaceLocalVoiceUrl(tempId, realUrl);
+  } catch(e) {
+    console.error('Voice upload failed', e);
+    removeLocalVoiceMessage(tempId);
+    showToast('الرسالة الصوتية متبعتتش، جرب تاني', 'error');
   }
+}
+
+// Helper: add local voice message bubble immediately
+function appendLocalVoiceMessage(localUrl, durationSec, tempId) {
+  const container = document.getElementById('messages-container');
+  if (!container) return;
+
+  const mm = Math.floor(durationSec / 60);
+  const ss = durationSec % 60;
+  const bars = Array.from({ length: 24 }).map((_, i) => {
+    const h = 6 + Math.round(Math.abs(Math.sin(i * 1.7)) * 16);
+    return `<span style="height:${h}px;"></span>`;
+  }).join('');
+
+  const html = `
+    <div class="bubble-row me" data-tempid="${tempId}">
+      <div class="bubble me">
+        <div class="voice-msg">
+          <button class="voice-msg-play-btn" data-url="${escapeAttr(localUrl)}">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+          </button>
+          <div class="voice-msg-wave">${bars}</div>
+          <div class="voice-msg-duration">${mm}:${ss.toString().padStart(2, '0')}</div>
+        </div>
+        <div class="msg-footer">
+          <span class="msg-time">الآن</span>
+          <span class="msg-status check-sent">
+            <svg class="check-icon" viewBox="0 0 24 24" fill="none">
+              <path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+      </div>
+    </div>
+  `;
+
+  container.insertAdjacentHTML('beforeend', html);
+  container.scrollTop = container.scrollHeight;
+
+  const playBtn = container.querySelector(`[data-tempid="${tempId}"] .voice-msg-play-btn`);
+  if (playBtn) {
+    playBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playVoiceMessage(playBtn.dataset.url, playBtn);
+    });
+  }
+}
+
+function replaceLocalVoiceUrl(tempId, realUrl) {
+  const el = document.querySelector(`[data-tempid="${tempId}"]`);
+  if (!el) return;
+  const playBtn = el.querySelector('.voice-msg-play-btn');
+  if (playBtn) playBtn.dataset.url = realUrl;
+}
+
+function removeLocalVoiceMessage(tempId) {
+  const el = document.querySelector(`[data-tempid="${tempId}"]`);
+  if (el) el.remove();
 }
 
 async function uploadAndSendVoiceMessage(mimeType, durationSec){
@@ -1305,17 +1328,15 @@ async function uploadAndSendVoiceMessage(mimeType, durationSec){
     });
     await rtdb.update(rtdb.ref(db, `chats/${state.currentChatId}`), { lastMessage: '🎤 رسالة صوتية', lastMessageAt: now, lastSenderId: state.uid });
     state.msgCount++; updateProfileStats();
+    
+    return downloadUrl;
   } catch(e){
     console.error('Voice send failed', e);
-    showToast('الرسالة الصوتية متبعتتش، جرب تاني', 'error');
+    throw e;
   }
 }
 
-sendBtnEl.addEventListener('click', ()=>{
-  if(sendBtnEl.dataset.mode === 'send') sendMessage();
-});
-
-// --- Touch (موبايل): نبدأ عند touchstart وننهي عند touchend/touchcancel لنفس الزرار فقط ---
+// Touch handlers
 sendBtnEl.addEventListener('touchstart', (e)=>{
   if(sendBtnEl.dataset.mode !== 'mic') return;
   e.preventDefault();
@@ -1333,7 +1354,7 @@ sendBtnEl.addEventListener('touchcancel', (e)=>{
   stopVoiceRecording(true);
 });
 
-// --- Mouse (ديسكتوب): بنتجاهله تمامًا لو التسجيل بدأ أصلاً من لمسة (ghost events) ---
+// Mouse handlers (desktop)
 sendBtnEl.addEventListener('mousedown', (e)=>{
   if(voiceUsingTouch) return;
   if(sendBtnEl.dataset.mode !== 'mic') return;
@@ -1345,23 +1366,21 @@ sendBtnEl.addEventListener('mouseup', ()=>{
   if(voiceIsBusy) stopVoiceRecording(false);
 });
 
-sendBtnEl.addEventListener('mouseleave', ()=>{
-  // لو الإصبع/الماوس خرج برة الزرار وهو لسه ماسك، اعتبرها نية إلغاء فقط لو مكنش touch
-  // (سلوك اختياري تقدر تشيله لو عايزة السحب برة يكمل تسجيل عادي)
+sendBtnEl.addEventListener('click', ()=>{
+  if(sendBtnEl.dataset.mode === 'send') sendMessage();
 });
 
 voiceRecCancelBtn.addEventListener('click', ()=>{
   if(voiceIsBusy) stopVoiceRecording(true);
 });
 
-// أمان إضافي: لو المستخدم قفل الشاشة أو غيّر التاب وهو بيسجل، وقفي التسجيل بدل ما يفضل عالق
 document.addEventListener('visibilitychange', ()=>{
   if(document.hidden && voiceIsBusy && voiceRecorder && voiceRecorder.state === 'recording'){
     stopVoiceRecording(true);
   }
 });
 
-// --- تشغيل رسالة صوتية مستلمة ---
+// Play voice message
 let currentPlayingAudio = null, currentPlayingBtn = null;
 function playVoiceMessage(url, btnEl){
   if(currentPlayingAudio && currentPlayingBtn === btnEl){
@@ -1378,7 +1397,7 @@ function playVoiceMessage(url, btnEl){
   audio.onended = ()=>{ btnEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>'; currentPlayingAudio = null; currentPlayingBtn = null; };
 }
 
-// ============ ATTACH MENU (كاميرا / معرض / مستند) ============
+// ============ ATTACH MENU ============
 const attachMenu = document.getElementById('attach-menu');
 const attachOverlay = document.getElementById('attach-overlay');
 document.getElementById('btn-attach').addEventListener('click', ()=>{ attachMenu.classList.add('show'); attachOverlay.classList.add('show'); });
@@ -1595,10 +1614,9 @@ function updateProfileStats(){ document.getElementById('chat-count').textContent
 // ============ PROFILE & LOGOUT ============
 document.getElementById('my-avatar').addEventListener('click',()=>{ updateProfileStats(); updateNotifStatusCard(); goTo('profile'); });
 document.getElementById('btn-back-profile').addEventListener('click',()=>goTo('main'));
-document.querySelector('[data-nav="profile"]')?.addEventListener('click',()=>{ updateProfileStats(); updateNotifStatusCard(); goTo('profile'); });
+
 document.querySelector('[data-nav="chats"]').addEventListener('click',()=>goTo('main'));
 
-// ============ COMING SOON TABS (المكالمات، المجتمعات، التحديثات) ============
 const comingSoonInfo = {
   calls: { title: 'المكالمات', icon: '📞', text: 'المكالمات الصوتية والفيديو لسه تحت التطوير، هتكون متاحة قريبًا إن شاء الله.' },
   communities: { title: 'المجتمعات', icon: '👥', text: 'ميزة المجتمعات لسه تحت التطوير، هتكون متاحة قريبًا إن شاء الله.' },
@@ -1638,7 +1656,15 @@ document.querySelectorAll('[data-nav3]').forEach(el=>{
     else openComingSoon(key);
   });
 });
-document.getElementById('btn-logout').addEventListener('click',()=>{ if(confirm('⚠️ هيتم تسجيل خروجك من الجهاز ده، وهتحتاج تسجل تاني. متأكد؟')){ const {db,rtdb}=fb; rtdb.update(rtdb.ref(db,`users/${state.uid}`),{online:false,lastSeen:new Date().toISOString()}); localStorage.removeItem('heye_uid'); location.reload(); } });
+
+document.getElementById('btn-logout').addEventListener('click',()=>{
+  if(confirm('⚠️ هيتم تسجيل خروجك من الجهاز ده، وهتحتاج تسجل تاني. متأكد؟')){
+    const {db,rtdb}=fb;
+    rtdb.update(rtdb.ref(db,`users/${state.uid}`),{online:false,lastSeen:new Date().toISOString()});
+    localStorage.removeItem('heye_uid');
+    location.reload();
+  }
+});
 
 document.getElementById('chat-header-info-click').addEventListener('click',()=>{
   if(state.currentChatUser){
