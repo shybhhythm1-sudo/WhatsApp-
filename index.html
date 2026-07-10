@@ -85,6 +85,8 @@
   @keyframes micPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
   @keyframes recBlink{0%,100%{opacity:1;}50%{opacity:.3;}}
   @keyframes micLevelPulse{0%,100%{transform:scaleY(0.3);}50%{transform:scaleY(1);}}
+  @keyframes micModalPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(217,112,90,.4);}50%{transform:scale(1.05);box-shadow:0 0 0 20px rgba(217,112,90,0);}}
+  @keyframes slideDown{from{opacity:0;transform:translateY(-30px);}to{opacity:1;transform:translateY(0);}}
 
   #view-loading{align-items:center;justify-content:center;background:var(--bg-deep);gap:18px;}
   .loader-ring{width:44px;height:44px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--gold);animation:spin 0.9s linear infinite;}
@@ -256,6 +258,126 @@
   .settings-help-box.show{display:block;}
   .settings-help-box strong{color:var(--danger);font-weight:700;}
   .settings-help-box code{background:var(--bg-panel);padding:2px 6px;border-radius:4px;font-size:11px;color:var(--ink);direction:ltr;display:inline-block;}
+
+  /* ============ MIC PERMISSION MODAL ============ */
+  .mic-modal-overlay{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,.75);
+    z-index:700;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    backdrop-filter:blur(8px);
+  }
+  .mic-modal-overlay.show{display:flex;animation:fadeIn .25s ease;}
+  
+  .mic-modal{
+    background:linear-gradient(180deg, var(--bg-panel-2) 0%, var(--bg-panel) 100%);
+    border:1px solid var(--line);
+    border-radius:24px;
+    padding:28px 24px 24px;
+    max-width:380px;
+    width:100%;
+    box-shadow:0 20px 60px rgba(0,0,0,.6);
+    animation:slideUp .35s cubic-bezier(.16,1,.3,1);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:18px;
+    text-align:center;
+  }
+  
+  .mic-modal-icon{
+    width:84px;
+    height:84px;
+    border-radius:50%;
+    background:linear-gradient(160deg, rgba(217,112,90,.2), rgba(217,112,90,.08));
+    border:2px solid rgba(217,112,90,.3);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    animation:micModalPulse 2.5s ease-in-out infinite;
+  }
+  .mic-modal-icon svg{width:40px;height:40px;}
+  
+  .mic-modal-title{
+    font-size:20px;
+    font-weight:800;
+    color:var(--ink);
+    line-height:1.4;
+  }
+  
+  .mic-modal-subtitle{
+    font-size:13.5px;
+    color:var(--mute);
+    line-height:1.8;
+    max-width:300px;
+  }
+  
+  .mic-modal-steps{
+    background:var(--bg-deep);
+    border:1px solid var(--line-soft);
+    border-radius:14px;
+    padding:14px 16px;
+    width:100%;
+    text-align:right;
+  }
+  
+  .mic-modal-step{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:8px 0;
+    font-size:12.5px;
+    color:var(--mute);
+    line-height:1.7;
+  }
+  .mic-modal-step:not(:last-child){border-bottom:1px solid var(--line-soft);}
+  .mic-modal-step-num{
+    width:22px;height:22px;border-radius:50%;
+    background:var(--gold);color:#1A1206;
+    font-size:11px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;margin-top:2px;
+  }
+  .mic-modal-step strong{color:var(--ink);font-weight:700;}
+  
+  .mic-modal-actions{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    width:100%;
+    margin-top:4px;
+  }
+  
+  .mic-modal-btn{
+    width:100%;
+    height:50px;
+    border-radius:14px;
+    border:none;
+    font-family:'Cairo',sans-serif;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    transition:all .2s ease;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  .mic-modal-btn:active{transform:scale(.97);}
+  .mic-modal-btn.primary{
+    background:linear-gradient(160deg, var(--gold-soft), var(--gold));
+    color:#1A1206;
+    box-shadow:0 6px 20px rgba(201,162,75,.35);
+  }
+  .mic-modal-btn.secondary{
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    color:var(--ink);
+  }
+  .mic-modal-btn svg{width:18px;height:18px;}
 
   #view-chat{background:var(--bg-deep);}
   .chat-header{display:flex;align-items:center;gap:12px;padding:max(16px, var(--safe-top)) 16px 14px;background:linear-gradient(180deg, var(--bg-rise) 0%, rgba(23,18,32,.8) 100%);border-bottom:1px solid var(--line-soft);backdrop-filter:blur(10px);}
@@ -813,6 +935,54 @@
     <div class="media-viewer-caption" id="media-viewer-caption" style="display:none;"></div>
   </div>
 
+  <!-- ============ MIC PERMISSION MODAL ============ -->
+  <div class="mic-modal-overlay" id="mic-modal-overlay">
+    <div class="mic-modal">
+      <div class="mic-modal-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" stroke="#D9705A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="#D9705A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="12" y1="19" x2="12" y2="23" stroke="#D9705A" stroke-width="2" stroke-linecap="round"/>
+          <line x1="8" y1="23" x2="16" y2="23" stroke="#D9705A" stroke-width="2" stroke-linecap="round"/>
+          <line x1="2" y1="2" x2="22" y2="22" stroke="#D9705A" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="mic-modal-title">🎤 الميكروفون مش شغّال</div>
+      <div class="mic-modal-subtitle">عشان تبعت رسالة صوتية أو تعمل مكالمة، محتاجين إذن الميكروفون. اتبع الخطوات دي عشان تفعّله:</div>
+      
+      <div class="mic-modal-steps">
+        <div class="mic-modal-step">
+          <div class="mic-modal-step-num">1</div>
+          <div>اضغط على <strong>أيقونة القفل 🔒</strong> اللي في شريط العنوان فوق (جانب الرابط)</div>
+        </div>
+        <div class="mic-modal-step">
+          <div class="mic-modal-step-num">2</div>
+          <div>اختار <strong>"أذونات الموقع"</strong> أو <strong>"Permissions"</strong></div>
+        </div>
+        <div class="mic-modal-step">
+          <div class="mic-modal-step-num">3</div>
+          <div>دوّر على <strong>"الميكروفون"</strong> وغيّرها إلى <strong>"سماح"</strong> أو <strong>"Allow"</strong></div>
+        </div>
+        <div class="mic-modal-step">
+          <div class="mic-modal-step-num">4</div>
+          <div>ارجع للتطبيق واضغط على <strong>"حاول مرة تانية"</strong></div>
+        </div>
+      </div>
+
+      <div class="mic-modal-actions">
+        <button class="mic-modal-btn primary" id="mic-modal-retry">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M1 4v6h6M23 20v-6h-6" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          حاول مرة تانية
+        </button>
+        <button class="mic-modal-btn secondary" id="mic-modal-open-settings">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          افتح الإعدادات
+        </button>
+        <button class="mic-modal-btn secondary" id="mic-modal-close">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
@@ -866,7 +1036,6 @@ const state = {
   chatCount: 0, msgCount: 0,
   onlineUsers: {}, typingUsers: {},
   typingTimeout: null, selectedMsgId: null,
-  // ----- CALL STATE -----
   callState: {
     active: false, type: null,
     partnerUid: null, partnerName: '',
@@ -876,7 +1045,6 @@ const state = {
     offerSent: false, remoteSet: false, callId: null
   },
   incomingCallData: null,
-  // ----- SETTINGS STATE -----
   micTestStream: null, micTestAnalyser: null, micTestRaf: null
 };
 
@@ -920,6 +1088,54 @@ const arabicToLatinMap = {'ا':'a','أ':'a','إ':'a','آ':'a','ب':'b','ت':'t',
 function transliterate(t){ let o=''; for(const c of t){ if(arabicToLatinMap[c]) o+=arabicToLatinMap[c]; else if(/[a-zA-Z0-9]/.test(c)) o+=c; else if(c===' ') o+=' '; } return o; }
 function generateUsernameBase(n){ const b = /[\u0600-\u06FF]/.test(n) ? transliterate(n) : n; let s = b.trim().toLowerCase().replace(/\s+/g,'.').replace(/[^a-z0-9.]/g,'').replace(/\.+/g,'.').replace(/^\.|\.$/g,''); if(!s) s='user'; if(s.length>16) s=s.slice(0,16).replace(/\.$/,''); return s; }
 function generateUsernameSync(n){ return `${generateUsernameBase(n)}${Math.floor(100+Math.random()*900)}`; }
+
+// ============ MIC PERMISSION MODAL ============
+const micModalOverlay = document.getElementById('mic-modal-overlay');
+
+function showMicPermissionModal(){
+  micModalOverlay.classList.add('show');
+}
+
+function hideMicPermissionModal(){
+  micModalOverlay.classList.remove('show');
+}
+
+document.getElementById('mic-modal-close').addEventListener('click', hideMicPermissionModal);
+micModalOverlay.addEventListener('click', (e) => {
+  if(e.target === micModalOverlay) hideMicPermissionModal();
+});
+
+document.getElementById('mic-modal-retry').addEventListener('click', async () => {
+  const btn = document.getElementById('mic-modal-retry');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin" style="width:16px;height:16px;border-radius:50%;border:2px solid rgba(26,18,6,.3);border-top-color:#1A1206;animation:spin .7s linear infinite;"></div> جاري الطلب...';
+  
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // Success - stop immediately
+    stream.getTracks().forEach(t => t.stop());
+    hideMicPermissionModal();
+    showToast('✅ تم تفعيل الميكروفون! جرب تاني','success');
+  } catch(e){
+    console.error('Retry mic failed:', e);
+    if(e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError'){
+      // Still denied - keep modal open, user needs to change in browser settings
+      showToast('❌ لسه الإذن مرفوض. اتبع الخطوات فوق.','error');
+    } else {
+      showToast('❌ فشل: ' + (e.message || 'خطأ'),'error');
+    }
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" style="width:18px;height:18px;"><path d="M1 4v6h6M23 20v-6h-6" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> حاول مرة تانية';
+  }
+});
+
+document.getElementById('mic-modal-open-settings').addEventListener('click', () => {
+  hideMicPermissionModal();
+  goTo('settings');
+  checkMicPermission();
+  checkNotifPermission();
+});
 
 // ============ RINGTONE ============
 let ringtoneAudio = null;
@@ -1131,7 +1347,14 @@ async function startCall(){
 
   let stream;
   try { stream = await ensureLocalStream(); }
-  catch(e){ showToast('محتاجين إذن الميكروفون عشان تتصل','error'); return; }
+  catch(e){
+    if(e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError'){
+      showMicPermissionModal();
+    } else {
+      showToast('محتاجين إذن الميكروفون عشان تتصل','error');
+    }
+    return;
+  }
 
   state.callState.active = true; state.callState.type = 'outgoing';
   state.callState.partnerUid = partnerUid; state.callState.partnerName = partnerName;
@@ -1163,7 +1386,11 @@ async function acceptCall(){
   let stream;
   try { stream = await ensureLocalStream(); }
   catch(e){
-    showToast('محتاجين إذن الميكروفون عشان ترد على المكالمة','error');
+    if(e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError'){
+      showMicPermissionModal();
+    } else {
+      showToast('محتاجين إذن الميكروفون عشان ترد على المكالمة','error');
+    }
   }
 
   state.callState.active = true; state.callState.type = 'incoming';
@@ -1326,7 +1553,6 @@ async function checkMicPermission(){
   const requestBtn = document.getElementById('btn-request-mic');
 
   if(!navigator.permissions || !navigator.permissions.query){
-    // fallback: try getUserMedia directly
     badge.className = 'perm-badge unknown';
     text.textContent = 'غير معروف';
     requestBtn.style.display = 'block';
@@ -1337,10 +1563,8 @@ async function checkMicPermission(){
     const result = await navigator.permissions.query({ name: 'microphone' });
     updateMicBadge(result.state);
 
-    // Listen for changes
     result.onchange = () => {
       updateMicBadge(result.state);
-      // Auto-refresh when user changes permission in browser
       if(result.state === 'granted'){
         helpBox.classList.remove('show');
         requestBtn.style.display = 'none';
@@ -1411,7 +1635,6 @@ async function checkNotifPermission(){
   requestBtn.style.display = perm === 'default' ? 'block' : 'none';
 }
 
-// ----- MIC TEST -----
 function buildMicVisualizer(){
   const viz = document.getElementById('mic-level-visualizer');
   viz.innerHTML = '';
@@ -1469,7 +1692,6 @@ async function startMicTest(){
     }
     animate();
 
-    // Update permission badge after successful grant
     checkMicPermission();
 
   } catch(e){
@@ -1512,7 +1734,6 @@ async function requestMicPermission(){
 
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    // Stop immediately — just wanted to trigger the permission prompt
     stream.getTracks().forEach(t => t.stop());
     showToast('✅ تم السماح بالمايكروفون','success');
     checkMicPermission();
@@ -1665,7 +1886,26 @@ function setRecordingUI(active){ sendBtnEl.classList.toggle('recording', active)
 async function startVoiceRecording(fromTouch){
   if(!state.currentChatId){ showToast('افتح محادثة الأول','error'); return; } if(sendBtnEl.dataset.mode === 'send' || voiceIsBusy) return;
   voiceUsingTouch = !!fromTouch; voiceIsBusy = true;
-  try { voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch(e){ showToast('محتاجين إذن الميكروفون — افتح الإعدادات للتحقق','error'); voiceIsBusy=false; return; }
+  try { 
+    voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true }); 
+  } catch(e){ 
+    console.error('Voice recording mic error:', e);
+    voiceIsBusy = false;
+    voiceStream = null;
+    
+    // Check if permission was denied
+    if(e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError'){
+      // Show the helpful modal instead of just a toast
+      showMicPermissionModal();
+    } else if(e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError'){
+      showToast('❌ مفيش ميكروفون في جهازك','error');
+    } else if(e.name === 'NotReadableError'){
+      showToast('❌ الميكروفون مستخدم من تطبيق تاني','error');
+    } else {
+      showToast('❌ فشل الوصول للميكروفون','error');
+    }
+    return; 
+  }
   voiceChunks = []; voiceCancelled = false; voiceRecorder = new MediaRecorder(voiceStream);
   voiceRecorder.ondataavailable = (e) => { if(e.data.size>0) voiceChunks.push(e.data); };
   voiceRecorder.onstop = () => { if(!voiceCancelled) processAndSendVoice(); };
@@ -2012,7 +2252,7 @@ document.getElementById('status-viewer-next').addEventListener('click', ()=> sho
 document.getElementById('status-viewer-prev').addEventListener('click', ()=> showStatusAt(statusState.activeIndex-1));
 document.getElementById('status-viewer-close').addEventListener('click', ()=>{ clearTimeout(statusState.timerHandle); document.getElementById('status-viewer').classList.remove('show'); });
 
-console.log('✅ Heye App - Settings with Mic Permission Check + WebRTC Voice Calls + Base64 Voice Messages');
+console.log('✅ Heye App - Mic Permission Modal + WebRTC Voice Calls + Base64 Voice Messages');
 </script>
 </body>
 </html>
