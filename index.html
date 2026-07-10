@@ -81,6 +81,8 @@
   @keyframes markIn{from{opacity:0;transform:scale(.6) rotate(-8deg);}to{opacity:1;transform:scale(1) rotate(0);}}
   @keyframes unreadPulse{0%,100%{background:rgba(201,162,75,.08);}50%{background:rgba(201,162,75,.15);}}
   @keyframes contextMenuIn{from{opacity:0;transform:scale(.9);}to{opacity:1;transform:scale(1);}}
+  @keyframes callPulse{0%,100%{box-shadow:0 0 0 0 rgba(76,175,80,.6);}50%{box-shadow:0 0 0 20px rgba(76,175,80,0);}}
+  @keyframes callRinging{0%{transform:rotate(0);}10%{transform:rotate(15deg);}20%{transform:rotate(-15deg);}30%{transform:rotate(10deg);}40%{transform:rotate(-10deg);}50%{transform:rotate(5deg);}60%{transform:rotate(-5deg);}70%{transform:rotate(0);}100%{transform:rotate(0);}}
 
   #view-loading{align-items:center;justify-content:center;background:var(--bg-deep);gap:18px;}
   .loader-ring{width:44px;height:44px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--gold);animation:spin 0.9s linear infinite;}
@@ -228,6 +230,8 @@
   .chat-action-btn{width:36px;height:36px;border-radius:50%;background:var(--bg-panel);border:1px solid var(--line-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s ease;}
   .chat-action-btn:active{background:var(--bg-panel-2);}
   .chat-action-btn svg{width:16px;height:16px;opacity:.7;}
+  .chat-call-btn{background:linear-gradient(160deg, var(--ok), #3a8d5c);}
+  .chat-call-btn svg{opacity:1;}
 
   .messages{flex:1;overflow-y:auto;padding:18px 14px 10px;display:flex;flex-direction:column;gap:8px;background:radial-gradient(140% 40% at 50% 0%, #1A1424 0%, transparent 60%), var(--bg-deep);}
   .day-chip{align-self:center;font-size:11px;color:var(--mute);background:var(--bg-panel);padding:6px 16px;border-radius:999px;margin:12px 0;border:1px solid var(--line-soft);}
@@ -323,60 +327,51 @@
 
   @media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;}}
 
-  .status-section-title{padding:18px 16px 10px;font-size:15px;font-weight:700;color:var(--ink);}
-  .my-status-row{display:flex;align-items:center;gap:14px;padding:10px 16px 16px;cursor:pointer;}
-  .my-status-avatar-wrap{position:relative;flex-shrink:0;width:54px;height:54px;}
-  .my-status-avatar{width:54px;height:54px;border-radius:50%;background:linear-gradient(160deg, var(--gold-soft), var(--gold));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#1A1206;}
-  .my-status-avatar.has-status{background:none;padding:2px;border:2.5px solid var(--gold);}
-  .my-status-avatar.has-status img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;}
-  .my-status-add-btn{position:absolute;bottom:-2px;left:-2px;width:20px;height:20px;border-radius:50%;background:var(--gold);border:2.5px solid var(--bg-deep);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#1A1206;}
-  .my-status-info{flex:1;}
-  .my-status-title{font-size:15px;font-weight:700;color:var(--ink);}
-  .my-status-sub{font-size:12.5px;color:var(--mute);margin-top:2px;}
-  .status-list{padding:0 16px;}
-  .status-row{display:flex;align-items:center;gap:14px;padding:10px 0;cursor:pointer;}
-  .status-ring{width:54px;height:54px;border-radius:50%;padding:2.5px;flex-shrink:0;background:conic-gradient(var(--gold-soft), var(--gold) 80%, var(--line) 80%);}
-  .status-ring.seen{background:var(--line-soft);}
-  .status-avatar-inner{width:100%;height:100%;border-radius:50%;overflow:hidden;border:2.5px solid var(--bg-deep);}
-  .status-avatar-inner img{width:100%;height:100%;object-fit:cover;display:block;}
-  .status-row-name{font-size:15px;font-weight:700;color:var(--ink);}
-  .status-row-time{font-size:12px;color:var(--mute);margin-top:2px;}
-  .status-fab-camera{position:absolute;left:16px;bottom:calc(74px + max(10px, var(--safe-bottom)));width:50px;height:50px;border-radius:16px;background:linear-gradient(160deg, var(--gold-soft), var(--gold));display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 20px rgba(201,162,75,.4);border:none;font-size:20px;}
+  /* ----- CALL UI (Full-Screen Overlay) ----- */
+  .call-overlay{
+    position:fixed;inset:0;background:linear-gradient(180deg, #0a1a0f 0%, #0E0B14 100%);z-index:500;
+    display:none;flex-direction:column;align-items:center;justify-content:center;gap:30px;
+  }
+  .call-overlay.show{display:flex;animation:fadeIn .3s ease;}
+  .call-overlay.incoming .call-avatar{animation:callPulse 2s infinite;}
+  .call-overlay.outgoing .call-avatar{animation:callPulse 1.5s infinite;}
+  .call-avatar{
+    width:120px;height:120px;border-radius:50%;
+    background:linear-gradient(160deg, var(--ok), #3a8d5c);
+    display:flex;align-items:center;justify-content:center;
+    font-size:48px;font-weight:800;color:#fff;
+    box-shadow:0 0 40px rgba(76,175,80,.4);
+  }
+  .call-name{font-size:22px;font-weight:700;color:var(--ink);}
+  .call-status{font-size:14px;color:var(--mute);}
+  .call-status.ringing{color:var(--ok);animation:fadeUp 1s ease infinite;}
+  .call-timer{font-size:18px;color:var(--ink);font-variant-numeric:tabular-nums;display:none;}
+  .call-timer.show{display:block;}
+  .call-actions{display:flex;gap:30px;margin-top:20px;}
+  .call-action-btn{
+    width:64px;height:64px;border-radius:50%;border:none;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;transition:all .2s ease;
+  }
+  .call-action-btn:active{transform:scale(.9);}
+  .call-action-btn svg{width:28px;height:28px;}
+  .call-end-btn{background:var(--danger);box-shadow:0 4px 20px rgba(217,112,90,.4);}
+  .call-accept-btn{background:var(--ok);box-shadow:0 4px 20px rgba(76,175,80,.4);animation:callPulse 2s infinite;}
+  .call-mute-btn{background:var(--bg-panel-2);border:1px solid var(--line-soft);}
+  .call-mute-btn.muted{background:var(--danger);}
+  .call-speaker-btn{background:var(--bg-panel-2);border:1px solid var(--line-soft);}
+  .call-speaker-btn.active{background:var(--ok);}
 
-  .status-viewer{position:fixed;inset:0;background:#000;z-index:400;display:none;flex-direction:column;}
-  .status-viewer.show{display:flex;}
-  .status-viewer-progress{display:flex;gap:4px;padding:10px 10px 0;}
-  .status-viewer-bar{flex:1;height:2.5px;background:rgba(255,255,255,.3);border-radius:2px;overflow:hidden;}
-  .status-viewer-bar-fill{height:100%;width:0%;background:#fff;border-radius:2px;}
-  .status-viewer-header{display:flex;align-items:center;gap:10px;padding:12px 14px;}
-  .status-viewer-avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0;border:1.5px solid rgba(255,255,255,.3);}
-  .status-viewer-avatar img{width:100%;height:100%;object-fit:cover;}
-  .status-viewer-name{color:#fff;font-size:14px;font-weight:700;}
-  .status-viewer-time{color:rgba(255,255,255,.7);font-size:11.5px;margin-top:1px;}
-  .status-viewer-close{margin-right:auto;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);border:none;color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;}
-  .status-viewer-content{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
-  .status-viewer-content img{max-width:100%;max-height:100%;object-fit:contain;}
-  .status-viewer-nav{position:absolute;top:0;bottom:0;width:33%;z-index:2;}
-  .status-viewer-nav.prev{left:0;}
-  .status-viewer-nav.next{right:0;}
-  .status-viewer-caption{padding:16px;color:#fff;text-align:center;font-size:14px;background:linear-gradient(0deg, rgba(0,0,0,.5), transparent);}
+  /* Call notification message bubble */
+  .call-bubble{
+    background:var(--bg-panel)!important;border:1px solid var(--ok)!important;
+    display:flex;align-items:center;gap:10px;padding:10px 14px;
+  }
+  .call-bubble-icon{font-size:20px;}
+  .call-bubble-info{font-size:12px;color:var(--mute);}
+  .call-bubble-duration{font-size:11px;color:var(--mute-2);}
 
-  .status-upload-overlay{position:fixed;inset:0;background:#000;z-index:410;display:none;flex-direction:column;}
-  .status-upload-overlay.show{display:flex;}
-  .status-upload-header{display:flex;align-items:center;justify-content:space-between;padding:14px;}
-  .status-upload-close{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);border:none;color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;}
-  .status-upload-preview{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:10px;}
-  .status-upload-preview img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px;}
-  .status-upload-caption-input{margin:0 16px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:12px 16px;color:#fff;font-family:'Cairo',sans-serif;font-size:14px;outline:none;}
-  .status-upload-caption-input::placeholder{color:rgba(255,255,255,.5);}
-  .status-upload-footer{display:flex;align-items:center;justify-content:flex-end;padding:16px;gap:12px;}
-  .status-upload-send{width:52px;height:52px;border-radius:50%;background:linear-gradient(160deg, var(--gold-soft), var(--gold));border:none;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(201,162,75,.4);}
-  .status-upload-send svg{width:22px;height:22px;}
-  .status-upload-send:disabled{opacity:.5;}
-  .status-picker-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:#fff;text-align:center;padding:40px;}
-  .status-picker-btn{background:linear-gradient(160deg, var(--gold-soft), var(--gold));color:#1A1206;border:none;border-radius:14px;padding:14px 28px;font-family:'Cairo',sans-serif;font-size:14.5px;font-weight:700;}
-
-  /* WhatsApp-Style Voice Recording UI */
+  /* ----- VOICE RECORDING UI ----- */
   .composer-input-shell{flex:1;display:flex;align-items:center;gap:6px;background:var(--bg-panel);border:1.5px solid var(--line);border-radius:24px;padding:6px 8px 6px 14px;transition:border-color .25s ease;}
   .composer-input-shell:focus-within{border-color:var(--gold);}
   .composer-icon-btn{flex-shrink:0;width:34px;height:34px;border-radius:50%;background:transparent;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--mute);}
@@ -403,22 +398,16 @@
   .voice-msg-wave{flex:1;height:26px;display:flex;align-items:center;gap:2px;}
   .voice-msg-wave span{width:2.5px;background:var(--gold);border-radius:2px;opacity:.5;flex-shrink:0;}
   .voice-msg-duration{font-size:11px;color:var(--mute-2);flex-shrink:0;}
-
-  .attach-menu{position:fixed;left:14px;right:14px;bottom:80px;background:var(--bg-panel-2);border:1px solid var(--line);border-radius:18px;padding:16px;z-index:150;display:none;grid-template-columns:repeat(3,1fr);gap:16px;box-shadow:0 10px 30px rgba(0,0,0,.5);}
-  .attach-menu.show{display:grid;}
-  .attach-menu-item{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;}
-  .attach-menu-icon{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;}
-  .attach-menu-label{font-size:11.5px;color:var(--ink);font-weight:600;}
-  .attach-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:149;display:none;}
-  .attach-overlay.show{display:block;}
 </style>
 </head>
 <body>
 
 <div id="app">
 
+  <!-- LOADING -->
   <div class="view" id="view-loading"><div class="loader-ring"></div><p>لحظة واحدة...</p></div>
 
+  <!-- ONBOARDING -->
   <div class="view hidden" id="view-onboarding">
     <div class="field"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
     <div class="ob-top"><div class="eyebrow">دائرتك الخاصة</div></div>
@@ -433,6 +422,7 @@
     </div>
   </div>
 
+  <!-- NAME -->
   <div class="view hidden" id="view-name">
     <div class="step-top"><button class="back-btn" id="btn-back-name"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div style="width:40px"></div></div>
     <div class="name-head"><h1>إزيك، تحب نناديك إزاي؟</h1><p>اكتب اسمك، وإحنا هنجهزلك يوزرنيم مميز بالإنجليزي — وهيفتكرك تلقائي في المرات الجاية</p></div>
@@ -446,6 +436,7 @@
     <div class="name-bottom"><button class="cta" id="btn-continue-name" disabled><span>متابعة</span><svg viewBox="0 0 24 24" fill="none"><path d="M15 6L9 12L15 18" stroke="#1A1206" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
   </div>
 
+  <!-- MAIN -->
   <div class="view hidden" id="view-main">
     <div class="app-header">
       <div class="app-header-row"><div class="app-title">هي<span>ي</span></div><button class="avatar-btn" id="my-avatar">ه</button></div>
@@ -472,6 +463,78 @@
     </div>
   </div>
 
+  <!-- UPDATES -->
+  <div class="view hidden" id="view-updates">
+    <div class="app-header" style="padding-bottom:8px;">
+      <div class="app-header-row"><h2 style="font-size:20px;font-weight:700;">التحديثات</h2><button class="avatar-btn" id="updates-avatar-btn">ه</button></div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding-bottom:90px;position:relative;">
+      <div class="status-section-title">الحالة</div>
+      <div class="my-status-row" id="my-status-row">
+        <div class="my-status-avatar-wrap">
+          <div class="my-status-avatar" id="my-status-avatar-el">ه</div>
+          <div class="my-status-add-btn">+</div>
+        </div>
+        <div class="my-status-info">
+          <div class="my-status-title">حالتي</div>
+          <div class="my-status-sub" id="my-status-sub">اضغط لإضافة حالة</div>
+        </div>
+      </div>
+      <div id="others-status-section" style="display:none;">
+        <div class="status-section-title">حالات جديدة</div>
+        <div class="status-list" id="others-status-list"></div>
+      </div>
+    </div>
+    <button class="status-fab-camera" id="status-fab-camera">📷</button>
+    <div style="display:flex;align-items:center;justify-content:space-around;padding:10px 4px max(10px, var(--safe-bottom));background:var(--bg-rise);border-top:1px solid var(--line-soft);">
+      <div class="nav-item" data-nav3="calls" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;cursor:pointer;flex:1;">
+        <svg viewBox="0 0 24 24" fill="none" style="width:22px;height:22px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#8A7F99" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="font-size:10.5px;color:var(--mute-2);font-weight:600;">المكالمات</span>
+      </div>
+      <div class="nav-item" data-nav3="communities" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;cursor:pointer;flex:1;">
+        <svg viewBox="0 0 24 24" fill="none" style="width:22px;height:22px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="#8A7F99" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="#8A7F99" stroke-width="2"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="#8A7F99" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="font-size:10.5px;color:var(--mute-2);font-weight:600;">المجتمعات</span>
+      </div>
+      <div class="nav-item active" data-nav3="updates" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;cursor:pointer;flex:1;">
+        <svg viewBox="0 0 24 24" fill="none" style="width:22px;height:22px;"><circle cx="12" cy="12" r="10" stroke="#E4C77A" stroke-width="2"/><path d="M12 6v6l4 2" stroke="#E4C77A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="font-size:10.5px;color:var(--gold-soft);font-weight:600;">التحديثات</span>
+      </div>
+      <div class="nav-item" data-nav3="chats" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;cursor:pointer;flex:1;">
+        <svg viewBox="0 0 24 24" fill="none" style="width:22px;height:22px;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="#8A7F99" stroke-width="2" stroke-linejoin="round"/></svg>
+        <span style="font-size:10.5px;color:var(--mute-2);font-weight:600;">الدردشات</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMING SOON -->
+  <div class="view hidden" id="view-coming-soon">
+    <div class="profile-header"><button class="back-btn" id="btn-back-coming-soon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h2 id="coming-soon-title">قريبًا</h2></div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:40px;text-align:center;">
+      <div style="width:88px;height:88px;border-radius:50%;background:linear-gradient(160deg, var(--bg-panel-2), var(--bg-panel));border:2px solid var(--line-soft);display:flex;align-items:center;justify-content:center;font-size:36px;" id="coming-soon-icon">✨</div>
+      <h3 style="font-size:19px;font-weight:700;color:var(--ink);">قريبًا</h3>
+      <p style="color:var(--mute);font-size:14px;line-height:1.9;max-width:280px;" id="coming-soon-text">الميزة دي لسه تحت التطوير، وهتكون متاحة قريبًا إن شاء الله.</p>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-around;padding:10px 4px max(10px, var(--safe-bottom));background:var(--bg-rise);border-top:1px solid var(--line-soft);">
+      <div class="nav-item" data-nav2="calls" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;cursor:pointer;flex:1;">
+        <svg viewBox="0 0 24 24" fill="none" style="width:22px;height:22px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#8A7F99" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="font-size:10.5px;color:var(--mute-2);font-weight:600;">المكالمات</span>
+      </div>
+      <div class="nav-item" data-nav2="communities" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;cursor:pointer;flex:1;">
+        <svg viewBox="0 0 24 24" fill="none" style="width:22px;height:22px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="#8A7F99" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="#8A7F99" stroke-width="2"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="#8A7F99" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="font-size:10.5px;color:var(--mute-2);font-weight:600;">المجتمعات</span>
+      </div>
+      <div class="nav-item" data-nav2="updates" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;cursor:pointer;flex:1;">
+        <svg viewBox="0 0 24 24" fill="none" style="width:22px;height:22px;"><circle cx="12" cy="12" r="10" stroke="#8A7F99" stroke-width="2"/><path d="M12 6v6l4 2" stroke="#8A7F99" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="font-size:10.5px;color:var(--mute-2);font-weight:600;">التحديثات</span>
+      </div>
+      <div class="nav-item" data-nav2="chats" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;cursor:pointer;flex:1;">
+        <svg viewBox="0 0 24 24" fill="none" style="width:22px;height:22px;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="#8A7F99" stroke-width="2" stroke-linejoin="round"/></svg>
+        <span style="font-size:10.5px;color:var(--mute-2);font-weight:600;">الدردشات</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
   <div class="view hidden" id="view-profile">
     <div class="profile-header"><button class="back-btn" id="btn-back-profile"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h2>حسابي</h2></div>
     <div class="profile-body">
@@ -483,12 +546,18 @@
     </div>
   </div>
 
+  <!-- CHAT -->
   <div class="view hidden" id="view-chat">
     <div class="chat-header">
       <button class="back-btn" id="btn-back-chat"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <div class="chat-header-info" id="chat-header-info-click">
         <div class="chat-header-avatar-wrapper"><div class="chat-header-avatar" id="chat-header-avatar">ل</div><div class="chat-header-online-indicator" id="chat-header-online-indicator"></div></div>
         <div style="min-width:0;"><div class="chat-header-name" id="chat-header-name">اسم</div><div class="chat-header-status offline" id="chat-header-status">غير متصل</div></div>
+      </div>
+      <div class="chat-actions">
+        <button class="chat-action-btn chat-call-btn" id="btn-call" title="مكالمة صوتية">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
       </div>
     </div>
     <div class="messages" id="messages-container"></div>
@@ -508,16 +577,27 @@
     </div>
   </div>
 
-  <div class="context-overlay" id="context-overlay"></div>
-  <div class="context-menu" id="context-menu">
-    <div class="context-menu-item delete-all" id="delete-for-all">
-      <span class="menu-icon">🗑️</span> حذف للجميع
-    </div>
-    <div class="context-menu-item delete-me" id="delete-for-me">
-      <span class="menu-icon">🙈</span> حذف عندي فقط
+  <!-- CALL OVERLAY -->
+  <div class="call-overlay" id="call-overlay">
+    <div class="call-avatar" id="call-avatar">ل</div>
+    <div class="call-name" id="call-name">اسم</div>
+    <div class="call-status" id="call-status">جاري الاتصال...</div>
+    <div class="call-timer" id="call-timer">00:00</div>
+    <div class="call-actions" id="call-actions">
+      <button class="call-action-btn call-end-btn" id="call-end-btn">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(135 12 12)"/></svg>
+      </button>
     </div>
   </div>
 
+  <!-- CONTEXT MENU -->
+  <div class="context-overlay" id="context-overlay"></div>
+  <div class="context-menu" id="context-menu">
+    <div class="context-menu-item delete-all" id="delete-for-all"><span class="menu-icon">🗑️</span> حذف للجميع</div>
+    <div class="context-menu-item delete-me" id="delete-for-me"><span class="menu-icon">🙈</span> حذف عندي فقط</div>
+  </div>
+
+  <!-- MESSAGE INFO POPUP -->
   <div class="popup-overlay" id="popup-overlay"></div>
   <div class="message-info-popup" id="message-info-popup">
     <h4>📋 معلومات الرسالة</h4>
@@ -526,7 +606,27 @@
     <div class="info-row"><span class="info-icon">💙</span><span class="info-label">تمت القراءة</span><span class="info-value" id="info-read">-</span></div>
   </div>
 
+  <!-- TOAST -->
   <div class="toast" id="toast"></div>
+
+  <!-- STATUS INPUTS (HIDDEN) -->
+  <input type="file" id="status-file-input" accept="image/*" style="display:none;">
+  <div class="status-upload-overlay" id="status-upload-overlay">
+    <div class="status-upload-header"><button class="status-upload-close" id="status-upload-close">✕</button></div>
+    <div class="status-upload-preview" id="status-upload-preview"><img id="status-upload-img" src="" alt=""></div>
+    <input type="text" class="status-upload-caption-input" id="status-upload-caption" placeholder="أضف تعليق...">
+    <div class="status-upload-footer"><button class="status-upload-send" id="status-upload-send"><svg viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+  </div>
+  <div class="status-viewer" id="status-viewer">
+    <div class="status-viewer-progress" id="status-viewer-progress"></div>
+    <div class="status-viewer-header">
+      <div class="status-viewer-avatar" id="status-viewer-avatar"><img src="" alt=""></div>
+      <div><div class="status-viewer-name" id="status-viewer-name"></div><div class="status-viewer-time" id="status-viewer-time"></div></div>
+      <button class="status-viewer-close" id="status-viewer-close">✕</button>
+    </div>
+    <div class="status-viewer-content" id="status-viewer-content"><img id="status-viewer-img" src="" alt=""><div class="status-viewer-nav prev" id="status-viewer-prev"></div><div class="status-viewer-nav next" id="status-viewer-next"></div></div>
+    <div class="status-viewer-caption" id="status-viewer-caption" style="display:none;"></div>
+  </div>
 
 </div>
 
@@ -551,14 +651,22 @@
 </script>
 
 <script>
+// ============ STATE ============
 const state = {
   uid: null, displayName: '', username: '',
   currentChatId: null, currentChatUser: null,
   unsubMessages: null, unsubChats: null, unsubTyping: null,
   chatCount: 0, msgCount: 0,
   onlineUsers: {}, typingUsers: {},
-  typingTimeout: null,
-  selectedMsgId: null
+  typingTimeout: null, selectedMsgId: null,
+  // ----- CALL STATE -----
+  callState: {
+    active: false, type: null, // 'outgoing' | 'incoming'
+    partnerUid: null, partnerName: '',
+    startTime: 0, timerInterval: null,
+    localStream: null, peerConnection: null
+  },
+  incomingCallData: null
 };
 
 let fb = null, fbReady = false;
@@ -574,7 +682,8 @@ function whenReady(fn){ if (fbReady) fn(); else readyQueue.push(fn); }
 const views = {
   loading: document.getElementById('view-loading'), onboarding: document.getElementById('view-onboarding'),
   name: document.getElementById('view-name'), main: document.getElementById('view-main'),
-  profile: document.getElementById('view-profile'), chat: document.getElementById('view-chat')
+  profile: document.getElementById('view-profile'), chat: document.getElementById('view-chat'),
+  comingSoon: document.getElementById('view-coming-soon'), updates: document.getElementById('view-updates')
 };
 
 function goTo(viewName){ Object.values(views).forEach(v => v.classList.add('hidden')); views[viewName].classList.remove('hidden'); }
@@ -585,6 +694,9 @@ function showToast(msg, type){
   setTimeout(()=> t.classList.remove('show'), 2500);
 }
 
+function escapeHtml(str){ const div=document.createElement('div'); div.textContent=str==null?'':String(str); return div.innerHTML; }
+function escapeAttr(str){ return escapeHtml(str).replace(/"/g,'&quot;'); }
+
 function getOrCreateLocalUid(){
   let uid = localStorage.getItem('heye_uid');
   if (!uid){ uid = 'u_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10); localStorage.setItem('heye_uid', uid); }
@@ -593,17 +705,227 @@ function getOrCreateLocalUid(){
 
 const arabicToLatinMap = {'ا':'a','أ':'a','إ':'a','آ':'a','ب':'b','ت':'t','ث':'th','ج':'j','ح':'h','خ':'kh','د':'d','ذ':'th','ر':'r','ز':'z','س':'s','ش':'sh','ص':'s','ض':'d','ط':'t','ظ':'z','ع':'a','غ':'gh','ف':'f','ق':'q','ك':'k','ل':'l','م':'m','ن':'n','ه':'h','ة':'a','و':'w','ي':'y','ى':'a','ئ':'y','ء':'a','ؤ':'w'};
 
-function transliterate(t){
-  let o=''; for(const c of t){ if(arabicToLatinMap[c]) o+=arabicToLatinMap[c]; else if(/[a-zA-Z0-9]/.test(c)) o+=c; else if(c===' ') o+=' '; } return o;
-}
-
-function generateUsernameBase(n){
-  const b = /[\u0600-\u06FF]/.test(n) ? transliterate(n) : n;
-  let s = b.trim().toLowerCase().replace(/\s+/g,'.').replace(/[^a-z0-9.]/g,'').replace(/\.+/g,'.').replace(/^\.|\.$/g,'');
-  if(!s) s='user'; if(s.length>16) s=s.slice(0,16).replace(/\.$/,''); return s;
-}
-
+function transliterate(t){ let o=''; for(const c of t){ if(arabicToLatinMap[c]) o+=arabicToLatinMap[c]; else if(/[a-zA-Z0-9]/.test(c)) o+=c; else if(c===' ') o+=' '; } return o; }
+function generateUsernameBase(n){ const b = /[\u0600-\u06FF]/.test(n) ? transliterate(n) : n; let s = b.trim().toLowerCase().replace(/\s+/g,'.').replace(/[^a-z0-9.]/g,'').replace(/\.+/g,'.').replace(/^\.|\.$/g,''); if(!s) s='user'; if(s.length>16) s=s.slice(0,16).replace(/\.$/,''); return s; }
 function generateUsernameSync(n){ return `${generateUsernameBase(n)}${Math.floor(100+Math.random()*900)}`; }
+
+// ============ CALLING SOUND (RINGTONE) ============
+let ringtoneAudio = null;
+function playRingtone(){
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = 'sine';
+    gain.gain.value = 0.3;
+    const now = audioCtx.currentTime;
+    osc.frequency.setValueAtTime(800, now);
+    osc.frequency.setValueAtTime(1000, now + 0.5);
+    osc.frequency.setValueAtTime(800, now + 1);
+    osc.frequency.setValueAtTime(1000, now + 1.5);
+    osc.start(now); osc.stop(now + 2);
+    ringtoneAudio = { ctx: audioCtx, osc, gain, startTime: now };
+  } catch(e){ console.warn('Ringtone failed:', e); }
+}
+
+function stopRingtone(){
+  try { if(ringtoneAudio){ ringtoneAudio.osc.stop(); ringtoneAudio.ctx.close(); ringtoneAudio = null; } } catch(e){}
+}
+
+// ============ CALL UI ============
+const callOverlay = document.getElementById('call-overlay');
+const callAvatar = document.getElementById('call-avatar');
+const callName = document.getElementById('call-name');
+const callStatus = document.getElementById('call-status');
+const callTimer = document.getElementById('call-timer');
+const callActions = document.getElementById('call-actions');
+const callEndBtn = document.getElementById('call-end-btn');
+
+function showCallUI(type, partnerName){
+  callOverlay.className = 'call-overlay show ' + type;
+  callAvatar.textContent = partnerName.charAt(0).toUpperCase();
+  callName.textContent = partnerName;
+  callStatus.textContent = type === 'outgoing' ? 'جاري الاتصال...' : 'مكالمة واردة...';
+  callStatus.className = 'call-status ringing';
+  callTimer.classList.remove('show');
+  
+  // Add accept button for incoming calls
+  let html = `<button class="call-action-btn call-end-btn" id="call-end-btn"><svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(135 12 12)"/></svg></button>`;
+  if(type === 'incoming'){
+    html = `<button class="call-action-btn call-accept-btn" id="call-accept-btn"><svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>` + html;
+  }
+  callActions.innerHTML = html;
+  
+  // Rebind end button
+  document.getElementById('call-end-btn').addEventListener('click', endCall);
+  if(type === 'incoming'){
+    document.getElementById('call-accept-btn').addEventListener('click', acceptCall);
+  }
+}
+
+function hideCallUI(){
+  callOverlay.classList.remove('show', 'incoming', 'outgoing');
+  stopRingtone();
+  if(state.callState.timerInterval) clearInterval(state.callState.timerInterval);
+}
+
+// ============ CALL SIGNALING (VIA FIREBASE) ============
+const servers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+
+function listenForIncomingCalls(){
+  if(!state.uid) return;
+  const { db, rtdb } = fb;
+  rtdb.onValue(rtdb.ref(db, `calls/${state.uid}`), async (snap) => {
+    if(!snap.exists()) return;
+    const callData = snap.val();
+    if(callData.status === 'ringing' && !state.callState.active){
+      state.incomingCallData = callData;
+      const partnerName = callData.callerName || 'مستخدم';
+      showCallUI('incoming', partnerName);
+      playRingtone();
+      
+      // Show notification if supported
+      if('Notification' in window && Notification.permission === 'granted'){
+        new Notification('📞 مكالمة واردة', { body: `${partnerName} بيتصل بك`, icon: './icon-192.png', vibrate: [200, 100, 200] });
+      }
+    } else if(callData.status === 'ended'){
+      hideCallUI();
+      state.callState.active = false;
+      rtdb.set(rtdb.ref(db, `calls/${state.uid}`), null);
+    }
+  });
+}
+
+async function startCall(){
+  if(!state.currentChatUser || state.callState.active) return;
+  const partnerUid = state.currentChatUser.id;
+  const partnerName = state.currentChatUser.displayName;
+  
+  state.callState.active = true;
+  state.callState.type = 'outgoing';
+  state.callState.partnerUid = partnerUid;
+  state.callState.partnerName = partnerName;
+  
+  showCallUI('outgoing', partnerName);
+  playRingtone();
+  
+  // Save call to Firebase
+  const { db, rtdb } = fb;
+  const now = Date.now();
+  await rtdb.update(rtdb.ref(db, `calls/${partnerUid}`), {
+    callerId: state.uid,
+    callerName: state.displayName,
+    status: 'ringing',
+    createdAt: now
+  });
+  
+  // Listen for answer or end
+  const callRef = rtdb.ref(db, `calls/${partnerUid}`);
+  const unsub = rtdb.onValue(callRef, (snap) => {
+    if(!snap.exists()){ endCall(); unsub(); return; }
+    const data = snap.val();
+    if(data.status === 'answered'){
+      stopRingtone();
+      callStatus.textContent = 'متصل';
+      callStatus.className = 'call-status';
+      startCallTimer();
+      unsub();
+      // Save call log
+      saveCallLog('completed', now);
+    } else if(data.status === 'rejected' || data.status === 'ended'){
+      endCall();
+      unsub();
+    }
+  });
+  
+  // Auto-end after 30s if no answer
+  setTimeout(() => {
+    if(state.callState.active && state.callState.type === 'outgoing' && !callTimer.classList.contains('show')){
+      endCall();
+    }
+  }, 30000);
+}
+
+async function acceptCall(){
+  if(!state.incomingCallData) return;
+  const { callerId, callerName, createdAt } = state.incomingCallData;
+  
+  state.callState.active = true;
+  state.callState.type = 'incoming';
+  state.callState.partnerUid = callerId;
+  state.callState.partnerName = callerName || 'مستخدم';
+  
+  stopRingtone();
+  callStatus.textContent = 'متصل';
+  callStatus.className = 'call-status';
+  startCallTimer();
+  
+  // Update Firebase
+  const { db, rtdb } = fb;
+  await rtdb.update(rtdb.ref(db, `calls/${state.uid}`), {
+    status: 'answered',
+    answeredAt: Date.now()
+  });
+  
+  // Save call log
+  saveCallLog('completed', createdAt || Date.now());
+}
+
+function endCall(){
+  const { db, rtdb } = fb;
+  if(state.callState.partnerUid){
+    rtdb.update(rtdb.ref(db, `calls/${state.callState.partnerUid}`), { status: 'ended' });
+  }
+  if(state.callState.type === 'incoming'){
+    rtdb.set(rtdb.ref(db, `calls/${state.uid}`), null);
+  }
+  
+  hideCallUI();
+  state.callState.active = false;
+  state.callState.type = null;
+  state.incomingCallData = null;
+}
+
+function startCallTimer(){
+  state.callState.startTime = Date.now();
+  callTimer.classList.add('show');
+  state.callState.timerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - state.callState.startTime) / 1000);
+    const mm = Math.floor(elapsed / 60).toString().padStart(2, '0');
+    const ss = (elapsed % 60).toString().padStart(2, '0');
+    callTimer.textContent = `${mm}:${ss}`;
+  }, 1000);
+}
+
+async function saveCallLog(status, startTime){
+  if(!state.currentChatId) return;
+  const { db, rtdb } = fb;
+  const now = new Date().toISOString();
+  const duration = state.callState.startTime ? Math.floor((Date.now() - state.callState.startTime) / 1000) : 0;
+  const newMsgRef = rtdb.push(rtdb.ref(db, `chats/${state.currentChatId}/messages`));
+  await rtdb.set(newMsgRef, {
+    senderId: state.uid,
+    senderName: state.displayName,
+    type: 'call',
+    callStatus: status,
+    duration: duration,
+    createdAt: now,
+    deliveredAt: now
+  });
+  await rtdb.update(rtdb.ref(db, `chats/${state.currentChatId}`), {
+    lastMessage: status === 'missed' ? '📞 مكالمة فائتة' : `📞 مكالمة ${duration > 0 ? formatCallDuration(duration) : 'منتهية'}`,
+    lastMessageAt: now,
+    lastSenderId: state.uid
+  });
+  state.msgCount++; updateProfileStats();
+}
+
+function formatCallDuration(sec){
+  const mm = Math.floor(sec / 60);
+  const ss = sec % 60;
+  return `${mm}:${ss.toString().padStart(2, '0')}`;
+}
 
 // ============ BOOT ============
 whenReady(async () => {
@@ -630,9 +952,7 @@ nameInput.addEventListener('input', ()=>{
   else { usernamePreview.classList.remove('show'); continueBtn.disabled=true; pendingUsername=''; }
 });
 
-document.getElementById('btn-refresh-username').addEventListener('click', ()=>{
-  const v=nameInput.value.trim(); if(v.length<2) return; pendingUsername=generateUsernameSync(v); usernameValue.textContent=pendingUsername;
-});
+document.getElementById('btn-refresh-username').addEventListener('click', ()=>{ const v=nameInput.value.trim(); if(v.length<2) return; pendingUsername=generateUsernameSync(v); usernameValue.textContent=pendingUsername; });
 
 continueBtn.addEventListener('click', async ()=>{
   const v=nameInput.value.trim(); if(v.length<2||!pendingUsername) return;
@@ -658,6 +978,7 @@ function enterApp(){
   document.getElementById('pc-name').textContent=state.displayName; document.getElementById('pc-username').textContent='@'+state.username;
   document.getElementById('pc-date').textContent=new Date().toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric'});
   goTo('main'); setupOnlinePresence(); listenToOnlineUsers(); listenToChatList();
+  listenForIncomingCalls();
 }
 
 // ============ ONLINE PRESENCE ============
@@ -681,24 +1002,12 @@ function updateChatHeaderStatus(){
   const otherUid=state.currentChatUser.id, userStatus=state.onlineUsers[otherUid];
   const statusEl=document.getElementById('chat-header-status'), onlineIndicator=document.getElementById('chat-header-online-indicator');
   const isTyping=state.typingUsers[otherUid];
-  
-  if(isTyping){
-    statusEl.className='chat-header-status typing';
-    statusEl.innerHTML='جاري الكتابة<div class="typing-dots"><span></span><span></span><span></span></div>';
-    onlineIndicator.classList.add('show');
-  } else if(userStatus&&userStatus.online){
-    statusEl.className='chat-header-status online'; statusEl.textContent='متصل الآن'; onlineIndicator.classList.add('show');
-  } else {
-    statusEl.className='chat-header-status offline'; statusEl.textContent=userStatus?.lastSeen?'آخر ظهور '+formatLastSeen(userStatus.lastSeen):'غير متصل'; onlineIndicator.classList.remove('show');
-  }
+  if(isTyping){ statusEl.className='chat-header-status typing'; statusEl.innerHTML='جاري الكتابة<div class="typing-dots"><span></span><span></span><span></span></div>'; onlineIndicator.classList.add('show'); }
+  else if(userStatus&&userStatus.online){ statusEl.className='chat-header-status online'; statusEl.textContent='متصل الآن'; onlineIndicator.classList.add('show'); }
+  else { statusEl.className='chat-header-status offline'; statusEl.textContent=userStatus?.lastSeen?'آخر ظهور '+formatLastSeen(userStatus.lastSeen):'غير متصل'; onlineIndicator.classList.remove('show'); }
 }
 
-function refreshChatListOnlineStatus(){
-  document.querySelectorAll('.chat-row').forEach(row=>{
-    const otherUid=row.dataset.uid, indicator=row.querySelector('.online-indicator');
-    if(indicator&&otherUid) indicator.classList.toggle('show', state.onlineUsers[otherUid]?.online);
-  });
-}
+function refreshChatListOnlineStatus(){ document.querySelectorAll('.chat-row').forEach(row=>{ const otherUid=row.dataset.uid, indicator=row.querySelector('.online-indicator'); if(indicator&&otherUid) indicator.classList.toggle('show', state.onlineUsers[otherUid]?.online); }); }
 
 function formatLastSeen(ts){
   if(!ts) return 'غير معروف'; const d=new Date(ts), now=new Date(), diff=now-d;
@@ -709,185 +1018,93 @@ function formatLastSeen(ts){
 
 // ============ SEARCH ============
 const searchInput=document.getElementById('search-input'), searchResults=document.getElementById('search-results'); let searchDebounce=null;
-
-searchInput.addEventListener('input',()=>{
-  clearTimeout(searchDebounce); const q=searchInput.value.trim();
-  if(q.length<2){ searchResults.classList.remove('show'); searchResults.innerHTML=''; return; }
-  searchDebounce=setTimeout(()=>runSearch(q),300);
-});
-
+searchInput.addEventListener('input',()=>{ clearTimeout(searchDebounce); const q=searchInput.value.trim(); if(q.length<2){ searchResults.classList.remove('show'); searchResults.innerHTML=''; return; } searchDebounce=setTimeout(()=>runSearch(q),300); });
 async function runSearch(qText){
   whenReady(async()=>{
-    try {
-      const {db,rtdb}=fb; const qLower=qText.toLowerCase();
-      const snap=await rtdb.get(rtdb.query(rtdb.ref(db,'users'),rtdb.limitToFirst(50))); const results=[];
-      if(snap.exists()){ for(const[id,data]of Object.entries(snap.val())){ if(id!==state.uid&&((data.usernameLower?.includes(qLower))||(data.nameLower?.includes(qLower)))){ results.push({id,...data}); if(results.length>=10) break; } } }
-      renderSearchResults(results);
-    } catch(e){ searchResults.innerHTML='<div class="search-empty">مش قادرين نبحث دلوقتي</div>'; searchResults.classList.add('show'); }
+    try { const {db,rtdb}=fb; const qLower=qText.toLowerCase(); const snap=await rtdb.get(rtdb.query(rtdb.ref(db,'users'),rtdb.limitToFirst(50))); const results=[]; if(snap.exists()){ for(const[id,data]of Object.entries(snap.val())){ if(id!==state.uid&&((data.usernameLower?.includes(qLower))||(data.nameLower?.includes(qLower)))){ results.push({id,...data}); if(results.length>=10) break; } } } renderSearchResults(results); }
+    catch(e){ searchResults.innerHTML='<div class="search-empty">مش قادرين نبحث دلوقتي</div>'; searchResults.classList.add('show'); }
   });
 }
-
 function renderSearchResults(results){
   if(!results.length){ searchResults.innerHTML='<div class="search-empty">😕 مفيش حد بالاسم ده</div>'; searchResults.classList.add('show'); return; }
-  searchResults.innerHTML=results.map(u=>`<div class="search-result-row" data-uid="${u.id}" data-name="${escapeAttr(u.displayName)}" data-username="${escapeAttr(u.username)}"><div class="sr-avatar">${(u.displayName||'?').charAt(0).toUpperCase()}</div><div class="sr-info"><div class="sr-name">${escapeHtml(u.displayName)}</div><div class="sr-username">@${escapeHtml(u.username)}</div></div></div>`).join('');
+  searchResults.innerHTML=results.map(u=>`<div class="search-result-row" data-uid="${u.id}" data-name="${escapeAttr(u.displayName)}"><div class="sr-avatar">${(u.displayName||'?').charAt(0).toUpperCase()}</div><div class="sr-info"><div class="sr-name">${escapeHtml(u.displayName)}</div><div class="sr-username">@${escapeHtml(u.username)}</div></div></div>`).join('');
   searchResults.classList.add('show');
-  searchResults.querySelectorAll('.search-result-row').forEach(row=>{ row.addEventListener('click',()=>{ const u={id:row.dataset.uid,displayName:row.dataset.name,username:row.dataset.username}; searchInput.value=''; searchResults.classList.remove('show'); openChatWith(u); }); });
+  searchResults.querySelectorAll('.search-result-row').forEach(row=>{ row.addEventListener('click',()=>{ searchInput.value=''; searchResults.classList.remove('show'); openChatWith({id:row.dataset.uid,displayName:row.dataset.name,username:''}); }); });
 }
-
 document.addEventListener('click',(e)=>{ if(!e.target.closest('.search-shell')) searchResults.classList.remove('show'); });
 
 // ============ CHATS ============
 function chatIdFor(uidA,uidB){ return [uidA,uidB].sort().join('__'); }
-
 async function openChatWith(otherUser){
   const chatId=chatIdFor(state.uid,otherUser.id); state.currentChatId=chatId; state.currentChatUser=otherUser;
   const {db,rtdb}=fb;
   try { const chatRef=rtdb.ref(db,`chats/${chatId}`); if(!(await rtdb.get(chatRef)).exists()){ const now=new Date().toISOString(); await rtdb.set(chatRef,{participants:{[state.uid]:true,[otherUser.id]:true},participantNames:{[state.uid]:state.displayName,[otherUser.id]:otherUser.displayName},createdAt:now,lastMessage:'',lastMessageAt:now}); } }
-  catch(e){ showToast('مش قادرين نفتح المحادثة دلوقتي','error'); return; }
+  catch(e){ showToast('مش قادرين نفتح المحادثة','error'); return; }
   document.getElementById('chat-header-avatar').textContent=otherUser.displayName.charAt(0).toUpperCase();
   document.getElementById('chat-header-name').textContent=otherUser.displayName;
   updateChatHeaderStatus(); goTo('chat');
-  listenToMessages(chatId); listenToTyping(chatId, otherUser.id);
-  markMessagesAsRead(chatId);
+  listenToMessages(chatId); listenToTyping(chatId);
 }
 
-// ============ TYPING INDICATOR ============
-function setTypingStatus(isTyping){
-  if(!state.currentChatId) return;
-  const {db,rtdb}=fb;
-  const typingRef=rtdb.ref(db,`chats/${state.currentChatId}/typing/${state.uid}`);
-  if(isTyping){ rtdb.set(typingRef,true); }
-  else { rtdb.set(typingRef,null); }
-}
-
-function listenToTyping(chatId, otherUid){
+function listenToTyping(chatId){
   if(state.unsubTyping){ fb.rtdb.off(fb.rtdb.ref(fb.db,`chats/${chatId}/typing`)); state.unsubTyping=null; }
-  const {db,rtdb}=fb;
-  state.unsubTyping=rtdb.onValue(rtdb.ref(db,`chats/${chatId}/typing`),(snap)=>{
-    state.typingUsers={};
-    if(snap.exists()){
-      const typingData=snap.val();
-      for(const[uid,isTyping]of Object.entries(typingData)){
-        if(uid!==state.uid&&isTyping) state.typingUsers[uid]=true;
-      }
-    }
-    updateChatHeaderStatus();
-  });
+  const {db,rtdb}=fb; state.unsubTyping=rtdb.onValue(rtdb.ref(db,`chats/${chatId}/typing`),(snap)=>{ state.typingUsers={}; if(snap.exists()){ const typingData=snap.val(); for(const[uid,isTyping]of Object.entries(typingData)){ if(uid!==state.uid&&isTyping) state.typingUsers[uid]=true; } } updateChatHeaderStatus(); });
 }
 
-// ============ SEND MESSAGE ============
+// ============ TEXT MESSAGE ============
 const composerInputEl = document.getElementById('composer-input');
-const sendBtnEl = document.getElementById('btn-send');
-const sendBtnIcon = document.getElementById('btn-send-icon');
-const voiceRecordingBar = document.getElementById('voice-recording-bar');
-const voiceRecTimer = document.getElementById('voice-rec-timer');
-const voiceRecCancelBtn = document.getElementById('voice-rec-cancel');
-const composerInputShell = document.getElementById('composer-input-shell');
-
+const sendBtnEl = document.getElementById('btn-send'); const sendBtnIcon = document.getElementById('btn-send-icon');
+const voiceRecordingBar = document.getElementById('voice-recording-bar'); const voiceRecTimer = document.getElementById('voice-rec-timer');
+const voiceRecCancelBtn = document.getElementById('voice-rec-cancel'); const composerInputShell = document.getElementById('composer-input-shell');
 const ICON_MIC = '<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
 const ICON_SEND = '<path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
 
-function updateSendButtonMode(){
-  const hasText = composerInputEl.value.trim().length > 0;
-  if(hasText){ sendBtnEl.dataset.mode = 'send'; sendBtnIcon.innerHTML = ICON_SEND; }
-  else { sendBtnEl.dataset.mode = 'mic'; sendBtnIcon.innerHTML = ICON_MIC; }
-}
-
-composerInputEl.addEventListener('input', ()=>{
-  setTypingStatus(true);
-  clearTimeout(state.typingTimeout);
-  state.typingTimeout = setTimeout(()=> setTypingStatus(false), 2000);
-  composerInputEl.style.height = 'auto';
-  composerInputEl.style.height = Math.min(composerInputEl.scrollHeight, 110) + 'px';
-  updateSendButtonMode();
-});
-
+function updateSendButtonMode(){ const hasText = composerInputEl.value.trim().length > 0; sendBtnEl.dataset.mode = hasText ? 'send' : 'mic'; sendBtnIcon.innerHTML = hasText ? ICON_SEND : ICON_MIC; }
+composerInputEl.addEventListener('input', ()=>{ if(state.currentChatId){ const {db,rtdb}=fb; rtdb.set(rtdb.ref(db,`chats/${state.currentChatId}/typing/${state.uid}`),true); clearTimeout(state.typingTimeout); state.typingTimeout = setTimeout(()=> rtdb.set(rtdb.ref(db,`chats/${state.currentChatId}/typing/${state.uid}`),null), 2000); } composerInputEl.style.height = 'auto'; composerInputEl.style.height = Math.min(composerInputEl.scrollHeight, 110) + 'px'; updateSendButtonMode(); });
 async function sendMessage(){
-  const val = composerInputEl.value.trim();
-  if (!val || !state.currentChatId) return;
+  const val = composerInputEl.value.trim(); if (!val || !state.currentChatId) return;
   composerInputEl.value = ''; composerInputEl.style.height = 'auto'; updateSendButtonMode();
-  try {
-    const { db, rtdb } = fb; const now = new Date().toISOString();
-    const newMsgRef = rtdb.push(rtdb.ref(db, `chats/${state.currentChatId}/messages`));
-    await rtdb.set(newMsgRef, { senderId: state.uid, senderName: state.displayName, text: val, createdAt: now, deliveredAt: now });
-    await rtdb.update(rtdb.ref(db, `chats/${state.currentChatId}`), { lastMessage: val, lastMessageAt: now, lastSenderId: state.uid });
-    state.msgCount++; updateProfileStats();
-  } catch(e) { showToast('الرسالة متبعتتش', 'error'); }
+  try { const {db,rtdb}=fb; const now=new Date().toISOString(); const newMsgRef = rtdb.push(rtdb.ref(db,`chats/${state.currentChatId}/messages`)); await rtdb.set(newMsgRef,{senderId:state.uid,senderName:state.displayName,text:val,createdAt:now,deliveredAt:now}); await rtdb.update(rtdb.ref(db,`chats/${state.currentChatId}`),{lastMessage:val,lastMessageAt:now,lastSenderId:state.uid}); state.msgCount++; updateProfileStats(); }
+  catch(e){ showToast('الرسالة متبعتتش','error'); }
 }
-
 composerInputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
 
-// ============ VOICE RECORDING - BASE64 (NO STORAGE) ============
+// ============ VOICE RECORDING - BASE64 ============
 let voiceRecorder = null, voiceChunks = [], voiceStream = null, voiceStartTime = 0, voiceTimerInterval = null, voiceCancelled = false;
 let voiceUsingTouch = false, voiceIsBusy = false;
-
-function setRecordingUI(active){
-  sendBtnEl.classList.toggle('recording', active);
-  voiceRecordingBar.classList.toggle('show', active);
-  composerInputShell.style.display = active ? 'none' : 'flex';
-}
-
+function setRecordingUI(active){ sendBtnEl.classList.toggle('recording', active); voiceRecordingBar.classList.toggle('show', active); composerInputShell.style.display = active ? 'none' : 'flex'; }
 async function startVoiceRecording(fromTouch){
   if(!state.currentChatId){ showToast('افتح محادثة الأول','error'); return; }
   if(sendBtnEl.dataset.mode === 'send' || voiceIsBusy) return;
   voiceUsingTouch = !!fromTouch; voiceIsBusy = true;
   try { voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
   catch(e){ showToast('محتاجين إذن الميكروفون','error'); voiceIsBusy=false; return; }
-  
   voiceChunks = []; voiceCancelled = false;
   voiceRecorder = new MediaRecorder(voiceStream);
   voiceRecorder.ondataavailable = (e) => { if(e.data.size>0) voiceChunks.push(e.data); };
   voiceRecorder.onstop = () => { if(!voiceCancelled) processAndSendVoice(); };
-  voiceRecorder.start();
-  voiceStartTime = Date.now();
-  setRecordingUI(true);
-  
-  voiceTimerInterval = setInterval(()=>{
-    const elapsed = Math.floor((Date.now() - voiceStartTime) / 1000);
-    voiceRecTimer.textContent = `${Math.floor(elapsed/60)}:${(elapsed%60).toString().padStart(2,'0')}`;
-  }, 200);
+  voiceRecorder.start(); voiceStartTime = Date.now(); setRecordingUI(true);
+  voiceTimerInterval = setInterval(()=>{ const elapsed = Math.floor((Date.now() - voiceStartTime) / 1000); voiceRecTimer.textContent = `${Math.floor(elapsed/60)}:${(elapsed%60).toString().padStart(2,'0')}`; }, 200);
 }
-
 async function stopVoiceRecording(cancel){
-  if(!voiceIsBusy) return;
-  voiceCancelled = !!cancel;
-  clearInterval(voiceTimerInterval);
+  if(!voiceIsBusy) return; voiceCancelled = !!cancel; clearInterval(voiceTimerInterval);
   if(voiceRecorder && voiceRecorder.state === 'recording') voiceRecorder.stop();
   if(voiceStream){ voiceStream.getTracks().forEach(t=>t.stop()); voiceStream=null; }
-  setRecordingUI(false);
-  voiceIsBusy = false;
-  if(voiceCancelled){ voiceChunks=[]; showToast('تم إلغاء التسجيل',''); }
+  setRecordingUI(false); voiceIsBusy = false; if(voiceCancelled){ voiceChunks=[]; }
 }
-
 async function processAndSendVoice(){
   if(voiceCancelled || voiceChunks.length===0) return;
   const durationSec = Math.max(1, Math.floor((Date.now() - voiceStartTime) / 1000));
   if(durationSec < 1){ voiceChunks=[]; return; }
-
-  const blob = new Blob(voiceChunks, { type: 'audio/webm' });
-  const reader = new FileReader();
-  
+  const blob = new Blob(voiceChunks, { type: 'audio/webm' }); const reader = new FileReader();
   reader.onload = async () => {
     const base64Audio = reader.result;
-    try {
-      const { db, rtdb } = fb; const now = new Date().toISOString();
-      const newMsgRef = rtdb.push(rtdb.ref(db, `chats/${state.currentChatId}/messages`));
-      await rtdb.set(newMsgRef, {
-        senderId: state.uid, senderName: state.displayName,
-        type: 'voice', audioBase64: base64Audio, duration: durationSec,
-        createdAt: now, deliveredAt: now
-      });
-      await rtdb.update(rtdb.ref(db, `chats/${state.currentChatId}`), { lastMessage: '🎤 رسالة صوتية', lastMessageAt: now, lastSenderId: state.uid });
-      state.msgCount++; updateProfileStats();
-      showToast('✅ تم إرسال الرسالة الصوتية', 'success');
-    } catch(e) { console.error(e); showToast('فشل الإرسال', 'error'); }
+    try { const { db, rtdb } = fb; const now = new Date().toISOString(); const newMsgRef = rtdb.push(rtdb.ref(db, `chats/${state.currentChatId}/messages`)); await rtdb.set(newMsgRef, { senderId: state.uid, senderName: state.displayName, type: 'voice', audioBase64: base64Audio, duration: durationSec, createdAt: now, deliveredAt: now }); await rtdb.update(rtdb.ref(db, `chats/${state.currentChatId}`), { lastMessage: '🎤 رسالة صوتية', lastMessageAt: now, lastSenderId: state.uid }); state.msgCount++; updateProfileStats(); }
+    catch(e) { showToast('فشل الإرسال','error'); }
     voiceChunks = [];
   };
-  
   reader.readAsDataURL(blob);
 }
-
-// Touch & mouse handlers
 sendBtnEl.addEventListener('touchstart', (e)=>{ if(sendBtnEl.dataset.mode!=='mic') return; e.preventDefault(); startVoiceRecording(true); }, {passive: false});
 sendBtnEl.addEventListener('touchend', (e)=>{ if(!voiceUsingTouch) return; e.preventDefault(); stopVoiceRecording(false); }, {passive: false});
 sendBtnEl.addEventListener('touchcancel', ()=>{ if(voiceUsingTouch) stopVoiceRecording(true); });
@@ -900,119 +1117,87 @@ document.addEventListener('visibilitychange', ()=>{ if(document.hidden&&voiceIsB
 // ============ PLAY VOICE ============
 let currentPlayingAudio = null, currentPlayingBtn = null;
 function playVoiceMessage(url, btnEl){
-  if(currentPlayingAudio && currentPlayingBtn === btnEl){
-    currentPlayingAudio.pause(); currentPlayingAudio=null; currentPlayingBtn=null;
-    btnEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>'; return;
-  }
+  if(currentPlayingAudio && currentPlayingBtn === btnEl){ currentPlayingAudio.pause(); currentPlayingAudio=null; currentPlayingBtn=null; btnEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>'; return; }
   if(currentPlayingAudio){ currentPlayingAudio.pause(); if(currentPlayingBtn) currentPlayingBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>'; }
-  const audio = new Audio(url);
-  currentPlayingAudio=audio; currentPlayingBtn=btnEl;
+  const audio = new Audio(url); currentPlayingAudio=audio; currentPlayingBtn=btnEl;
   btnEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><rect x="6" y="5" width="4" height="14" fill="currentColor"/><rect x="14" y="5" width="4" height="14" fill="currentColor"/></svg>';
-  audio.play();
-  audio.onended = ()=>{ btnEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>'; currentPlayingAudio=null; currentPlayingBtn=null; };
+  audio.play(); audio.onended = ()=>{ btnEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>'; currentPlayingAudio=null; currentPlayingBtn=null; };
 }
 
-// ============ READ RECEIPTS ============
+// ============ MESSAGES & BUBBLES ============
 async function markMessagesAsRead(chatId){
   const {db,rtdb}=fb; const snap=await rtdb.get(rtdb.ref(db,`chats/${chatId}/messages`));
   if(!snap.exists()) return; const messages=snap.val(); const now=new Date().toISOString(); const updates={};
   for(const[msgId,msg]of Object.entries(messages)){ if(msg.senderId!==state.uid&&!msg.readAt) updates[`chats/${chatId}/messages/${msgId}/readAt`]=now; }
   if(Object.keys(updates).length>0) await rtdb.update(rtdb.ref(db),updates);
 }
-
 function getMessageStatusIcon(msg){
-  if(msg.readAt){ return `<span class="msg-status check-read"><svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="check-icon" viewBox="0 0 24 24" fill="none" style="margin-right:-8px;"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`; }
-  else if(msg.deliveredAt){ return `<span class="msg-status check-delivered"><svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="check-icon" viewBox="0 0 24 24" fill="none" style="margin-right:-8px;"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`; }
-  else { return `<span class="msg-status check-sent"><svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`; }
+  if(msg.readAt) return `<span class="msg-status check-read"><svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="check-icon" viewBox="0 0 24 24" fill="none" style="margin-right:-8px;"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
+  if(msg.deliveredAt) return `<span class="msg-status check-delivered"><svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="check-icon" viewBox="0 0 24 24" fill="none" style="margin-right:-8px;"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
+  return `<span class="msg-status check-sent"><svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
 }
-
-// ============ BUILD BUBBLE - FIXED FOR BASE64 ============
 function buildBubbleContent(m){
-  // Check for voice message with Base64
-  if(m.type === 'voice'){
-    const audioSrc = m.audioUrl || m.audioBase64 || '';
-    if(audioSrc){
-      const dur = m.duration || 0;
-      const mm = Math.floor(dur/60), ss = dur%60;
-      const bars = Array.from({length: 24}).map((_,i)=>{ const h = 6 + Math.round(Math.abs(Math.sin(i*1.7))*16); return `<span style="height:${h}px;"></span>`; }).join('');
-      return `<div class="voice-msg"><button class="voice-msg-play-btn" data-url="${escapeAttr(audioSrc)}"><svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></button><div class="voice-msg-wave">${bars}</div><div class="voice-msg-duration">${mm}:${ss.toString().padStart(2,'0')}</div></div>`;
-    }
+  if(m.type === 'call'){
+    const isMissed = m.callStatus === 'missed';
+    const icon = isMissed ? '📞❌' : '📞';
+    const label = isMissed ? 'مكالمة فائتة' : (m.duration ? `مكالمة ${formatCallDuration(m.duration)}` : 'مكالمة منتهية');
+    return `<div class="call-bubble"><span class="call-bubble-icon">${icon}</span><div><div>${label}</div><div class="call-bubble-duration">${m.duration ? formatCallDuration(m.duration) : ''}</div></div></div>`;
   }
-  // Text message
+  if(m.type === 'voice'){ const audioSrc = m.audioUrl || m.audioBase64 || ''; if(audioSrc){ const dur = m.duration || 0; const mm = Math.floor(dur/60), ss = dur%60; const bars = Array.from({length: 24}).map((_,i)=>{ const h = 6 + Math.round(Math.abs(Math.sin(i*1.7))*16); return `<span style="height:${h}px;"></span>`; }).join(''); return `<div class="voice-msg"><button class="voice-msg-play-btn" data-url="${escapeAttr(audioSrc)}"><svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></button><div class="voice-msg-wave">${bars}</div><div class="voice-msg-duration">${mm}:${ss.toString().padStart(2,'0')}</div></div>`; } }
   return escapeHtml(m.text || '');
 }
-
 function listenToMessages(chatId){
   if(state.unsubMessages){ fb.rtdb.off(fb.rtdb.ref(fb.db,`chats/${chatId}/messages`)); state.unsubMessages=null; }
   const {db,rtdb}=fb; const container=document.getElementById('messages-container');
-  const otherName=state.currentChatUser?.displayName||'الشخص';
-  container.innerHTML=`<div class="chat-empty"><div class="empty-avatar">${otherName.charAt(0).toUpperCase()}</div><h3>${escapeHtml(otherName)}</h3><p>دي بداية محادثتكم 👋</p></div>`;
-  const msgsRef=rtdb.query(rtdb.ref(db,`chats/${chatId}/messages`),rtdb.limitToLast(100));
-  state.unsubMessages=rtdb.onValue(msgsRef,(snap)=>{
-    if(!snap.exists()){ container.innerHTML=`<div class="chat-empty"><div class="empty-avatar">${otherName.charAt(0).toUpperCase()}</div><h3>${escapeHtml(otherName)}</h3><p>دي بداية محادثتكم 👋</p></div>`; return; }
-    markMessagesAsRead(chatId);
-    const messages=snap.val(); let html='';
+  container.innerHTML='<div class="chat-empty"><h3>بداية المحادثة</h3></div>';
+  state.unsubMessages=rtdb.onValue(rtdb.query(rtdb.ref(db,`chats/${chatId}/messages`),rtdb.limitToLast(100)),(snap)=>{
+    if(!snap.exists()){ container.innerHTML='<div class="chat-empty"><h3>بداية المحادثة</h3></div>'; return; }
+    markMessagesAsRead(chatId); const messages=snap.val(); let html='';
     Object.entries(messages).sort((a,b)=>(a[1].createdAt||'').localeCompare(b[1].createdAt||'')).forEach(([msgId,m])=>{
       if(m.deletedFor&&m.deletedFor[state.uid]) return;
-      const mine=m.senderId===state.uid;
-      const time=m.createdAt?new Date(m.createdAt).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'}):'';
-      const statusIcon=mine?getMessageStatusIcon(m):'';
-      const bubbleContent = buildBubbleContent(m);
-      if(bubbleContent){
-        html+=`<div class="bubble-row ${mine?'me':'them'}"><div class="bubble ${mine?'me':'them'}">${bubbleContent}<div class="msg-footer"><span class="msg-time">${time}</span>${statusIcon}</div></div></div>`;
-      }
+      const mine=m.senderId===state.uid; const time=m.createdAt?new Date(m.createdAt).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'}):'';
+      html+=`<div class="bubble-row ${mine?'me':'them'}"><div class="bubble ${mine?'me':'them'}">${buildBubbleContent(m)}<div class="msg-footer"><span class="msg-time">${time}</span>${mine?getMessageStatusIcon(m):''}</div></div></div>`;
     });
     container.innerHTML=html; container.scrollTop=container.scrollHeight;
-    
-    container.querySelectorAll('.voice-msg-play-btn').forEach(btn=>{
-      btn.addEventListener('click', (e)=>{ e.stopPropagation(); playVoiceMessage(btn.dataset.url, btn); });
-    });
+    container.querySelectorAll('.voice-msg-play-btn').forEach(btn=>{ btn.addEventListener('click', (e)=>{ e.stopPropagation(); playVoiceMessage(btn.dataset.url, btn); }); });
   });
 }
 
-// ============ DELETE MESSAGE SYSTEM ============
-const contextMenu = document.getElementById('context-menu');
-const contextOverlay = document.getElementById('context-overlay');
-
-function showDeleteMenu(e, msgId, isMine){
-  if(!isMine) return; e.preventDefault();
-  state.selectedMsgId = msgId;
-  const x = e.touches ? e.touches[0].clientX : e.clientX;
-  const y = e.touches ? e.touches[0].clientY : e.clientY;
-  contextMenu.style.left = Math.min(x, window.innerWidth - 200) + 'px';
-  contextMenu.style.top = Math.min(y, window.innerHeight - 120) + 'px';
-  contextMenu.classList.add('show'); contextOverlay.classList.add('show');
-}
-
+// ============ DELETE ============
+const contextMenu = document.getElementById('context-menu'); const contextOverlay = document.getElementById('context-overlay');
+function showDeleteMenu(e, msgId, isMine){ if(!isMine) return; e.preventDefault(); state.selectedMsgId = msgId; const x = e.touches ? e.touches[0].clientX : e.clientX; const y = e.touches ? e.touches[0].clientY : e.clientY; contextMenu.style.left = Math.min(x, window.innerWidth - 200) + 'px'; contextMenu.style.top = Math.min(y, window.innerHeight - 120) + 'px'; contextMenu.classList.add('show'); contextOverlay.classList.add('show'); }
 function hideDeleteMenu(){ contextMenu.classList.remove('show'); contextOverlay.classList.remove('show'); state.selectedMsgId = null; }
-
 contextOverlay.addEventListener('click', hideDeleteMenu);
-
-document.getElementById('delete-for-all').addEventListener('click', async ()=>{
-  if(!state.selectedMsgId || !state.currentChatId) return; hideDeleteMenu();
-  try { const { db, rtdb } = fb; await rtdb.remove(rtdb.ref(db, `chats/${state.currentChatId}/messages/${state.selectedMsgId}`)); showToast('🗑️ تم الحذف للجميع', 'success'); }
-  catch(e){ showToast('مش قادرين نحذف', 'error'); }
-});
-
-document.getElementById('delete-for-me').addEventListener('click', async ()=>{
-  if(!state.selectedMsgId || !state.currentChatId) return; hideDeleteMenu();
-  try { const { db, rtdb } = fb; await rtdb.update(rtdb.ref(db, `chats/${state.currentChatId}/messages/${state.selectedMsgId}`), { [`deletedFor.${state.uid}`]: true }); showToast('🙈 تم الحذف عندك فقط', 'success'); }
-  catch(e){ showToast('مش قادرين نحذف', 'error'); }
-});
-
+document.getElementById('delete-for-all').addEventListener('click', async ()=>{ if(!state.selectedMsgId||!state.currentChatId) return; hideDeleteMenu(); try { await fb.rtdb.remove(fb.rtdb.ref(fb.db,`chats/${state.currentChatId}/messages/${state.selectedMsgId}`)); showToast('🗑️ تم الحذف للجميع','success'); } catch(e){ showToast('مش قادرين نحذف','error'); } });
+document.getElementById('delete-for-me').addEventListener('click', async ()=>{ if(!state.selectedMsgId||!state.currentChatId) return; hideDeleteMenu(); try { await fb.rtdb.update(fb.rtdb.ref(fb.db,`chats/${state.currentChatId}/messages/${state.selectedMsgId}`),{[`deletedFor.${state.uid}`]:true}); showToast('🙈 تم الحذف عندك فقط','success'); } catch(e){ showToast('مش قادرين نحذف','error'); } });
 function showMessageInfo(bubbleElement){
   document.getElementById('info-sent').textContent=bubbleElement.dataset.sent?new Date(bubbleElement.dataset.sent).toLocaleString('ar-EG',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'}):'-';
   document.getElementById('info-delivered').textContent=bubbleElement.dataset.delivered?new Date(bubbleElement.dataset.delivered).toLocaleString('ar-EG',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'}):'لم يتم التسليم';
   document.getElementById('info-read').textContent=bubbleElement.dataset.read?new Date(bubbleElement.dataset.read).toLocaleString('ar-EG',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'}):'لم تُقرأ بعد';
   document.getElementById('message-info-popup').classList.add('show'); document.getElementById('popup-overlay').classList.add('show');
 }
-
 document.getElementById('popup-overlay').addEventListener('click',()=>{ document.getElementById('message-info-popup').classList.remove('show'); document.getElementById('popup-overlay').classList.remove('show'); });
 
-document.getElementById('btn-back-chat').addEventListener('click',()=>{
-  if(state.unsubMessages){ fb.rtdb.off(fb.rtdb.ref(fb.db,`chats/${state.currentChatId}/messages`)); state.unsubMessages=null; }
-  if(state.unsubTyping){ fb.rtdb.off(fb.rtdb.ref(fb.db,`chats/${state.currentChatId}/typing`)); state.unsubTyping=null; }
-  state.currentChatUser=null; state.currentChatId=null; goTo('main');
+// ============ NAVIGATION ============
+document.getElementById('btn-back-chat').addEventListener('click',()=>{ if(state.unsubMessages){ fb.rtdb.off(fb.rtdb.ref(fb.db,`chats/${state.currentChatId}/messages`)); state.unsubMessages=null; } if(state.unsubTyping){ fb.rtdb.off(fb.rtdb.ref(fb.db,`chats/${state.currentChatId}/typing`)); state.unsubTyping=null; } state.currentChatUser=null; state.currentChatId=null; goTo('main'); });
+document.getElementById('my-avatar').addEventListener('click',()=>{ updateProfileStats(); goTo('profile'); });
+document.getElementById('btn-back-profile').addEventListener('click',()=>goTo('main'));
+document.querySelector('[data-nav="chats"]').addEventListener('click',()=>goTo('main'));
+document.querySelector('[data-nav="calls"]').addEventListener('click',()=>{ document.getElementById('coming-soon-title').textContent='المكالمات'; document.getElementById('coming-soon-icon').textContent='📞'; document.getElementById('coming-soon-text').textContent='المكالمات الصوتية متاحة في كل محادثة - اضغط على أيقونة الهاتف في الشات.'; goTo('comingSoon'); });
+document.querySelector('[data-nav="communities"]').addEventListener('click',()=>{ document.getElementById('coming-soon-title').textContent='المجتمعات'; document.getElementById('coming-soon-icon').textContent='👥'; document.getElementById('coming-soon-text').textContent='ميزة المجتمعات لسه تحت التطوير، وهتكون متاحة قريبًا إن شاء الله.'; goTo('comingSoon'); });
+document.querySelector('[data-nav="updates"]').addEventListener('click',()=>{ document.getElementById('updates-avatar-btn').textContent=state.displayName.charAt(0).toUpperCase(); goTo('updates'); });
+document.getElementById('btn-back-coming-soon').addEventListener('click',()=>goTo('main'));
+document.querySelectorAll('[data-nav3="chats"]').forEach(el=>el.addEventListener('click',()=>goTo('main')));
+document.querySelectorAll('[data-nav3="calls"]').forEach(el=>el.addEventListener('click',()=>{ document.getElementById('coming-soon-title').textContent='المكالمات'; document.getElementById('coming-soon-icon').textContent='📞'; goTo('comingSoon'); }));
+document.querySelectorAll('[data-nav3="communities"]').forEach(el=>el.addEventListener('click',()=>{ document.getElementById('coming-soon-title').textContent='المجتمعات'; document.getElementById('coming-soon-icon').textContent='👥'; goTo('comingSoon'); }));
+document.querySelectorAll('[data-nav2="chats"]').forEach(el=>el.addEventListener('click',()=>goTo('main')));
+document.querySelectorAll('[data-nav2="updates"]').forEach(el=>el.addEventListener('click',()=>{ document.getElementById('updates-avatar-btn').textContent=state.displayName.charAt(0).toUpperCase(); goTo('updates'); }));
+
+// ============ CALL BUTTON IN CHAT ============
+document.getElementById('btn-call').addEventListener('click', () => {
+  if(!state.currentChatUser){ showToast('افتح محادثة الأول','error'); return; }
+  if(state.callState.active){ showToast('فيه مكالمة شغالة بالفعل',''); return; }
+  startCall();
 });
 
 // ============ CHAT LIST ============
@@ -1020,10 +1205,10 @@ function listenToChatList(){
   if(state.unsubChats){ fb.rtdb.off(fb.rtdb.ref(fb.db,'chats')); state.unsubChats=null; }
   const {db,rtdb}=fb; const listEl=document.getElementById('chat-list');
   state.unsubChats=rtdb.onValue(rtdb.query(rtdb.ref(db,'chats'),rtdb.limitToFirst(100)),(snap)=>{
-    if(!snap.exists()){ listEl.innerHTML=`<div class="empty-state"><h3>📭 مفيش محادثات</h3></div>`; state.chatCount=0; return; }
+    if(!snap.exists()){ listEl.innerHTML='<div class="empty-state"><h3>📭 مفيش محادثات لسه</h3></div>'; state.chatCount=0; updateProfileStats(); return; }
     const chats=snap.val(); const myChats=Object.entries(chats).filter(([id,c])=>c.participants?.[state.uid]).sort((a,b)=>(b[1].lastMessageAt||'').localeCompare(a[1].lastMessageAt||''));
-    state.chatCount=myChats.length;
-    if(!myChats.length){ listEl.innerHTML=`<div class="empty-state"><h3>📭 مفيش محادثات</h3></div>`; return; }
+    state.chatCount=myChats.length; updateProfileStats();
+    if(!myChats.length){ listEl.innerHTML='<div class="empty-state"><h3>📭 مفيش محادثات لسه</h3></div>'; return; }
     let html='<div class="section-header">المحادثات الأخيرة</div>';
     myChats.forEach(([chatId,c])=>{
       const otherUid=Object.keys(c.participants).find(p=>p!==state.uid), otherName=c.participantNames?.[otherUid]||'مستخدم';
@@ -1034,38 +1219,33 @@ function listenToChatList(){
     listEl.querySelectorAll('.chat-row').forEach(row=>{ row.addEventListener('click',()=>{ openChatWith({id:row.dataset.uid,displayName:row.dataset.name,username:''}); }); });
   });
 }
-
 function formatTime(ts){ const d=new Date(ts),now=new Date(),diff=now-d; if(diff<60000) return 'الآن'; if(diff<3600000) return `${Math.floor(diff/60000)} د`; if(diff<86400000) return d.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'}); return d.toLocaleDateString('ar-EG',{month:'short',day:'numeric'}); }
-
 function updateProfileStats(){ document.getElementById('chat-count').textContent=state.chatCount; document.getElementById('msg-count').textContent=state.msgCount; }
 
-// ============ PROFILE & LOGOUT ============
-document.getElementById('my-avatar').addEventListener('click',()=>{ goTo('profile'); });
-document.getElementById('btn-back-profile').addEventListener('click',()=>goTo('main'));
-document.querySelector('[data-nav="chats"]').addEventListener('click',()=>goTo('main'));
+// ============ LOGOUT ============
+document.getElementById('btn-logout').addEventListener('click',()=>{ if(confirm('⚠️ متأكد من تسجيل الخروج؟')){ const {db,rtdb}=fb; rtdb.update(rtdb.ref(db,`users/${state.uid}`),{online:false,lastSeen:new Date().toISOString()}); localStorage.removeItem('heye_uid'); location.reload(); } });
 
-document.getElementById('btn-logout').addEventListener('click',()=>{
-  if(confirm('⚠️ متأكد من تسجيل الخروج؟')){
-    const {db,rtdb}=fb;
-    rtdb.update(rtdb.ref(db,`users/${state.uid}`),{online:false,lastSeen:new Date().toISOString()});
-    localStorage.removeItem('heye_uid'); location.reload();
-  }
-});
+// ============ STATUS SYSTEM ============
+const STATUS_LIFETIME_MS = 24 * 60 * 60 * 1000;
+let statusState = { pendingFile: null, activeList: [], activeIndex: 0, timerHandle: null };
+document.getElementById('my-status-row').addEventListener('click',()=>document.getElementById('status-file-input').click());
+document.getElementById('status-fab-camera').addEventListener('click',()=>document.getElementById('status-file-input').click());
+document.getElementById('status-file-input').addEventListener('change', (e)=>{ const file = e.target.files[0]; if(!file) return; statusState.pendingFile = file; document.getElementById('status-upload-img').src = URL.createObjectURL(file); document.getElementById('status-upload-overlay').classList.add('show'); e.target.value = ''; });
+document.getElementById('status-upload-close').addEventListener('click',()=>{ document.getElementById('status-upload-overlay').classList.remove('show'); statusState.pendingFile = null; });
+document.getElementById('status-upload-send').addEventListener('click', async ()=>{ if(!statusState.pendingFile) return; const reader = new FileReader(); reader.onload = async () => { const { db, rtdb } = fb; const now = Date.now(); const newStatusRef = rtdb.push(rtdb.ref(db, `statuses/${state.uid}/items`)); await rtdb.set(newStatusRef, { imageBase64: reader.result, caption: document.getElementById('status-upload-caption').value.trim() || '', createdAt: now, expiresAt: now + STATUS_LIFETIME_MS }); await rtdb.update(rtdb.ref(db, `statusOwners/${state.uid}`), { displayName: state.displayName, lastStatusAt: now }); document.getElementById('status-upload-overlay').classList.remove('show'); statusState.pendingFile = null; showToast('✅ تم نشر الحالة','success'); loadStatuses(); }; reader.readAsDataURL(statusState.pendingFile); });
+async function loadStatuses(){
+  const { db, rtdb } = fb;
+  try { const mySnap = await rtdb.get(rtdb.ref(db, `statuses/${state.uid}/items`)); if(mySnap.exists()){ const items = Object.values(mySnap.val()).filter(it => it.expiresAt > Date.now()).sort((a,b)=>a.createdAt-b.createdAt); if(items.length){ document.getElementById('my-status-avatar-el').classList.add('has-status'); document.getElementById('my-status-avatar-el').innerHTML = `<img src="${escapeAttr(items[items.length-1].imageBase64)}" alt="">`; } } } catch(e){}
+  rtdb.onValue(rtdb.ref(db, 'statusOwners'), async (ownersSnap)=>{ if(!ownersSnap.exists()) return; const owners = Object.entries(ownersSnap.val()).filter(([uid]) => uid !== state.uid); const listEl = document.getElementById('others-status-list'); const sectionEl = document.getElementById('others-status-section'); if(!owners.length){ sectionEl.style.display='none'; return; } const rows = []; for(const [uid, ownerData] of owners){ const itemsSnap = await rtdb.get(rtdb.ref(db, `statuses/${uid}/items`)); if(!itemsSnap.exists()) continue; const items = Object.values(itemsSnap.val()).filter(it => it.expiresAt > Date.now()).sort((a,b)=>a.createdAt-b.createdAt); if(!items.length) continue; rows.push({ uid, name: ownerData.displayName || 'مستخدم', items, latestImg: items[items.length-1].imageBase64, latestTime: items[items.length-1].createdAt }); } if(!rows.length){ sectionEl.style.display='none'; return; } sectionEl.style.display='block'; listEl.innerHTML = rows.map(r => `<div class="status-row" data-uid="${r.uid}"><div class="status-ring"><div class="status-avatar-inner"><img src="${escapeAttr(r.latestImg)}" alt=""></div></div><div><div class="status-row-name">${escapeHtml(r.name)}</div><div class="status-row-time">${formatStatusTime(r.latestTime)}</div></div></div>`).join(''); listEl.querySelectorAll('.status-row').forEach(row=>{ row.addEventListener('click',()=>{ const found = rows.find(r=>r.uid===row.dataset.uid); if(found) openStatusViewer(found.items, found.name); }); }); });
+}
+function formatStatusTime(ts){ const diff = Date.now() - ts; if(diff < 60000) return 'الآن'; if(diff < 3600000) return `منذ ${Math.floor(diff/60000)} دقيقة`; return `منذ ${Math.floor(diff/3600000)} ساعة`; }
+function openStatusViewer(items, ownerName){ statusState.activeList = items; statusState.activeIndex = 0; document.getElementById('status-viewer-name').textContent = ownerName; document.getElementById('status-viewer-progress').innerHTML = items.map(()=>'<div class="status-viewer-bar"><div class="status-viewer-bar-fill"></div></div>').join(''); showStatusAt(0); document.getElementById('status-viewer').classList.add('show'); }
+function showStatusAt(index){ clearTimeout(statusState.timerHandle); if(index < 0 || index >= statusState.activeList.length){ document.getElementById('status-viewer').classList.remove('show'); return; } statusState.activeIndex = index; const item = statusState.activeList[index]; document.getElementById('status-viewer-img').src = item.imageBase64; document.getElementById('status-viewer-time').textContent = formatStatusTime(item.createdAt); document.getElementById('status-viewer-caption').style.display = item.caption ? 'block' : 'none'; if(item.caption) document.getElementById('status-viewer-caption').textContent = item.caption; document.querySelectorAll('.status-viewer-bar-fill').forEach((b,i)=>{ b.style.transition='none'; b.style.width = i < index ? '100%' : '0%'; }); void document.getElementById('status-viewer-progress').offsetWidth; const bar = document.querySelectorAll('.status-viewer-bar-fill')[index]; if(bar){ bar.style.transition = 'width 5s linear'; requestAnimationFrame(()=>{ bar.style.width = '100%'; }); } statusState.timerHandle = setTimeout(()=> showStatusAt(index+1), 5000); }
+document.getElementById('status-viewer-next').addEventListener('click', ()=> showStatusAt(statusState.activeIndex+1));
+document.getElementById('status-viewer-prev').addEventListener('click', ()=> showStatusAt(statusState.activeIndex-1));
+document.getElementById('status-viewer-close').addEventListener('click', ()=>{ clearTimeout(statusState.timerHandle); document.getElementById('status-viewer').classList.remove('show'); });
 
-document.getElementById('chat-header-info-click').addEventListener('click',()=>{
-  if(state.currentChatUser){
-    const userStatus=state.onlineUsers[state.currentChatUser.id];
-    const isTyping=state.typingUsers[state.currentChatUser.id];
-    if(isTyping) showToast('✍️ جاري الكتابة...','success');
-    else if(userStatus?.online) showToast('🟢 متصل الآن','success');
-    else showToast('⚫ '+(userStatus?.lastSeen?'آخر ظهور '+formatLastSeen(userStatus.lastSeen):'غير متصل'),'');
-  }
-});
-
-function escapeHtml(str){ const div=document.createElement('div'); div.textContent=str==null?'':String(str); return div.innerHTML; }
-function escapeAttr(str){ return escapeHtml(str).replace(/"/g,'&quot;'); }
-
-console.log('✅ Heye App - Base64 Voice Messages (No Storage) - Ready');
+console.log('✅ Heye App - مكالمات صوتية + رسائل صوتية Base64 + جميع الصفحات');
 </script>
 </body>
 </html>
