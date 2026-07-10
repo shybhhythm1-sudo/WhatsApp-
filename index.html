@@ -84,6 +84,7 @@
   @keyframes callPulse{0%,100%{box-shadow:0 0 0 0 rgba(76,175,80,.6);}50%{box-shadow:0 0 0 20px rgba(76,175,80,0);}}
   @keyframes micPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
   @keyframes recBlink{0%,100%{opacity:1;}50%{opacity:.3;}}
+  @keyframes micLevelPulse{0%,100%{transform:scaleY(0.3);}50%{transform:scaleY(1);}}
 
   #view-loading{align-items:center;justify-content:center;background:var(--bg-deep);gap:18px;}
   .loader-ring{width:44px;height:44px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--gold);animation:spin 0.9s linear infinite;}
@@ -141,9 +142,13 @@
 
   #view-main{background:var(--bg-deep);}
   .app-header{padding:max(18px, var(--safe-top)) 20px 14px;display:flex;flex-direction:column;gap:16px;background:linear-gradient(180deg, var(--bg-rise) 0%, var(--bg-deep) 100%);border-bottom:1px solid var(--line-soft);}
-  .app-header-row{display:flex;align-items:center;justify-content:space-between;}
+  .app-header-row{display:flex;align-items:center;justify-content:space-between;gap:12px;}
   .app-title{font-family:'Amiri',serif;font-size:28px;font-weight:700;display:flex;align-items:center;gap:6px;}
   .app-title span{color:var(--gold-soft);}
+  .header-actions{display:flex;align-items:center;gap:10px;}
+  .settings-btn{width:42px;height:42px;border-radius:50%;background:var(--bg-panel);border:1px solid var(--line-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s ease;flex-shrink:0;}
+  .settings-btn:active{background:var(--bg-panel-2);transform:scale(.93);}
+  .settings-btn svg{width:20px;height:20px;}
   .avatar-btn{width:42px;height:42px;border-radius:50%;background:linear-gradient(160deg, var(--gold-soft), var(--gold));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#1A1206;cursor:pointer;flex-shrink:0;border:none;box-shadow:0 4px 15px rgba(201,162,75,.3);transition:all .2s ease;}
   .avatar-btn:active{transform:scale(.93);}
 
@@ -207,6 +212,50 @@
   .notif-status-card .ns-title{font-size:14px;font-weight:700;color:var(--ink);}
   .notif-status-card .ns-sub{font-size:12px;color:var(--mute);margin-top:2px;}
   .notif-status-card .ns-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+
+  /* ============ SETTINGS VIEW ============ */
+  #view-settings{background:var(--bg-deep);}
+  .settings-body{flex:1;overflow-y:auto;padding:24px 20px 40px;display:flex;flex-direction:column;gap:18px;}
+  .settings-section-title{font-size:13px;font-weight:600;color:var(--mute-2);letter-spacing:.05em;padding:8px 4px;}
+  .settings-card{width:100%;background:var(--bg-panel);border:1px solid var(--line-soft);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px;}
+  .settings-row{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--line-soft);}
+  .settings-row:last-child{border-bottom:none;}
+  .settings-row-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+  .settings-row-icon.mic-icon{background:rgba(95,191,143,.14);}
+  .settings-row-icon.notif-icon{background:rgba(201,162,75,.14);}
+  .settings-row-icon.info-icon{background:rgba(52,183,241,.14);}
+  .settings-row-text{flex:1;min-width:0;}
+  .settings-row-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:2px;}
+  .settings-row-sub{font-size:12.5px;color:var(--mute);line-height:1.6;}
+  .settings-row-action{flex-shrink:0;}
+  .perm-badge{padding:6px 12px;border-radius:999px;font-size:11.5px;font-weight:700;display:inline-flex;align-items:center;gap:5px;}
+  .perm-badge.granted{background:rgba(95,191,143,.15);color:var(--ok);border:1px solid rgba(95,191,143,.3);}
+  .perm-badge.denied{background:rgba(217,112,90,.15);color:var(--danger);border:1px solid rgba(217,112,90,.3);}
+  .perm-badge.prompt{background:rgba(201,162,75,.15);color:var(--gold-soft);border:1px solid rgba(201,162,75,.3);}
+  .perm-badge.unknown{background:rgba(138,127,153,.15);color:var(--mute);border:1px solid rgba(138,127,153,.3);}
+  .perm-badge .dot{width:7px;height:7px;border-radius:50%;background:currentColor;}
+  .perm-badge.granted .dot{background:var(--ok);}
+  .perm-badge.denied .dot{background:var(--danger);}
+  .perm-badge.prompt .dot{background:var(--gold-soft);}
+
+  .mic-test-card{background:var(--bg-panel-2);border:1px solid var(--line-soft);border-radius:14px;padding:16px;display:none;flex-direction:column;gap:12px;}
+  .mic-test-card.show{display:flex;}
+  .mic-level-visualizer{display:flex;align-items:center;justify-content:center;gap:3px;height:40px;padding:0 10px;}
+  .mic-level-bar{width:4px;background:var(--ok);border-radius:2px;transition:height 0.1s ease;min-height:3px;}
+  .mic-test-status{font-size:13px;color:var(--mute);text-align:center;line-height:1.7;}
+  .mic-test-status.ok{color:var(--ok);}
+  .mic-test-status.error{color:var(--danger);}
+  .mic-test-btn{width:100%;height:44px;border-radius:12px;border:none;background:linear-gradient(160deg, var(--gold-soft), var(--gold));color:#1A1206;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s ease;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .mic-test-btn:active{transform:scale(.97);}
+  .mic-test-btn:disabled{opacity:.5;pointer-events:none;}
+  .mic-test-btn.secondary{background:var(--bg-panel);border:1px solid var(--line);color:var(--ink);}
+  .mic-test-btn.danger{background:rgba(217,112,90,.15);border:1px solid rgba(217,112,90,.3);color:var(--danger);}
+  .mic-test-btn .spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(26,18,6,.3);border-top-color:#1A1206;animation:spin .7s linear infinite;}
+
+  .settings-help-box{background:rgba(217,112,90,.08);border:1px solid rgba(217,112,90,.2);border-radius:12px;padding:14px;font-size:12.5px;color:var(--mute);line-height:1.8;display:none;}
+  .settings-help-box.show{display:block;}
+  .settings-help-box strong{color:var(--danger);font-weight:700;}
+  .settings-help-box code{background:var(--bg-panel);padding:2px 6px;border-radius:4px;font-size:11px;color:var(--ink);direction:ltr;display:inline-block;}
 
   #view-chat{background:var(--bg-deep);}
   .chat-header{display:flex;align-items:center;gap:12px;padding:max(16px, var(--safe-top)) 16px 14px;background:linear-gradient(180deg, var(--bg-rise) 0%, rgba(23,18,32,.8) 100%);border-bottom:1px solid var(--line-soft);backdrop-filter:blur(10px);}
@@ -465,7 +514,18 @@
   <!-- MAIN -->
   <div class="view hidden" id="view-main">
     <div class="app-header">
-      <div class="app-header-row"><div class="app-title">هي<span>ي</span></div><button class="avatar-btn" id="my-avatar">ه</button></div>
+      <div class="app-header-row">
+        <div class="app-title">هي<span>ي</span></div>
+        <div class="header-actions">
+          <button class="settings-btn" id="btn-open-settings" title="الإعدادات">
+            <svg viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="3" stroke="#E4C77A" stroke-width="2"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="#E4C77A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button class="avatar-btn" id="my-avatar">ه</button>
+        </div>
+      </div>
       <div class="search-shell"><input type="text" class="search-input" id="search-input" placeholder="🔍  ابحث عن صديق..."><div class="search-results" id="search-results"></div></div>
     </div>
     <div class="chat-list" id="chat-list"></div>
@@ -486,6 +546,80 @@
         <svg viewBox="0 0 24 24" fill="none" style="width:22px;height:22px;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="#E4C77A" stroke-width="2" stroke-linejoin="round"/></svg>
         <span style="font-size:10.5px;color:var(--gold-soft);font-weight:600;">الدردشات</span>
       </div>
+    </div>
+  </div>
+
+  <!-- ============ SETTINGS VIEW ============ -->
+  <div class="view hidden" id="view-settings">
+    <div class="profile-header">
+      <button class="back-btn" id="btn-back-settings"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <h2>الإعدادات</h2>
+    </div>
+    <div class="settings-body">
+
+      <div class="settings-section-title">الأذونات والصلاحيات</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-row-icon mic-icon">🎤</div>
+          <div class="settings-row-text">
+            <div class="settings-row-title">إذن الميكروفون</div>
+            <div class="settings-row-sub">مطلوب للمكالمات الصوتية والرسائل الصوتية</div>
+          </div>
+          <div class="settings-row-action">
+            <span class="perm-badge unknown" id="mic-perm-badge"><span class="dot"></span><span id="mic-perm-text">جاري الفحص...</span></span>
+          </div>
+        </div>
+
+        <div class="mic-test-card" id="mic-test-card">
+          <div class="mic-level-visualizer" id="mic-level-visualizer"></div>
+          <div class="mic-test-status" id="mic-test-status">اضغط على "اختبر الميكروفون" للتحقق من عمله</div>
+          <button class="mic-test-btn secondary" id="btn-test-mic">
+            <svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            اختبر الميكروفون
+          </button>
+          <button class="mic-test-btn danger" id="btn-stop-mic-test" style="display:none;">إيقاف الاختبار</button>
+        </div>
+
+        <div class="settings-help-box" id="mic-help-box">
+          <strong>⚠️ الميكروفون مرفوض من المتصفح</strong><br>
+          لإعادة تفعيله، افتح إعدادات الموقع في المتصفح:<br>
+          • <strong>Chrome:</strong> اضغط على أيقونة القفل 🔒 بجانب الرابط → "أذونات الموقع" → "الميكروفون" → "سماح"<br>
+          • <strong>Safari:</strong> الإعدادات → المواقع → الميكروفون → سماح لهذا الموقع<br>
+          • ثم أعد تحميل الصفحة
+        </div>
+
+        <button class="mic-test-btn" id="btn-request-mic" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;"><path d="M23 12l-7 7-1.5-1.5M1 12l7-7 1.5 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 3v18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          اطلب إذن الميكروفون الآن
+        </button>
+      </div>
+
+      <div class="settings-section-title">الإشعارات</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-row-icon notif-icon">🔔</div>
+          <div class="settings-row-text">
+            <div class="settings-row-title">إشعارات المتصفح</div>
+            <div class="settings-row-sub" id="notif-perm-sub">جاري الفحص...</div>
+          </div>
+          <div class="settings-row-action">
+            <span class="perm-badge unknown" id="notif-perm-badge"><span class="dot"></span><span id="notif-perm-text">...</span></span>
+          </div>
+        </div>
+        <button class="mic-test-btn secondary" id="btn-request-notif" style="display:none;">تفعيل الإشعارات</button>
+      </div>
+
+      <div class="settings-section-title">حول التطبيق</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-row-icon info-icon">📱</div>
+          <div class="settings-row-text">
+            <div class="settings-row-title">هيي - Heye</div>
+            <div class="settings-row-sub">الإصدار 1.0.0 · تطبيق محادثة آمن</div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -741,7 +875,9 @@ const state = {
     isMuted: false, isSpeakerOn: false,
     offerSent: false, remoteSet: false, callId: null
   },
-  incomingCallData: null
+  incomingCallData: null,
+  // ----- SETTINGS STATE -----
+  micTestStream: null, micTestAnalyser: null, micTestRaf: null
 };
 
 let fb = null, fbReady = false;
@@ -758,7 +894,8 @@ const views = {
   loading: document.getElementById('view-loading'), onboarding: document.getElementById('view-onboarding'),
   name: document.getElementById('view-name'), main: document.getElementById('view-main'),
   profile: document.getElementById('view-profile'), chat: document.getElementById('view-chat'),
-  comingSoon: document.getElementById('view-coming-soon'), updates: document.getElementById('view-updates')
+  comingSoon: document.getElementById('view-coming-soon'), updates: document.getElementById('view-updates'),
+  settings: document.getElementById('view-settings')
 };
 
 function goTo(viewName){ Object.values(views).forEach(v => v.classList.add('hidden')); views[viewName].classList.remove('hidden'); }
@@ -869,8 +1006,6 @@ function toggleSpeaker(){
 }
 
 // ============ WebRTC CONFIGURATION ============
-// STUN لمعرفة الـ IP العام + TURN كـ "خط رجعة" لما الاتصال المباشر يبقى مستحيل
-// (مهم جدًا لما الطرفين على شبكات موبايل/NAT مختلفة زي الحالة عندك)
 const rtcConfig = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
@@ -883,7 +1018,6 @@ const rtcConfig = {
 };
 
 // ============ CALL SIGNALING (VIA FIREBASE) ============
-// طابور ICE candidates بمفاتيح فريدة (push) بدل ما نكتب فوق بعض
 let iceListenerAttached = false;
 
 function resetCallState(){
@@ -902,7 +1036,6 @@ function listenForIncomingCalls(){
   if(!state.uid) return;
   const { db, rtdb } = fb;
 
-  // حالة المكالمة (ringing / answered / ended)
   rtdb.onValue(rtdb.ref(db, `calls/${state.uid}/status`), async (snap) => {
     if(!snap.exists()) return;
     const status = snap.val();
@@ -928,7 +1061,6 @@ function listenForIncomingCalls(){
       callQuality.textContent = 'جاري الاتصال بالطرف الآخر...';
       callQuality.classList.add('show');
       state.callState.offerSent = true;
-      // المتصل جهّز المايك والـ peerConnection من الأول عند الطلب، فدلوقتي نبعت الـ offer
       await createAndSendOffer();
       return;
     }
@@ -938,7 +1070,6 @@ function listenForIncomingCalls(){
     }
   });
 
-  // الـ offer
   rtdb.onValue(rtdb.ref(db, `calls/${state.uid}/offer`), async (snap) => {
     if(!snap.exists() || !state.callState.peerConnection || state.callState.remoteSet) return;
     state.callState.remoteSet = true;
@@ -946,7 +1077,6 @@ function listenForIncomingCalls(){
     await drainIceQueue();
   });
 
-  // الـ answer
   rtdb.onValue(rtdb.ref(db, `calls/${state.uid}/answer`), async (snap) => {
     if(!snap.exists() || !state.callState.peerConnection) return;
     if(state.callState.peerConnection.currentRemoteDescription) return;
@@ -954,7 +1084,6 @@ function listenForIncomingCalls(){
     await drainIceQueue();
   });
 
-  // ICE candidates بتوصل من الطرف التاني كقايمة (push nodes)
   rtdb.onValue(rtdb.ref(db, `calls/${state.uid}/iceIn`), async (snap) => {
     if(!snap.exists()) return;
     const items = snap.val();
@@ -1000,7 +1129,6 @@ async function startCall(){
   const partnerUid = state.currentChatUser.id;
   const partnerName = state.currentChatUser.displayName;
 
-  // نجهز المايك والاتصال قبل ما نرن عند التاني، عشان لما يرد نبعت الـ offer فورًا
   let stream;
   try { stream = await ensureLocalStream(); }
   catch(e){ showToast('محتاجين إذن الميكروفون عشان تتصل','error'); return; }
@@ -1021,7 +1149,6 @@ async function startCall(){
     createdAt: now, callId: state.callState.callId
   });
 
-  // إلغاء تلقائي لو محدش رد خلال 45 ثانية
   setTimeout(() => {
     if(state.callState.active && state.callState.type === 'outgoing' && !callTimer.classList.contains('show')){
       endCall(); saveCallLog('missed', now);
@@ -1033,12 +1160,10 @@ async function acceptCall(){
   if(!state.incomingCallData) return;
   const { callerId, callerName, createdAt } = state.incomingCallData;
 
-  // نجهز المايك والـ peerConnection الأول قبل أي حاجة، عشان نبقى جاهزين نستقبل الصوت فورًا
   let stream;
   try { stream = await ensureLocalStream(); }
   catch(e){
     showToast('محتاجين إذن الميكروفون عشان ترد على المكالمة','error');
-    // نرفض المكالمة لو مفيش إذن مايك، لكن ده اختيارك: ممكن كمان تسمح بالرد بدون مايك (استماع فقط)
   }
 
   state.callState.active = true; state.callState.type = 'incoming';
@@ -1065,7 +1190,6 @@ async function createPeerConnection(providedStream){
   state.callState.peerConnection = pc;
   iceQueue = [];
 
-  // الصوت المحلي (الميكروفون بتاعنا) — لو رفض الإذن، هنكمل بدون بعت صوت لكن نستمر نستقبل صوت التاني
   try {
     const stream = providedStream || await ensureLocalStream();
     stream.getTracks().forEach(track => pc.addTrack(track, stream));
@@ -1074,7 +1198,6 @@ async function createPeerConnection(providedStream){
     showToast('مش قادرين نوصل للميكروفون، هتقدر تسمع بس','error');
   }
 
-  // استقبال صوت الطرف التاني — ده بيشتغل دايمًا حتى لو إحنا مقفلين المايك بتاعنا
   pc.ontrack = (event) => {
     let audioEl = document.querySelector('audio[data-peer="remote"]');
     if(!audioEl){
@@ -1101,7 +1224,6 @@ async function createPeerConnection(providedStream){
     }
   };
 
-  // بعت ICE candidates كعناصر منفصلة (push) عشان محدش يمسح التاني
   pc.onicecandidate = (event) => {
     if(event.candidate && state.callState.partnerUid){
       const { db, rtdb } = fb;
@@ -1195,6 +1317,230 @@ async function saveCallLog(status, startTime){
 }
 
 function formatCallDuration(sec){ const mm=Math.floor(sec/60); const ss=sec%60; return `${mm}:${ss.toString().padStart(2,'0')}`; }
+
+// ============ SETTINGS - MIC PERMISSION ============
+async function checkMicPermission(){
+  const badge = document.getElementById('mic-perm-badge');
+  const text = document.getElementById('mic-perm-text');
+  const helpBox = document.getElementById('mic-help-box');
+  const requestBtn = document.getElementById('btn-request-mic');
+
+  if(!navigator.permissions || !navigator.permissions.query){
+    // fallback: try getUserMedia directly
+    badge.className = 'perm-badge unknown';
+    text.textContent = 'غير معروف';
+    requestBtn.style.display = 'block';
+    return;
+  }
+
+  try {
+    const result = await navigator.permissions.query({ name: 'microphone' });
+    updateMicBadge(result.state);
+
+    // Listen for changes
+    result.onchange = () => {
+      updateMicBadge(result.state);
+      // Auto-refresh when user changes permission in browser
+      if(result.state === 'granted'){
+        helpBox.classList.remove('show');
+        requestBtn.style.display = 'none';
+      } else if(result.state === 'denied'){
+        helpBox.classList.add('show');
+        requestBtn.style.display = 'none';
+      } else {
+        helpBox.classList.remove('show');
+        requestBtn.style.display = 'block';
+      }
+    };
+
+    if(result.state === 'granted'){
+      helpBox.classList.remove('show');
+      requestBtn.style.display = 'none';
+    } else if(result.state === 'denied'){
+      helpBox.classList.add('show');
+      requestBtn.style.display = 'none';
+    } else {
+      helpBox.classList.remove('show');
+      requestBtn.style.display = 'block';
+    }
+  } catch(e){
+    console.error('Permission check failed:', e);
+    badge.className = 'perm-badge unknown';
+    text.textContent = 'غير معروف';
+    requestBtn.style.display = 'block';
+  }
+}
+
+function updateMicBadge(permState){
+  const badge = document.getElementById('mic-perm-badge');
+  const text = document.getElementById('mic-perm-text');
+  const map = {
+    granted: { cls: 'granted', txt: 'مسموح ✅' },
+    denied: { cls: 'denied', txt: 'مرفوض ❌' },
+    prompt: { cls: 'prompt', txt: 'لم يُطلب بعد' }
+  };
+  const info = map[permState] || { cls: 'unknown', txt: 'غير معروف' };
+  badge.className = 'perm-badge ' + info.cls;
+  text.textContent = info.txt;
+}
+
+async function checkNotifPermission(){
+  const badge = document.getElementById('notif-perm-badge');
+  const text = document.getElementById('notif-perm-text');
+  const sub = document.getElementById('notif-perm-sub');
+  const requestBtn = document.getElementById('btn-request-notif');
+
+  if(!('Notification' in window)){
+    badge.className = 'perm-badge denied';
+    text.textContent = 'غير مدعوم';
+    sub.textContent = 'المتصفح لا يدعم الإشعارات';
+    requestBtn.style.display = 'none';
+    return;
+  }
+
+  const perm = Notification.permission;
+  const map = {
+    granted: { cls: 'granted', txt: 'مفعّلة ✅', sub: 'الإشعارات مفعّلة حاليًا' },
+    denied: { cls: 'denied', txt: 'مرفوضة ❌', sub: 'الإشعارات مرفوضة من المتصفح' },
+    default: { cls: 'prompt', txt: 'لم تُفعَّل', sub: 'اضغط للتفعيل' }
+  };
+  const info = map[perm] || { cls: 'unknown', txt: 'غير معروف', sub: '' };
+  badge.className = 'perm-badge ' + info.cls;
+  text.textContent = info.txt;
+  sub.textContent = info.sub;
+  requestBtn.style.display = perm === 'default' ? 'block' : 'none';
+}
+
+// ----- MIC TEST -----
+function buildMicVisualizer(){
+  const viz = document.getElementById('mic-level-visualizer');
+  viz.innerHTML = '';
+  for(let i = 0; i < 24; i++){
+    const bar = document.createElement('div');
+    bar.className = 'mic-level-bar';
+    bar.style.height = '3px';
+    viz.appendChild(bar);
+  }
+}
+
+async function startMicTest(){
+  const testCard = document.getElementById('mic-test-card');
+  const testBtn = document.getElementById('btn-test-mic');
+  const stopBtn = document.getElementById('btn-stop-mic-test');
+  const statusEl = document.getElementById('mic-test-status');
+
+  testCard.classList.add('show');
+  testBtn.style.display = 'none';
+  stopBtn.style.display = 'block';
+  stopBtn.disabled = true;
+  stopBtn.innerHTML = '<div class="spin"></div> جاري التفعيل...';
+  statusEl.className = 'mic-test-status';
+  statusEl.textContent = 'جاري طلب إذن الميكروفون...';
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    state.micTestStream = stream;
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioCtx.createMediaStreamSource(stream);
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 64;
+    source.connect(analyser);
+    state.micTestAnalyser = analyser;
+
+    buildMicVisualizer();
+    const bars = document.querySelectorAll('.mic-level-bar');
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    stopBtn.disabled = false;
+    stopBtn.innerHTML = '⏹ إيقاف الاختبار';
+    statusEl.className = 'mic-test-status ok';
+    statusEl.textContent = '🎤 الميكروفون يعمل! تحدث الآن لرؤية المستوى';
+
+    function animate(){
+      analyser.getByteFrequencyData(dataArray);
+      bars.forEach((bar, i) => {
+        const value = dataArray[i] || 0;
+        const height = Math.max(3, (value / 255) * 36);
+        bar.style.height = height + 'px';
+        bar.style.background = value > 150 ? 'var(--ok)' : value > 50 ? 'var(--gold-soft)' : 'var(--mute)';
+      });
+      state.micTestRaf = requestAnimationFrame(animate);
+    }
+    animate();
+
+    // Update permission badge after successful grant
+    checkMicPermission();
+
+  } catch(e){
+    console.error('Mic test failed:', e);
+    statusEl.className = 'mic-test-status error';
+    if(e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError'){
+      statusEl.textContent = '❌ تم رفض إذن الميكروفون. افتح إعدادات المتصفح للسماح.';
+      document.getElementById('mic-help-box').classList.add('show');
+    } else if(e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError'){
+      statusEl.textContent = '❌ لم يتم العثور على ميكروفون في جهازك.';
+    } else if(e.name === 'NotReadableError'){
+      statusEl.textContent = '❌ الميكروفون مستخدم من تطبيق آخر. أغلق التطبيقات الأخرى وحاول مجددًا.';
+    } else {
+      statusEl.textContent = '❌ فشل الوصول للميكروفون: ' + (e.message || 'خطأ غير معروف');
+    }
+    testBtn.style.display = 'block';
+    stopBtn.style.display = 'none';
+    checkMicPermission();
+  }
+}
+
+function stopMicTest(){
+  if(state.micTestRaf){ cancelAnimationFrame(state.micTestRaf); state.micTestRaf = null; }
+  if(state.micTestStream){
+    state.micTestStream.getTracks().forEach(t => t.stop());
+    state.micTestStream = null;
+  }
+  state.micTestAnalyser = null;
+
+  const testBtn = document.getElementById('btn-test-mic');
+  const stopBtn = document.getElementById('btn-stop-mic-test');
+  testBtn.style.display = 'block';
+  stopBtn.style.display = 'none';
+}
+
+async function requestMicPermission(){
+  const statusEl = document.getElementById('mic-test-status');
+  const testCard = document.getElementById('mic-test-card');
+  testCard.classList.add('show');
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // Stop immediately — just wanted to trigger the permission prompt
+    stream.getTracks().forEach(t => t.stop());
+    showToast('✅ تم السماح بالمايكروفون','success');
+    checkMicPermission();
+    document.getElementById('mic-help-box').classList.remove('show');
+    document.getElementById('btn-request-mic').style.display = 'none';
+  } catch(e){
+    console.error('Request mic failed:', e);
+    if(e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError'){
+      showToast('❌ تم رفض الإذن','error');
+      document.getElementById('mic-help-box').classList.add('show');
+    } else {
+      showToast('❌ فشل: ' + (e.message || 'خطأ'),'error');
+    }
+    checkMicPermission();
+  }
+}
+
+async function requestNotifPermission(){
+  if(!('Notification' in window)) return;
+  try {
+    const result = await Notification.requestPermission();
+    checkNotifPermission();
+    if(result === 'granted') showToast('✅ تم تفعيل الإشعارات','success');
+    else showToast('لم يتم التفعيل','');
+  } catch(e){
+    showToast('فشل تفعيل الإشعارات','error');
+  }
+}
 
 // ============ BOOT ============
 whenReady(async () => {
@@ -1319,7 +1665,7 @@ function setRecordingUI(active){ sendBtnEl.classList.toggle('recording', active)
 async function startVoiceRecording(fromTouch){
   if(!state.currentChatId){ showToast('افتح محادثة الأول','error'); return; } if(sendBtnEl.dataset.mode === 'send' || voiceIsBusy) return;
   voiceUsingTouch = !!fromTouch; voiceIsBusy = true;
-  try { voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch(e){ showToast('محتاجين إذن الميكروفون','error'); voiceIsBusy=false; return; }
+  try { voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch(e){ showToast('محتاجين إذن الميكروفون — افتح الإعدادات للتحقق','error'); voiceIsBusy=false; return; }
   voiceChunks = []; voiceCancelled = false; voiceRecorder = new MediaRecorder(voiceStream);
   voiceRecorder.ondataavailable = (e) => { if(e.data.size>0) voiceChunks.push(e.data); };
   voiceRecorder.onstop = () => { if(!voiceCancelled) processAndSendVoice(); };
@@ -1366,10 +1712,10 @@ function playVoiceMessage(url, btnEl){
 }
 
 // ============ MEDIA (IMAGES / VIDEOS) ============
-const MAX_IMAGE_DIM = 1280;           // أقصى بُعد للصورة بعد الضغط
-const IMAGE_QUALITY = 0.72;           // جودة ضغط JPEG
-const MAX_VIDEO_BYTES = 8 * 1024 * 1024;   // 8MB أقصى حجم فيديو (RTDB مش مناسبة لملفات كبيرة)
-const MAX_VIDEO_SECONDS = 30;         // أقصى مدة فيديو مسموحة
+const MAX_IMAGE_DIM = 1280;
+const IMAGE_QUALITY = 0.72;
+const MAX_VIDEO_BYTES = 8 * 1024 * 1024;
+const MAX_VIDEO_SECONDS = 30;
 
 const attachBtn = document.getElementById('btn-attach');
 const attachSheet = document.getElementById('attach-sheet');
@@ -1417,7 +1763,6 @@ async function handleMediaFileChosen(file){
     return;
   }
 
-  // فيديو
   if(file.size > MAX_VIDEO_BYTES){
     showToast(`الفيديو أكبر من ${Math.round(MAX_VIDEO_BYTES/1024/1024)} ميجا، اختار فيديو أصغر`,'error');
     return;
@@ -1600,6 +1945,21 @@ document.querySelectorAll('[data-nav3="communities"]').forEach(el=>el.addEventLi
 document.querySelectorAll('[data-nav2="chats"]').forEach(el=>el.addEventListener('click',()=>goTo('main')));
 document.querySelectorAll('[data-nav2="updates"]').forEach(el=>el.addEventListener('click',()=>{ document.getElementById('updates-avatar-btn').textContent=state.displayName.charAt(0).toUpperCase(); goTo('updates'); }));
 
+// ============ SETTINGS NAVIGATION ============
+document.getElementById('btn-open-settings').addEventListener('click', ()=>{
+  goTo('settings');
+  checkMicPermission();
+  checkNotifPermission();
+});
+document.getElementById('btn-back-settings').addEventListener('click', ()=>{
+  stopMicTest();
+  goTo('main');
+});
+document.getElementById('btn-test-mic').addEventListener('click', startMicTest);
+document.getElementById('btn-stop-mic-test').addEventListener('click', stopMicTest);
+document.getElementById('btn-request-mic').addEventListener('click', requestMicPermission);
+document.getElementById('btn-request-notif').addEventListener('click', requestNotifPermission);
+
 // ============ CALL BUTTON IN CHAT ============
 document.getElementById('btn-call').addEventListener('click', () => {
   if(!state.currentChatUser){ showToast('افتح محادثة الأول','error'); return; }
@@ -1652,7 +2012,7 @@ document.getElementById('status-viewer-next').addEventListener('click', ()=> sho
 document.getElementById('status-viewer-prev').addEventListener('click', ()=> showStatusAt(statusState.activeIndex-1));
 document.getElementById('status-viewer-close').addEventListener('click', ()=>{ clearTimeout(statusState.timerHandle); document.getElementById('status-viewer').classList.remove('show'); });
 
-console.log('✅ Heye App - WebRTC Voice Calls (Fixed ICE queue + TURN) + Base64 Voice Messages');
+console.log('✅ Heye App - Settings with Mic Permission Check + WebRTC Voice Calls + Base64 Voice Messages');
 </script>
 </body>
 </html>
