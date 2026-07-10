@@ -328,6 +328,8 @@
   .call-status.ringing{color:var(--ok);animation:fadeUp 1s ease infinite;}
   .call-timer{font-size:18px;color:var(--ink);font-variant-numeric:tabular-nums;display:none;}
   .call-timer.show{display:block;}
+  .call-quality{font-size:12px;color:var(--mute-2);display:none;}
+  .call-quality.show{display:block;}
   .call-actions{display:flex;gap:30px;margin-top:20px;}
   .call-action-btn{
     width:64px;height:64px;border-radius:50%;border:none;
@@ -561,6 +563,7 @@
     <div class="call-name" id="call-name">اسم</div>
     <div class="call-status" id="call-status">جاري الاتصال...</div>
     <div class="call-timer" id="call-timer">00:00</div>
+    <div class="call-quality" id="call-quality">جاري الاتصال بالطرف الآخر...</div>
     <div class="call-actions" id="call-actions">
       <button class="call-action-btn call-mute-btn" id="call-mute-btn" title="كتم الميكروفون">
         <svg viewBox="0 0 24 24" fill="none"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -649,7 +652,8 @@ const state = {
     partnerUid: null, partnerName: '',
     startTime: 0, timerInterval: null,
     localStream: null, peerConnection: null,
-    isMuted: false, isSpeakerOn: false
+    isMuted: false, isSpeakerOn: false,
+    offerSent: false, remoteSet: false, callId: null
   },
   incomingCallData: null
 };
@@ -717,6 +721,7 @@ const callAvatar = document.getElementById('call-avatar');
 const callName = document.getElementById('call-name');
 const callStatus = document.getElementById('call-status');
 const callTimer = document.getElementById('call-timer');
+const callQuality = document.getElementById('call-quality');
 const callActions = document.getElementById('call-actions');
 
 function showCallUI(type, partnerName){
@@ -726,6 +731,7 @@ function showCallUI(type, partnerName){
   callStatus.textContent = type === 'outgoing' ? 'جاري الاتصال...' : 'مكالمة واردة...';
   callStatus.className = 'call-status ringing';
   callTimer.classList.remove('show');
+  callQuality.classList.remove('show');
   
   let html = `
     <button class="call-action-btn call-mute-btn" id="call-mute-btn" title="كتم الميكروفون">
@@ -762,86 +768,174 @@ function toggleMute(){
   if(state.callState.localStream){
     state.callState.localStream.getAudioTracks().forEach(track => track.enabled = !state.callState.isMuted);
   }
-  document.getElementById('call-mute-btn').classList.toggle('muted', state.callState.isMuted);
+  const btn = document.getElementById('call-mute-btn');
+  if(btn) btn.classList.toggle('muted', state.callState.isMuted);
 }
 
 function toggleSpeaker(){
   state.callState.isSpeakerOn = !state.callState.isSpeakerOn;
-  document.getElementById('call-speaker-btn').classList.toggle('active', state.callState.isSpeakerOn);
-  // On mobile, changing the audio output is limited, but we can try
-  if(state.callState.peerConnection){
-    const audioEl = document.querySelector('audio[data-peer]');
-    if(audioEl && audioEl.setSinkId){
-      audioEl.setSinkId(state.callState.isSpeakerOn ? 'speaker' : 'default').catch(()=>{});
-    }
+  const btn = document.getElementById('call-speaker-btn');
+  if(btn) btn.classList.toggle('active', state.callState.isSpeakerOn);
+  const audioEl = document.querySelector('audio[data-peer="remote"]');
+  if(audioEl && audioEl.setSinkId){
+    audioEl.setSinkId(state.callState.isSpeakerOn ? 'speaker' : 'default').catch(()=>{});
   }
 }
 
 // ============ WebRTC CONFIGURATION ============
+// STUN لمعرفة الـ IP العام + TURN كـ "خط رجعة" لما الاتصال المباشر يبقى مستحيل
+// (مهم جدًا لما الطرفين على شبكات موبايل/NAT مختلفة زي الحالة عندك)
 const rtcConfig = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' }
-  ]
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
+  ],
+  iceCandidatePoolSize: 10
 };
 
 // ============ CALL SIGNALING (VIA FIREBASE) ============
+// طابور ICE candidates بمفاتيح فريدة (push) بدل ما نكتب فوق بعض
+let iceListenerAttached = false;
+
+function resetCallState(){
+  state.callState.active = false;
+  state.callState.type = null;
+  state.callState.partnerUid = null;
+  state.callState.partnerName = '';
+  state.callState.startTime = 0;
+  state.callState.offerSent = false;
+  state.callState.remoteSet = false;
+  state.callState.callId = null;
+  state.incomingCallData = null;
+}
+
 function listenForIncomingCalls(){
   if(!state.uid) return;
   const { db, rtdb } = fb;
-  rtdb.onValue(rtdb.ref(db, `calls/${state.uid}`), async (snap) => {
+
+  // حالة المكالمة (ringing / answered / ended)
+  rtdb.onValue(rtdb.ref(db, `calls/${state.uid}/status`), async (snap) => {
     if(!snap.exists()) return;
-    const callData = snap.val();
-    if(callData.status === 'ringing' && !state.callState.active){
+    const status = snap.val();
+
+    if(status === 'ringing' && !state.callState.active){
+      const callerSnap = await rtdb.get(rtdb.ref(db, `calls/${state.uid}`));
+      const callData = callerSnap.val();
+      if(!callData) return;
       state.incomingCallData = callData;
+      state.callState.callId = callData.callId || null;
       showCallUI('incoming', callData.callerName || 'مستخدم');
       playRingtone();
       if('Notification' in window && Notification.permission === 'granted'){
-        new Notification('📞 مكالمة واردة', { body: `${callData.callerName} بيتصل بك`, icon: './icon-192.png', vibrate: [200, 100, 200] });
+        new Notification('📞 مكالمة واردة', { body: `${callData.callerName} بيتصل بك`, icon: './icon-192.png' });
       }
-    } else if(callData.status === 'answered' && state.callState.type === 'outgoing'){
+      return;
+    }
+
+    if(status === 'answered' && state.callState.type === 'outgoing' && !state.callState.offerSent){
       stopRingtone();
-      callStatus.textContent = 'متصل';
-      callStatus.className = 'call-status';
-      startCallTimer();
-      // Create peer connection and start streaming
-      await createPeerConnection();
+      callStatus.textContent = 'جاري تجهيز الاتصال...';
+      callStatus.className = 'call-status ringing';
+      callQuality.textContent = 'جاري الاتصال بالطرف الآخر...';
+      callQuality.classList.add('show');
+      state.callState.offerSent = true;
+      // المتصل جهّز المايك والـ peerConnection من الأول عند الطلب، فدلوقتي نبعت الـ offer
       await createAndSendOffer();
-    } else if(callData.status === 'ended'){
-      endCall();
+      return;
     }
-    // Handle WebRTC signaling
-    if(callData.offer && !state.callState.peerConnection){
-      await createPeerConnection();
-      await handleOffer(callData.offer);
-    }
-    if(callData.answer && state.callState.peerConnection){
-      await handleAnswer(callData.answer);
-    }
-    if(callData.iceCandidate && state.callState.peerConnection){
-      await handleIceCandidate(callData.iceCandidate);
+
+    if(status === 'ended'){
+      if(state.callState.active) endCall(true);
     }
   });
+
+  // الـ offer
+  rtdb.onValue(rtdb.ref(db, `calls/${state.uid}/offer`), async (snap) => {
+    if(!snap.exists() || !state.callState.peerConnection || state.callState.remoteSet) return;
+    state.callState.remoteSet = true;
+    await handleOffer(snap.val());
+    await drainIceQueue();
+  });
+
+  // الـ answer
+  rtdb.onValue(rtdb.ref(db, `calls/${state.uid}/answer`), async (snap) => {
+    if(!snap.exists() || !state.callState.peerConnection) return;
+    if(state.callState.peerConnection.currentRemoteDescription) return;
+    await handleAnswer(snap.val());
+    await drainIceQueue();
+  });
+
+  // ICE candidates بتوصل من الطرف التاني كقايمة (push nodes)
+  rtdb.onValue(rtdb.ref(db, `calls/${state.uid}/iceIn`), async (snap) => {
+    if(!snap.exists()) return;
+    const items = snap.val();
+    for(const [key, candidate] of Object.entries(items)){
+      await applyOrQueueIce(candidate);
+    }
+  });
+}
+
+let iceQueue = [];
+async function applyOrQueueIce(candidate){
+  const pc = state.callState.peerConnection;
+  if(pc && pc.remoteDescription && pc.remoteDescription.type){
+    try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch(e){}
+  } else {
+    iceQueue.push(candidate);
+  }
+}
+async function drainIceQueue(){
+  const pc = state.callState.peerConnection;
+  if(!pc) return;
+  while(iceQueue.length){
+    const c = iceQueue.shift();
+    try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch(e){}
+  }
+}
+
+async function ensureLocalStream(){
+  if(state.callState.localStream) return state.callState.localStream;
+  const stream = await navigator.mediaDevices.getUserMedia({
+    audio: {
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true
+    }
+  });
+  state.callState.localStream = stream;
+  return stream;
 }
 
 async function startCall(){
   if(!state.currentChatUser || state.callState.active) return;
   const partnerUid = state.currentChatUser.id;
   const partnerName = state.currentChatUser.displayName;
-  
+
+  // نجهز المايك والاتصال قبل ما نرن عند التاني، عشان لما يرد نبعت الـ offer فورًا
+  let stream;
+  try { stream = await ensureLocalStream(); }
+  catch(e){ showToast('محتاجين إذن الميكروفون عشان تتصل','error'); return; }
+
   state.callState.active = true; state.callState.type = 'outgoing';
   state.callState.partnerUid = partnerUid; state.callState.partnerName = partnerName;
-  
+  state.callState.callId = 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+
+  await createPeerConnection(stream);
+
   showCallUI('outgoing', partnerName);
   playRingtone();
-  
+
   const { db, rtdb } = fb;
   const now = Date.now();
   await rtdb.set(rtdb.ref(db, `calls/${partnerUid}`), {
-    callerId: state.uid, callerName: state.displayName, status: 'ringing', createdAt: now
+    callerId: state.uid, callerName: state.displayName, status: 'ringing',
+    createdAt: now, callId: state.callState.callId
   });
-  
-  // Auto-end after 45s if no answer
+
+  // إلغاء تلقائي لو محدش رد خلال 45 ثانية
   setTimeout(() => {
     if(state.callState.active && state.callState.type === 'outgoing' && !callTimer.classList.contains('show')){
       endCall(); saveCallLog('missed', now);
@@ -852,53 +946,81 @@ async function startCall(){
 async function acceptCall(){
   if(!state.incomingCallData) return;
   const { callerId, callerName, createdAt } = state.incomingCallData;
-  
+
+  // نجهز المايك والـ peerConnection الأول قبل أي حاجة، عشان نبقى جاهزين نستقبل الصوت فورًا
+  let stream;
+  try { stream = await ensureLocalStream(); }
+  catch(e){
+    showToast('محتاجين إذن الميكروفون عشان ترد على المكالمة','error');
+    // نرفض المكالمة لو مفيش إذن مايك، لكن ده اختيارك: ممكن كمان تسمح بالرد بدون مايك (استماع فقط)
+  }
+
   state.callState.active = true; state.callState.type = 'incoming';
   state.callState.partnerUid = callerId; state.callState.partnerName = callerName || 'مستخدم';
-  
+  state.callState.callId = state.incomingCallData.callId || null;
+
+  await createPeerConnection(stream);
+
   stopRingtone();
-  callStatus.textContent = 'متصل'; callStatus.className = 'call-status';
-  startCallTimer();
-  
+  callStatus.textContent = 'جاري تجهيز الاتصال...'; callStatus.className = 'call-status ringing';
+  callQuality.textContent = 'جاري الاتصال بالطرف الآخر...';
+  callQuality.classList.add('show');
+
   const { db, rtdb } = fb;
   await rtdb.update(rtdb.ref(db, `calls/${state.uid}`), { status: 'answered', answeredAt: Date.now() });
-  
+
   saveCallLog('completed', createdAt || Date.now());
 }
 
-async function createPeerConnection(){
+async function createPeerConnection(providedStream){
   if(state.callState.peerConnection) return;
-  
+
   const pc = new RTCPeerConnection(rtcConfig);
   state.callState.peerConnection = pc;
-  
-  // Get local audio stream
+  iceQueue = [];
+
+  // الصوت المحلي (الميكروفون بتاعنا) — لو رفض الإذن، هنكمل بدون بعت صوت لكن نستمر نستقبل صوت التاني
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    state.callState.localStream = stream;
+    const stream = providedStream || await ensureLocalStream();
     stream.getTracks().forEach(track => pc.addTrack(track, stream));
-  } catch(e){ console.error('Mic access failed:', e); showToast('مش قادرين نوصل للميكروفون','error'); }
-  
-  // Handle remote audio stream
+  } catch(e){
+    console.error('Mic access failed:', e);
+    showToast('مش قادرين نوصل للميكروفون، هتقدر تسمع بس','error');
+  }
+
+  // استقبال صوت الطرف التاني — ده بيشتغل دايمًا حتى لو إحنا مقفلين المايك بتاعنا
   pc.ontrack = (event) => {
-    const audioEl = document.createElement('audio');
+    let audioEl = document.querySelector('audio[data-peer="remote"]');
+    if(!audioEl){
+      audioEl = document.createElement('audio');
+      audioEl.setAttribute('data-peer', 'remote');
+      audioEl.autoplay = true;
+      audioEl.playsInline = true;
+      document.body.appendChild(audioEl);
+    }
     audioEl.srcObject = event.streams[0];
-    audioEl.autoplay = true;
-    audioEl.setAttribute('data-peer', 'remote');
-    document.body.appendChild(audioEl);
-    // Apply speaker setting
+    audioEl.play().catch(()=>{});
     if(state.callState.isSpeakerOn && audioEl.setSinkId){
       audioEl.setSinkId('speaker').catch(()=>{});
     }
   };
-  
-  // Send ICE candidates to partner
+
+  pc.onconnectionstatechange = () => {
+    if(pc.connectionState === 'connected'){
+      callQuality.textContent = 'الاتصال مستقر ✅';
+      setTimeout(()=> callQuality.classList.remove('show'), 2000);
+    } else if(pc.connectionState === 'failed' || pc.connectionState === 'disconnected'){
+      callQuality.textContent = 'ضعف في الاتصال...';
+      callQuality.classList.add('show');
+    }
+  };
+
+  // بعت ICE candidates كعناصر منفصلة (push) عشان محدش يمسح التاني
   pc.onicecandidate = (event) => {
     if(event.candidate && state.callState.partnerUid){
       const { db, rtdb } = fb;
-      rtdb.update(rtdb.ref(db, `calls/${state.callState.partnerUid}`), {
-        iceCandidate: event.candidate.toJSON()
-      });
+      const newRef = rtdb.push(rtdb.ref(db, `calls/${state.callState.partnerUid}/iceIn`));
+      rtdb.set(newRef, event.candidate.toJSON());
     }
   };
 }
@@ -906,10 +1028,10 @@ async function createPeerConnection(){
 async function createAndSendOffer(){
   const pc = state.callState.peerConnection;
   if(!pc) return;
-  
+
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
-  
+
   const { db, rtdb } = fb;
   await rtdb.update(rtdb.ref(db, `calls/${state.callState.partnerUid}`), {
     offer: { type: offer.type, sdp: offer.sdp }
@@ -919,11 +1041,11 @@ async function createAndSendOffer(){
 async function handleOffer(offer){
   const pc = state.callState.peerConnection;
   if(!pc) return;
-  
+
   await pc.setRemoteDescription(new RTCSessionDescription(offer));
   const answer = await pc.createAnswer();
   await pc.setLocalDescription(answer);
-  
+
   const { db, rtdb } = fb;
   await rtdb.update(rtdb.ref(db, `calls/${state.callState.partnerUid}`), {
     answer: { type: answer.type, sdp: answer.sdp }
@@ -934,48 +1056,42 @@ async function handleAnswer(answer){
   const pc = state.callState.peerConnection;
   if(!pc) return;
   await pc.setRemoteDescription(new RTCSessionDescription(answer));
+  callStatus.textContent = 'متصل'; callStatus.className = 'call-status';
+  startCallTimer();
 }
 
-async function handleIceCandidate(iceCandidate){
-  const pc = state.callState.peerConnection;
-  if(!pc) return;
-  try { await pc.addIceCandidate(new RTCIceCandidate(iceCandidate)); } catch(e){}
-}
-
-function endCall(){
+function endCall(skipRemoteUpdate){
   const { db, rtdb } = fb;
-  
-  // Close peer connection
+
   if(state.callState.peerConnection){
     state.callState.peerConnection.close();
     state.callState.peerConnection = null;
   }
-  
-  // Stop local stream
+
   if(state.callState.localStream){
     state.callState.localStream.getTracks().forEach(track => track.stop());
     state.callState.localStream = null;
   }
-  
-  // Remove remote audio element
+
   const audioEl = document.querySelector('audio[data-peer="remote"]');
   if(audioEl) audioEl.remove();
-  
-  // Update Firebase
-  if(state.callState.partnerUid){
+
+  if(!skipRemoteUpdate && state.callState.partnerUid){
     rtdb.update(rtdb.ref(db, `calls/${state.callState.partnerUid}`), { status: 'ended' });
   }
-  if(state.callState.type === 'incoming' || state.callState.type === 'outgoing'){
-    rtdb.set(rtdb.ref(db, `calls/${state.uid}`), null);
+  if(state.uid){
+    rtdb.remove(rtdb.ref(db, `calls/${state.uid}`));
   }
-  
+
   hideCallUI();
-  state.callState.active = false; state.callState.type = null; state.incomingCallData = null;
+  iceQueue = [];
+  resetCallState();
 }
 
 function startCallTimer(){
   state.callState.startTime = Date.now();
   callTimer.classList.add('show');
+  if(state.callState.timerInterval) clearInterval(state.callState.timerInterval);
   state.callState.timerInterval = setInterval(() => {
     const elapsed = Math.floor((Date.now() - state.callState.startTime) / 1000);
     callTimer.textContent = `${Math.floor(elapsed/60).toString().padStart(2,'0')}:${(elapsed%60).toString().padStart(2,'0')}`;
@@ -1126,7 +1242,10 @@ async function startVoiceRecording(fromTouch){
 }
 async function stopVoiceRecording(cancel){
   if(!voiceIsBusy) return; voiceCancelled = !!cancel; clearInterval(voiceTimerInterval);
-  if(voiceRecorder && voiceRecorder.state === 'recording') voiceRecorder.stop();
+  if(voiceRecorder && voiceRecorder.state === 'recording'){
+    if(typeof voiceRecorder.requestData === 'function'){ try { voiceRecorder.requestData(); } catch(e){} }
+    voiceRecorder.stop();
+  }
   if(voiceStream){ voiceStream.getTracks().forEach(t=>t.stop()); voiceStream=null; }
   setRecordingUI(false); voiceIsBusy = false; if(voiceCancelled){ voiceChunks=[]; }
 }
@@ -1276,7 +1395,7 @@ document.getElementById('status-viewer-next').addEventListener('click', ()=> sho
 document.getElementById('status-viewer-prev').addEventListener('click', ()=> showStatusAt(statusState.activeIndex-1));
 document.getElementById('status-viewer-close').addEventListener('click', ()=>{ clearTimeout(statusState.timerHandle); document.getElementById('status-viewer').classList.remove('show'); });
 
-console.log('✅ Heye App - WebRTC Voice Calls + Base64 Voice Messages');
+console.log('✅ Heye App - WebRTC Voice Calls (Fixed ICE queue + TURN) + Base64 Voice Messages');
 </script>
 </body>
 </html>
