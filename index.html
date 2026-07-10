@@ -378,6 +378,52 @@
   .voice-msg-wave{flex:1;height:26px;display:flex;align-items:center;gap:2px;}
   .voice-msg-wave span{width:2.5px;background:var(--gold);border-radius:2px;opacity:.5;flex-shrink:0;}
   .voice-msg-duration{font-size:11px;color:var(--mute-2);flex-shrink:0;}
+
+  /* ----- MEDIA (IMAGES / VIDEOS) IN CHAT ----- */
+  .attach-btn{width:38px;height:38px;border-radius:50%;border:none;flex-shrink:0;background:var(--bg-panel);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--mute);transition:all .2s ease;}
+  .attach-btn:active{background:var(--bg-panel-2);transform:scale(.92);}
+  .attach-btn svg{width:19px;height:19px;}
+
+  .attach-sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:399;display:none;}
+  .attach-sheet-overlay.show{display:block;animation:fadeIn .2s ease;}
+  .attach-sheet{position:fixed;left:0;right:0;bottom:0;z-index:400;background:var(--bg-panel-2);border-radius:22px 22px 0 0;padding:10px 18px max(20px, var(--safe-bottom));display:none;box-shadow:0 -10px 40px rgba(0,0,0,.4);}
+  .attach-sheet.show{display:block;animation:slideUp .25s cubic-bezier(.16,1,.3,1);}
+  .attach-sheet-handle{width:38px;height:4px;border-radius:99px;background:var(--line);margin:6px auto 16px;}
+  .attach-sheet-row{display:flex;align-items:center;gap:14px;padding:15px 6px;cursor:pointer;border-radius:14px;transition:background .2s ease;}
+  .attach-sheet-row:active{background:var(--bg-panel);}
+  .attach-sheet-icon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+  .attach-sheet-icon.gallery{background:rgba(201,162,75,.16);}
+  .attach-sheet-icon.camera{background:rgba(95,191,143,.16);}
+  .attach-sheet-text{font-size:15px;font-weight:600;color:var(--ink);}
+
+  .media-upload-overlay{position:fixed;inset:0;background:var(--bg-deep);z-index:450;display:none;flex-direction:column;}
+  .media-upload-overlay.show{display:flex;animation:fadeIn .2s ease;}
+  .media-upload-header{display:flex;align-items:center;justify-content:space-between;padding:max(16px, var(--safe-top)) 16px 10px;}
+  .media-upload-close{width:38px;height:38px;border-radius:50%;background:var(--bg-panel-2);border:none;color:var(--ink);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .media-upload-preview{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:10px;}
+  .media-upload-preview img,.media-upload-preview video{max-width:100%;max-height:100%;border-radius:14px;object-fit:contain;}
+  .media-upload-caption-input{margin:0 16px 12px;height:48px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg-panel);color:var(--ink);font-family:'Cairo',sans-serif;font-size:14.5px;padding:0 16px;outline:none;}
+  .media-upload-footer{display:flex;align-items:center;justify-content:space-between;padding:0 16px max(18px, var(--safe-bottom));}
+  .media-upload-info{font-size:12px;color:var(--mute);}
+  .media-upload-send{width:52px;height:52px;border-radius:50%;border:none;background:linear-gradient(160deg, var(--gold-soft), var(--gold));display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 15px rgba(201,162,75,.4);}
+  .media-upload-send svg{width:20px;height:20px;}
+  .media-upload-send:disabled{opacity:.4;pointer-events:none;}
+  .media-upload-progress{position:absolute;bottom:0;left:0;height:3px;background:var(--gold);transition:width .2s ease;}
+
+  .msg-image-bubble{max-width:220px;border-radius:14px;overflow:hidden;cursor:pointer;position:relative;}
+  .msg-image-bubble img{width:100%;display:block;max-height:280px;object-fit:cover;}
+  .msg-video-bubble{max-width:220px;border-radius:14px;overflow:hidden;cursor:pointer;position:relative;background:#000;}
+  .msg-video-bubble video{width:100%;display:block;max-height:280px;object-fit:cover;}
+  .msg-video-play-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;pointer-events:none;}
+  .msg-video-play-badge svg{width:20px;height:20px;margin-right:-2px;}
+  .msg-media-caption{padding:8px 4px 2px;font-size:13.5px;line-height:1.5;}
+
+  .media-viewer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:600;display:none;align-items:center;justify-content:center;flex-direction:column;}
+  .media-viewer-overlay.show{display:flex;animation:fadeIn .2s ease;}
+  .media-viewer-close{position:absolute;top:max(16px, var(--safe-top));left:16px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;}
+  .media-viewer-content{max-width:100%;max-height:85vh;display:flex;align-items:center;justify-content:center;}
+  .media-viewer-content img,.media-viewer-content video{max-width:100%;max-height:85vh;object-fit:contain;}
+  .media-viewer-caption{color:#fff;font-size:14px;padding:16px 24px 0;text-align:center;max-width:90%;}
 </style>
 </head>
 <body>
@@ -542,6 +588,9 @@
     </div>
     <div class="messages" id="messages-container"></div>
     <div class="composer">
+      <button class="attach-btn" id="btn-attach" title="إرفاق صورة أو فيديو">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
       <div class="composer-input-shell" id="composer-input-shell">
         <textarea class="composer-input" id="composer-input" placeholder="اكتب رسالة..." rows="1"></textarea>
       </div>
@@ -591,6 +640,43 @@
     <div class="info-row"><span class="info-icon">✓</span><span class="info-label">تم الإرسال</span><span class="info-value" id="info-sent">-</span></div>
     <div class="info-row"><span class="info-icon">✓✓</span><span class="info-label">تم التسليم</span><span class="info-value" id="info-delivered">-</span></div>
     <div class="info-row"><span class="info-icon">💙</span><span class="info-label">تمت القراءة</span><span class="info-value" id="info-read">-</span></div>
+  </div>
+
+  <!-- ATTACH SHEET -->
+  <div class="attach-sheet-overlay" id="attach-sheet-overlay"></div>
+  <div class="attach-sheet" id="attach-sheet">
+    <div class="attach-sheet-handle"></div>
+    <div class="attach-sheet-row" id="attach-row-gallery">
+      <div class="attach-sheet-icon gallery">🖼️</div>
+      <div class="attach-sheet-text">صورة أو فيديو من المعرض</div>
+    </div>
+    <div class="attach-sheet-row" id="attach-row-camera">
+      <div class="attach-sheet-icon camera">📷</div>
+      <div class="attach-sheet-text">التقط بالكاميرا</div>
+    </div>
+  </div>
+  <input type="file" id="media-gallery-input" accept="image/*,video/*" style="display:none;">
+  <input type="file" id="media-camera-input" accept="image/*" capture="environment" style="display:none;">
+
+  <!-- MEDIA UPLOAD PREVIEW -->
+  <div class="media-upload-overlay" id="media-upload-overlay">
+    <div class="media-upload-header"><button class="media-upload-close" id="media-upload-close">✕</button><div class="media-upload-info" id="media-upload-size-info"></div></div>
+    <div class="media-upload-preview" id="media-upload-preview"></div>
+    <input type="text" class="media-upload-caption-input" id="media-upload-caption" placeholder="أضف تعليق (اختياري)...">
+    <div class="media-upload-footer">
+      <div class="media-upload-info" id="media-upload-status"></div>
+      <button class="media-upload-send" id="media-upload-send">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <div class="media-upload-progress" id="media-upload-progress" style="width:0%;"></div>
+  </div>
+
+  <!-- MEDIA FULLSCREEN VIEWER -->
+  <div class="media-viewer-overlay" id="media-viewer-overlay">
+    <button class="media-viewer-close" id="media-viewer-close">✕</button>
+    <div class="media-viewer-content" id="media-viewer-content"></div>
+    <div class="media-viewer-caption" id="media-viewer-caption" style="display:none;"></div>
   </div>
 
   <!-- TOAST -->
@@ -1279,6 +1365,166 @@ function playVoiceMessage(url, btnEl){
   audio.play(); audio.onended = ()=>{ btnEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>'; currentPlayingAudio=null; currentPlayingBtn=null; };
 }
 
+// ============ MEDIA (IMAGES / VIDEOS) ============
+const MAX_IMAGE_DIM = 1280;           // أقصى بُعد للصورة بعد الضغط
+const IMAGE_QUALITY = 0.72;           // جودة ضغط JPEG
+const MAX_VIDEO_BYTES = 8 * 1024 * 1024;   // 8MB أقصى حجم فيديو (RTDB مش مناسبة لملفات كبيرة)
+const MAX_VIDEO_SECONDS = 30;         // أقصى مدة فيديو مسموحة
+
+const attachBtn = document.getElementById('btn-attach');
+const attachSheet = document.getElementById('attach-sheet');
+const attachSheetOverlay = document.getElementById('attach-sheet-overlay');
+const mediaGalleryInput = document.getElementById('media-gallery-input');
+const mediaCameraInput = document.getElementById('media-camera-input');
+
+function openAttachSheet(){ attachSheet.classList.add('show'); attachSheetOverlay.classList.add('show'); }
+function closeAttachSheet(){ attachSheet.classList.remove('show'); attachSheetOverlay.classList.remove('show'); }
+attachBtn.addEventListener('click', ()=>{ if(!state.currentChatId){ showToast('افتح محادثة الأول','error'); return; } openAttachSheet(); });
+attachSheetOverlay.addEventListener('click', closeAttachSheet);
+document.getElementById('attach-row-gallery').addEventListener('click', ()=>{ closeAttachSheet(); mediaGalleryInput.click(); });
+document.getElementById('attach-row-camera').addEventListener('click', ()=>{ closeAttachSheet(); mediaCameraInput.click(); });
+
+let pendingMedia = { file: null, type: null, dataUrl: null };
+
+function resetMediaUploadUI(){
+  document.getElementById('media-upload-caption').value = '';
+  document.getElementById('media-upload-status').textContent = '';
+  document.getElementById('media-upload-size-info').textContent = '';
+  document.getElementById('media-upload-progress').style.width = '0%';
+  document.getElementById('media-upload-send').disabled = false;
+}
+
+async function handleMediaFileChosen(file){
+  if(!file) return;
+  const isVideo = file.type.startsWith('video/');
+  const isImage = file.type.startsWith('image/');
+  if(!isVideo && !isImage){ showToast('الملف ده مش صورة أو فيديو','error'); return; }
+
+  resetMediaUploadUI();
+  const previewEl = document.getElementById('media-upload-preview');
+  previewEl.innerHTML = '';
+
+  if(isImage){
+    try {
+      const compressed = await compressImageFile(file);
+      pendingMedia = { file, type: 'image', dataUrl: compressed };
+      const img = document.createElement('img'); img.src = compressed;
+      previewEl.appendChild(img);
+      const sizeKb = Math.round((compressed.length * 0.75) / 1024);
+      document.getElementById('media-upload-size-info').textContent = `${sizeKb} كيلوبايت تقريبًا`;
+      document.getElementById('media-upload-overlay').classList.add('show');
+    } catch(e){ showToast('مش قادرين نفتح الصورة','error'); }
+    return;
+  }
+
+  // فيديو
+  if(file.size > MAX_VIDEO_BYTES){
+    showToast(`الفيديو أكبر من ${Math.round(MAX_VIDEO_BYTES/1024/1024)} ميجا، اختار فيديو أصغر`,'error');
+    return;
+  }
+  const videoUrl = URL.createObjectURL(file);
+  const tempVideo = document.createElement('video');
+  tempVideo.src = videoUrl; tempVideo.preload = 'metadata';
+  tempVideo.onloadedmetadata = () => {
+    if(tempVideo.duration > MAX_VIDEO_SECONDS){
+      showToast(`الفيديو أطول من ${MAX_VIDEO_SECONDS} ثانية، اختار فيديو أقصر`,'error');
+      URL.revokeObjectURL(videoUrl);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      pendingMedia = { file, type: 'video', dataUrl: reader.result };
+      const vid = document.createElement('video');
+      vid.src = reader.result; vid.controls = true; vid.playsInline = true;
+      previewEl.appendChild(vid);
+      const sizeKb = Math.round(file.size / 1024);
+      document.getElementById('media-upload-size-info').textContent = `${sizeKb} كيلوبايت`;
+      document.getElementById('media-upload-overlay').classList.add('show');
+    };
+    reader.readAsDataURL(file);
+  };
+  tempVideo.onerror = () => showToast('مش قادرين نقرأ الفيديو','error');
+}
+
+function compressImageFile(file){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      let { width, height } = img;
+      if(width > MAX_IMAGE_DIM || height > MAX_IMAGE_DIM){
+        const ratio = Math.min(MAX_IMAGE_DIM / width, MAX_IMAGE_DIM / height);
+        width = Math.round(width * ratio); height = Math.round(height * ratio);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL('image/jpeg', IMAGE_QUALITY));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image load failed')); };
+    img.src = url;
+  });
+}
+
+mediaGalleryInput.addEventListener('change', (e)=>{ const f = e.target.files[0]; handleMediaFileChosen(f); e.target.value = ''; });
+mediaCameraInput.addEventListener('change', (e)=>{ const f = e.target.files[0]; handleMediaFileChosen(f); e.target.value = ''; });
+
+document.getElementById('media-upload-close').addEventListener('click', ()=>{
+  document.getElementById('media-upload-overlay').classList.remove('show');
+  pendingMedia = { file: null, type: null, dataUrl: null };
+});
+
+document.getElementById('media-upload-send').addEventListener('click', async ()=>{
+  if(!pendingMedia.dataUrl || !state.currentChatId) return;
+  const sendBtn = document.getElementById('media-upload-send');
+  sendBtn.disabled = true;
+  document.getElementById('media-upload-status').textContent = 'جاري الإرسال...';
+  document.getElementById('media-upload-progress').style.width = '60%';
+  try {
+    const { db, rtdb } = fb; const now = new Date().toISOString();
+    const caption = document.getElementById('media-upload-caption').value.trim();
+    const newMsgRef = rtdb.push(rtdb.ref(db, `chats/${state.currentChatId}/messages`));
+    await rtdb.set(newMsgRef, {
+      senderId: state.uid, senderName: state.displayName,
+      type: pendingMedia.type, mediaBase64: pendingMedia.dataUrl,
+      caption: caption || '', createdAt: now, deliveredAt: now
+    });
+    await rtdb.update(rtdb.ref(db, `chats/${state.currentChatId}`), {
+      lastMessage: pendingMedia.type === 'image' ? '📷 صورة' : '🎬 فيديو',
+      lastMessageAt: now, lastSenderId: state.uid
+    });
+    state.msgCount++; updateProfileStats();
+    document.getElementById('media-upload-progress').style.width = '100%';
+    setTimeout(()=>{
+      document.getElementById('media-upload-overlay').classList.remove('show');
+      pendingMedia = { file: null, type: null, dataUrl: null };
+    }, 150);
+  } catch(e){
+    showToast('فشل إرسال الملف، جرب تاني أو اختار ملف أصغر','error');
+    sendBtn.disabled = false;
+    document.getElementById('media-upload-status').textContent = '';
+  }
+});
+
+function openMediaViewer(url, type, caption){
+  const content = document.getElementById('media-viewer-content');
+  content.innerHTML = '';
+  if(type === 'image'){
+    const img = document.createElement('img'); img.src = url; content.appendChild(img);
+  } else {
+    const vid = document.createElement('video'); vid.src = url; vid.controls = true; vid.autoplay = true; vid.playsInline = true; content.appendChild(vid);
+  }
+  const capEl = document.getElementById('media-viewer-caption');
+  if(caption){ capEl.textContent = caption; capEl.style.display = 'block'; } else { capEl.style.display = 'none'; }
+  document.getElementById('media-viewer-overlay').classList.add('show');
+}
+document.getElementById('media-viewer-close').addEventListener('click', ()=>{
+  document.getElementById('media-viewer-overlay').classList.remove('show');
+  document.getElementById('media-viewer-content').innerHTML = '';
+});
+
 // ============ MESSAGES & BUBBLES ============
 async function markMessagesAsRead(chatId){
   const {db,rtdb}=fb; const snap=await rtdb.get(rtdb.ref(db,`chats/${chatId}/messages`));
@@ -1294,6 +1540,16 @@ function getMessageStatusIcon(msg){
 function buildBubbleContent(m){
   if(m.type === 'call'){ const isMissed = m.callStatus === 'missed'; return `<div class="call-bubble"><span class="call-bubble-icon">${isMissed?'📞❌':'📞'}</span><div><div>${isMissed?'مكالمة فائتة':(m.duration?`مكالمة ${formatCallDuration(m.duration)}`:'مكالمة منتهية')}</div><div class="call-bubble-duration">${m.duration?formatCallDuration(m.duration):''}</div></div></div>`; }
   if(m.type === 'voice'){ const audioSrc = m.audioUrl || m.audioBase64 || ''; if(audioSrc){ const dur = m.duration || 0; const mm = Math.floor(dur/60), ss = dur%60; const bars = Array.from({length: 24}).map((_,i)=>{ const h = 6 + Math.round(Math.abs(Math.sin(i*1.7))*16); return `<span style="height:${h}px;"></span>`; }).join(''); return `<div class="voice-msg"><button class="voice-msg-play-btn" data-url="${escapeAttr(audioSrc)}"><svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></button><div class="voice-msg-wave">${bars}</div><div class="voice-msg-duration">${mm}:${ss.toString().padStart(2,'0')}</div></div>`; } }
+  if(m.type === 'image'){
+    const src = m.mediaBase64 || '';
+    const cap = m.caption ? `<div class="msg-media-caption">${escapeHtml(m.caption)}</div>` : '';
+    return `<div class="msg-image-bubble" data-media-url="${escapeAttr(src)}" data-media-type="image" data-media-caption="${escapeAttr(m.caption||'')}"><img src="${escapeAttr(src)}" alt="صورة" loading="lazy"></div>${cap}`;
+  }
+  if(m.type === 'video'){
+    const src = m.mediaBase64 || '';
+    const cap = m.caption ? `<div class="msg-media-caption">${escapeHtml(m.caption)}</div>` : '';
+    return `<div class="msg-video-bubble" data-media-url="${escapeAttr(src)}" data-media-type="video" data-media-caption="${escapeAttr(m.caption||'')}"><video src="${escapeAttr(src)}" muted playsinline preload="metadata"></video><div class="msg-video-play-badge"><svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="#fff"/></svg></div></div>${cap}`;
+  }
   return escapeHtml(m.text || '');
 }
 function listenToMessages(chatId){
@@ -1310,6 +1566,7 @@ function listenToMessages(chatId){
     });
     container.innerHTML=html; container.scrollTop=container.scrollHeight;
     container.querySelectorAll('.voice-msg-play-btn').forEach(btn=>{ btn.addEventListener('click', (e)=>{ e.stopPropagation(); playVoiceMessage(btn.dataset.url, btn); }); });
+    container.querySelectorAll('.msg-image-bubble, .msg-video-bubble').forEach(el=>{ el.addEventListener('click', (e)=>{ e.stopPropagation(); openMediaViewer(el.dataset.mediaUrl, el.dataset.mediaType, el.dataset.mediaCaption); }); });
   });
 }
 
