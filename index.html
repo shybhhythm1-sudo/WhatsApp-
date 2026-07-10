@@ -82,7 +82,8 @@
   @keyframes unreadPulse{0%,100%{background:rgba(201,162,75,.08);}50%{background:rgba(201,162,75,.15);}}
   @keyframes contextMenuIn{from{opacity:0;transform:scale(.9);}to{opacity:1;transform:scale(1);}}
   @keyframes callPulse{0%,100%{box-shadow:0 0 0 0 rgba(76,175,80,.6);}50%{box-shadow:0 0 0 20px rgba(76,175,80,0);}}
-  @keyframes callRinging{0%{transform:rotate(0);}10%{transform:rotate(15deg);}20%{transform:rotate(-15deg);}30%{transform:rotate(10deg);}40%{transform:rotate(-10deg);}50%{transform:rotate(5deg);}60%{transform:rotate(-5deg);}70%{transform:rotate(0);}100%{transform:rotate(0);}}
+  @keyframes micPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+  @keyframes recBlink{0%,100%{opacity:1;}50%{opacity:.3;}}
 
   #view-loading{align-items:center;justify-content:center;background:var(--bg-deep);gap:18px;}
   .loader-ring{width:44px;height:44px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--gold);animation:spin 0.9s linear infinite;}
@@ -307,26 +308,6 @@
   .toast.error{border-color:var(--danger);}
   .toast.success{border-color:var(--ok);}
 
-  .install-banner, .notif-banner{
-    position:absolute;left:14px;right:14px;bottom:14px;
-    background:var(--bg-panel-2);border:1px solid var(--line);
-    border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;
-    z-index:90;box-shadow:0 10px 30px rgba(0,0,0,.4);
-    animation:slideUp .35s ease;
-  }
-  .install-banner{display:none;}
-  .install-banner.show{display:flex;}
-  .notif-banner{display:none;}
-  .notif-banner.show{display:flex;}
-  .ib-icon{font-size:24px;flex-shrink:0;}
-  .ib-text{flex:1;min-width:0;}
-  .ib-text .ib-title{font-size:13.5px;font-weight:700;color:var(--ink);}
-  .ib-text .ib-sub{font-size:11.5px;color:var(--mute);margin-top:2px;}
-  .ib-btn{flex-shrink:0;background:linear-gradient(160deg, var(--gold-soft), var(--gold));color:#1A1206;border:none;border-radius:10px;padding:9px 14px;font-family:'Cairo',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;}
-  .ib-close{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:transparent;border:none;color:var(--mute);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-
-  @media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;}}
-
   /* ----- CALL UI (Full-Screen Overlay) ----- */
   .call-overlay{
     position:fixed;inset:0;background:linear-gradient(180deg, #0a1a0f 0%, #0E0B14 100%);z-index:500;
@@ -362,7 +343,6 @@
   .call-speaker-btn{background:var(--bg-panel-2);border:1px solid var(--line-soft);}
   .call-speaker-btn.active{background:var(--ok);}
 
-  /* Call notification message bubble */
   .call-bubble{
     background:var(--bg-panel)!important;border:1px solid var(--ok)!important;
     display:flex;align-items:center;gap:10px;padding:10px 14px;
@@ -382,12 +362,10 @@
   .mic-btn{width:44px;height:44px;border-radius:50%;border:none;flex-shrink:0;background:linear-gradient(160deg, var(--gold-soft), var(--gold));display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 15px rgba(201,162,75,.4);transition:transform .15s ease;touch-action:none;user-select:none;-webkit-user-select:none;}
   .mic-btn svg{width:19px;height:19px;}
   .mic-btn.recording{background:linear-gradient(160deg, var(--danger), #B54B39);animation:micPulse 1.4s ease-in-out infinite;}
-  @keyframes micPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
 
   .voice-recording-bar{display:none;align-items:center;gap:10px;flex:1;padding:8px 14px;background:var(--bg-panel);border:1.5px solid var(--danger);border-radius:24px;}
   .voice-recording-bar.show{display:flex;}
   .voice-rec-dot{width:10px;height:10px;border-radius:50%;background:var(--danger);animation:recBlink 1s ease-in-out infinite;flex-shrink:0;}
-  @keyframes recBlink{0%,100%{opacity:1;}50%{opacity:.3;}}
   .voice-rec-timer{font-size:14px;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;flex-shrink:0;}
   .voice-rec-hint{flex:1;font-size:12.5px;color:var(--mute);text-align:center;}
   .voice-rec-cancel{flex-shrink:0;font-size:13px;color:var(--danger);font-weight:700;background:none;border:none;padding:4px 8px;}
@@ -584,8 +562,14 @@
     <div class="call-status" id="call-status">جاري الاتصال...</div>
     <div class="call-timer" id="call-timer">00:00</div>
     <div class="call-actions" id="call-actions">
-      <button class="call-action-btn call-end-btn" id="call-end-btn">
+      <button class="call-action-btn call-mute-btn" id="call-mute-btn" title="كتم الميكروفون">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="call-action-btn call-end-btn" id="call-end-btn" title="إنهاء المكالمة">
         <svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(135 12 12)"/></svg>
+      </button>
+      <button class="call-action-btn call-speaker-btn" id="call-speaker-btn" title="مكبر الصوت">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M11 5L6 9H2v6h4l5 4V5z" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
     </div>
   </div>
@@ -661,10 +645,11 @@ const state = {
   typingTimeout: null, selectedMsgId: null,
   // ----- CALL STATE -----
   callState: {
-    active: false, type: null, // 'outgoing' | 'incoming'
+    active: false, type: null,
     partnerUid: null, partnerName: '',
     startTime: 0, timerInterval: null,
-    localStream: null, peerConnection: null
+    localStream: null, peerConnection: null,
+    isMuted: false, isSpeakerOn: false
   },
   incomingCallData: null
 };
@@ -709,29 +694,22 @@ function transliterate(t){ let o=''; for(const c of t){ if(arabicToLatinMap[c]) 
 function generateUsernameBase(n){ const b = /[\u0600-\u06FF]/.test(n) ? transliterate(n) : n; let s = b.trim().toLowerCase().replace(/\s+/g,'.').replace(/[^a-z0-9.]/g,'').replace(/\.+/g,'.').replace(/^\.|\.$/g,''); if(!s) s='user'; if(s.length>16) s=s.slice(0,16).replace(/\.$/,''); return s; }
 function generateUsernameSync(n){ return `${generateUsernameBase(n)}${Math.floor(100+Math.random()*900)}`; }
 
-// ============ CALLING SOUND (RINGTONE) ============
+// ============ RINGTONE ============
 let ringtoneAudio = null;
 function playRingtone(){
   try {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
     osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.type = 'sine';
-    gain.gain.value = 0.3;
+    osc.type = 'sine'; gain.gain.value = 0.3;
     const now = audioCtx.currentTime;
-    osc.frequency.setValueAtTime(800, now);
-    osc.frequency.setValueAtTime(1000, now + 0.5);
-    osc.frequency.setValueAtTime(800, now + 1);
-    osc.frequency.setValueAtTime(1000, now + 1.5);
+    osc.frequency.setValueAtTime(800, now); osc.frequency.setValueAtTime(1000, now + 0.5);
+    osc.frequency.setValueAtTime(800, now + 1); osc.frequency.setValueAtTime(1000, now + 1.5);
     osc.start(now); osc.stop(now + 2);
     ringtoneAudio = { ctx: audioCtx, osc, gain, startTime: now };
-  } catch(e){ console.warn('Ringtone failed:', e); }
+  } catch(e){}
 }
-
-function stopRingtone(){
-  try { if(ringtoneAudio){ ringtoneAudio.osc.stop(); ringtoneAudio.ctx.close(); ringtoneAudio = null; } } catch(e){}
-}
+function stopRingtone(){ try { if(ringtoneAudio){ ringtoneAudio.osc.stop(); ringtoneAudio.ctx.close(); ringtoneAudio = null; } } catch(e){} }
 
 // ============ CALL UI ============
 const callOverlay = document.getElementById('call-overlay');
@@ -740,7 +718,6 @@ const callName = document.getElementById('call-name');
 const callStatus = document.getElementById('call-status');
 const callTimer = document.getElementById('call-timer');
 const callActions = document.getElementById('call-actions');
-const callEndBtn = document.getElementById('call-end-btn');
 
 function showCallUI(type, partnerName){
   callOverlay.className = 'call-overlay show ' + type;
@@ -750,18 +727,28 @@ function showCallUI(type, partnerName){
   callStatus.className = 'call-status ringing';
   callTimer.classList.remove('show');
   
-  // Add accept button for incoming calls
-  let html = `<button class="call-action-btn call-end-btn" id="call-end-btn"><svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(135 12 12)"/></svg></button>`;
+  let html = `
+    <button class="call-action-btn call-mute-btn" id="call-mute-btn" title="كتم الميكروفون">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="call-action-btn call-end-btn" id="call-end-btn" title="إنهاء المكالمة">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(135 12 12)"/></svg>
+    </button>
+    <button class="call-action-btn call-speaker-btn" id="call-speaker-btn" title="مكبر الصوت">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M11 5L6 9H2v6h4l5 4V5z" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>`;
+  
   if(type === 'incoming'){
-    html = `<button class="call-action-btn call-accept-btn" id="call-accept-btn"><svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>` + html;
+    html = `<button class="call-action-btn call-accept-btn" id="call-accept-btn" title="قبول">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>` + html;
   }
   callActions.innerHTML = html;
   
-  // Rebind end button
   document.getElementById('call-end-btn').addEventListener('click', endCall);
-  if(type === 'incoming'){
-    document.getElementById('call-accept-btn').addEventListener('click', acceptCall);
-  }
+  if(type === 'incoming') document.getElementById('call-accept-btn').addEventListener('click', acceptCall);
+  document.getElementById('call-mute-btn').addEventListener('click', toggleMute);
+  document.getElementById('call-speaker-btn').addEventListener('click', toggleSpeaker);
 }
 
 function hideCallUI(){
@@ -770,9 +757,35 @@ function hideCallUI(){
   if(state.callState.timerInterval) clearInterval(state.callState.timerInterval);
 }
 
-// ============ CALL SIGNALING (VIA FIREBASE) ============
-const servers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+function toggleMute(){
+  state.callState.isMuted = !state.callState.isMuted;
+  if(state.callState.localStream){
+    state.callState.localStream.getAudioTracks().forEach(track => track.enabled = !state.callState.isMuted);
+  }
+  document.getElementById('call-mute-btn').classList.toggle('muted', state.callState.isMuted);
+}
 
+function toggleSpeaker(){
+  state.callState.isSpeakerOn = !state.callState.isSpeakerOn;
+  document.getElementById('call-speaker-btn').classList.toggle('active', state.callState.isSpeakerOn);
+  // On mobile, changing the audio output is limited, but we can try
+  if(state.callState.peerConnection){
+    const audioEl = document.querySelector('audio[data-peer]');
+    if(audioEl && audioEl.setSinkId){
+      audioEl.setSinkId(state.callState.isSpeakerOn ? 'speaker' : 'default').catch(()=>{});
+    }
+  }
+}
+
+// ============ WebRTC CONFIGURATION ============
+const rtcConfig = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' }
+  ]
+};
+
+// ============ CALL SIGNALING (VIA FIREBASE) ============
 function listenForIncomingCalls(){
   if(!state.uid) return;
   const { db, rtdb } = fb;
@@ -781,18 +794,32 @@ function listenForIncomingCalls(){
     const callData = snap.val();
     if(callData.status === 'ringing' && !state.callState.active){
       state.incomingCallData = callData;
-      const partnerName = callData.callerName || 'مستخدم';
-      showCallUI('incoming', partnerName);
+      showCallUI('incoming', callData.callerName || 'مستخدم');
       playRingtone();
-      
-      // Show notification if supported
       if('Notification' in window && Notification.permission === 'granted'){
-        new Notification('📞 مكالمة واردة', { body: `${partnerName} بيتصل بك`, icon: './icon-192.png', vibrate: [200, 100, 200] });
+        new Notification('📞 مكالمة واردة', { body: `${callData.callerName} بيتصل بك`, icon: './icon-192.png', vibrate: [200, 100, 200] });
       }
+    } else if(callData.status === 'answered' && state.callState.type === 'outgoing'){
+      stopRingtone();
+      callStatus.textContent = 'متصل';
+      callStatus.className = 'call-status';
+      startCallTimer();
+      // Create peer connection and start streaming
+      await createPeerConnection();
+      await createAndSendOffer();
     } else if(callData.status === 'ended'){
-      hideCallUI();
-      state.callState.active = false;
-      rtdb.set(rtdb.ref(db, `calls/${state.uid}`), null);
+      endCall();
+    }
+    // Handle WebRTC signaling
+    if(callData.offer && !state.callState.peerConnection){
+      await createPeerConnection();
+      await handleOffer(callData.offer);
+    }
+    if(callData.answer && state.callState.peerConnection){
+      await handleAnswer(callData.answer);
+    }
+    if(callData.iceCandidate && state.callState.peerConnection){
+      await handleIceCandidate(callData.iceCandidate);
     }
   });
 }
@@ -802,89 +829,148 @@ async function startCall(){
   const partnerUid = state.currentChatUser.id;
   const partnerName = state.currentChatUser.displayName;
   
-  state.callState.active = true;
-  state.callState.type = 'outgoing';
-  state.callState.partnerUid = partnerUid;
-  state.callState.partnerName = partnerName;
+  state.callState.active = true; state.callState.type = 'outgoing';
+  state.callState.partnerUid = partnerUid; state.callState.partnerName = partnerName;
   
   showCallUI('outgoing', partnerName);
   playRingtone();
   
-  // Save call to Firebase
   const { db, rtdb } = fb;
   const now = Date.now();
-  await rtdb.update(rtdb.ref(db, `calls/${partnerUid}`), {
-    callerId: state.uid,
-    callerName: state.displayName,
-    status: 'ringing',
-    createdAt: now
+  await rtdb.set(rtdb.ref(db, `calls/${partnerUid}`), {
+    callerId: state.uid, callerName: state.displayName, status: 'ringing', createdAt: now
   });
   
-  // Listen for answer or end
-  const callRef = rtdb.ref(db, `calls/${partnerUid}`);
-  const unsub = rtdb.onValue(callRef, (snap) => {
-    if(!snap.exists()){ endCall(); unsub(); return; }
-    const data = snap.val();
-    if(data.status === 'answered'){
-      stopRingtone();
-      callStatus.textContent = 'متصل';
-      callStatus.className = 'call-status';
-      startCallTimer();
-      unsub();
-      // Save call log
-      saveCallLog('completed', now);
-    } else if(data.status === 'rejected' || data.status === 'ended'){
-      endCall();
-      unsub();
-    }
-  });
-  
-  // Auto-end after 30s if no answer
+  // Auto-end after 45s if no answer
   setTimeout(() => {
     if(state.callState.active && state.callState.type === 'outgoing' && !callTimer.classList.contains('show')){
-      endCall();
+      endCall(); saveCallLog('missed', now);
     }
-  }, 30000);
+  }, 45000);
 }
 
 async function acceptCall(){
   if(!state.incomingCallData) return;
   const { callerId, callerName, createdAt } = state.incomingCallData;
   
-  state.callState.active = true;
-  state.callState.type = 'incoming';
-  state.callState.partnerUid = callerId;
-  state.callState.partnerName = callerName || 'مستخدم';
+  state.callState.active = true; state.callState.type = 'incoming';
+  state.callState.partnerUid = callerId; state.callState.partnerName = callerName || 'مستخدم';
   
   stopRingtone();
-  callStatus.textContent = 'متصل';
-  callStatus.className = 'call-status';
+  callStatus.textContent = 'متصل'; callStatus.className = 'call-status';
   startCallTimer();
   
-  // Update Firebase
   const { db, rtdb } = fb;
-  await rtdb.update(rtdb.ref(db, `calls/${state.uid}`), {
-    status: 'answered',
-    answeredAt: Date.now()
-  });
+  await rtdb.update(rtdb.ref(db, `calls/${state.uid}`), { status: 'answered', answeredAt: Date.now() });
   
-  // Save call log
   saveCallLog('completed', createdAt || Date.now());
+}
+
+async function createPeerConnection(){
+  if(state.callState.peerConnection) return;
+  
+  const pc = new RTCPeerConnection(rtcConfig);
+  state.callState.peerConnection = pc;
+  
+  // Get local audio stream
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    state.callState.localStream = stream;
+    stream.getTracks().forEach(track => pc.addTrack(track, stream));
+  } catch(e){ console.error('Mic access failed:', e); showToast('مش قادرين نوصل للميكروفون','error'); }
+  
+  // Handle remote audio stream
+  pc.ontrack = (event) => {
+    const audioEl = document.createElement('audio');
+    audioEl.srcObject = event.streams[0];
+    audioEl.autoplay = true;
+    audioEl.setAttribute('data-peer', 'remote');
+    document.body.appendChild(audioEl);
+    // Apply speaker setting
+    if(state.callState.isSpeakerOn && audioEl.setSinkId){
+      audioEl.setSinkId('speaker').catch(()=>{});
+    }
+  };
+  
+  // Send ICE candidates to partner
+  pc.onicecandidate = (event) => {
+    if(event.candidate && state.callState.partnerUid){
+      const { db, rtdb } = fb;
+      rtdb.update(rtdb.ref(db, `calls/${state.callState.partnerUid}`), {
+        iceCandidate: event.candidate.toJSON()
+      });
+    }
+  };
+}
+
+async function createAndSendOffer(){
+  const pc = state.callState.peerConnection;
+  if(!pc) return;
+  
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+  
+  const { db, rtdb } = fb;
+  await rtdb.update(rtdb.ref(db, `calls/${state.callState.partnerUid}`), {
+    offer: { type: offer.type, sdp: offer.sdp }
+  });
+}
+
+async function handleOffer(offer){
+  const pc = state.callState.peerConnection;
+  if(!pc) return;
+  
+  await pc.setRemoteDescription(new RTCSessionDescription(offer));
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+  
+  const { db, rtdb } = fb;
+  await rtdb.update(rtdb.ref(db, `calls/${state.callState.partnerUid}`), {
+    answer: { type: answer.type, sdp: answer.sdp }
+  });
+}
+
+async function handleAnswer(answer){
+  const pc = state.callState.peerConnection;
+  if(!pc) return;
+  await pc.setRemoteDescription(new RTCSessionDescription(answer));
+}
+
+async function handleIceCandidate(iceCandidate){
+  const pc = state.callState.peerConnection;
+  if(!pc) return;
+  try { await pc.addIceCandidate(new RTCIceCandidate(iceCandidate)); } catch(e){}
 }
 
 function endCall(){
   const { db, rtdb } = fb;
+  
+  // Close peer connection
+  if(state.callState.peerConnection){
+    state.callState.peerConnection.close();
+    state.callState.peerConnection = null;
+  }
+  
+  // Stop local stream
+  if(state.callState.localStream){
+    state.callState.localStream.getTracks().forEach(track => track.stop());
+    state.callState.localStream = null;
+  }
+  
+  // Remove remote audio element
+  const audioEl = document.querySelector('audio[data-peer="remote"]');
+  if(audioEl) audioEl.remove();
+  
+  // Update Firebase
   if(state.callState.partnerUid){
     rtdb.update(rtdb.ref(db, `calls/${state.callState.partnerUid}`), { status: 'ended' });
   }
-  if(state.callState.type === 'incoming'){
+  if(state.callState.type === 'incoming' || state.callState.type === 'outgoing'){
     rtdb.set(rtdb.ref(db, `calls/${state.uid}`), null);
   }
   
   hideCallUI();
-  state.callState.active = false;
-  state.callState.type = null;
-  state.incomingCallData = null;
+  state.callState.active = false; state.callState.type = null; state.incomingCallData = null;
 }
 
 function startCallTimer(){
@@ -892,40 +978,21 @@ function startCallTimer(){
   callTimer.classList.add('show');
   state.callState.timerInterval = setInterval(() => {
     const elapsed = Math.floor((Date.now() - state.callState.startTime) / 1000);
-    const mm = Math.floor(elapsed / 60).toString().padStart(2, '0');
-    const ss = (elapsed % 60).toString().padStart(2, '0');
-    callTimer.textContent = `${mm}:${ss}`;
+    callTimer.textContent = `${Math.floor(elapsed/60).toString().padStart(2,'0')}:${(elapsed%60).toString().padStart(2,'0')}`;
   }, 1000);
 }
 
 async function saveCallLog(status, startTime){
   if(!state.currentChatId) return;
-  const { db, rtdb } = fb;
-  const now = new Date().toISOString();
+  const { db, rtdb } = fb; const now = new Date().toISOString();
   const duration = state.callState.startTime ? Math.floor((Date.now() - state.callState.startTime) / 1000) : 0;
   const newMsgRef = rtdb.push(rtdb.ref(db, `chats/${state.currentChatId}/messages`));
-  await rtdb.set(newMsgRef, {
-    senderId: state.uid,
-    senderName: state.displayName,
-    type: 'call',
-    callStatus: status,
-    duration: duration,
-    createdAt: now,
-    deliveredAt: now
-  });
-  await rtdb.update(rtdb.ref(db, `chats/${state.currentChatId}`), {
-    lastMessage: status === 'missed' ? '📞 مكالمة فائتة' : `📞 مكالمة ${duration > 0 ? formatCallDuration(duration) : 'منتهية'}`,
-    lastMessageAt: now,
-    lastSenderId: state.uid
-  });
+  await rtdb.set(newMsgRef, { senderId: state.uid, senderName: state.displayName, type: 'call', callStatus: status, duration, createdAt: now, deliveredAt: now });
+  await rtdb.update(rtdb.ref(db, `chats/${state.currentChatId}`), { lastMessage: status==='missed'?'📞 مكالمة فائتة':`📞 مكالمة ${formatCallDuration(duration)}`, lastMessageAt:now, lastSenderId:state.uid });
   state.msgCount++; updateProfileStats();
 }
 
-function formatCallDuration(sec){
-  const mm = Math.floor(sec / 60);
-  const ss = sec % 60;
-  return `${mm}:${ss.toString().padStart(2, '0')}`;
-}
+function formatCallDuration(sec){ const mm=Math.floor(sec/60); const ss=sec%60; return `${mm}:${ss.toString().padStart(2,'0')}`; }
 
 // ============ BOOT ============
 whenReady(async () => {
@@ -982,39 +1049,18 @@ function enterApp(){
 }
 
 // ============ ONLINE PRESENCE ============
-function setupOnlinePresence(){
-  const {db,rtdb}=fb; const userStatusRef=rtdb.ref(db,`users/${state.uid}`);
-  rtdb.onValue(rtdb.ref(db,'.info/connected'),(snap)=>{
-    if(snap.val()===true){ rtdb.update(userStatusRef,{online:true,lastSeen:new Date().toISOString()}); rtdb.onDisconnect(userStatusRef).update({online:false,lastSeen:new Date().toISOString()}); }
-  });
-}
-
-function listenToOnlineUsers(){
-  const {db,rtdb}=fb;
-  rtdb.onValue(rtdb.ref(db,'users'),(snap)=>{
-    if(snap.exists()){ state.onlineUsers={}; const users=snap.val(); for(const[uid,data]of Object.entries(users)){ if(uid!==state.uid) state.onlineUsers[uid]={online:data.online||false,lastSeen:data.lastSeen||null}; } }
-    updateChatHeaderStatus(); refreshChatListOnlineStatus();
-  });
-}
-
+function setupOnlinePresence(){ const {db,rtdb}=fb; const userStatusRef=rtdb.ref(db,`users/${state.uid}`); rtdb.onValue(rtdb.ref(db,'.info/connected'),(snap)=>{ if(snap.val()===true){ rtdb.update(userStatusRef,{online:true,lastSeen:new Date().toISOString()}); rtdb.onDisconnect(userStatusRef).update({online:false,lastSeen:new Date().toISOString()}); } }); }
+function listenToOnlineUsers(){ const {db,rtdb}=fb; rtdb.onValue(rtdb.ref(db,'users'),(snap)=>{ if(snap.exists()){ state.onlineUsers={}; const users=snap.val(); for(const[uid,data]of Object.entries(users)){ if(uid!==state.uid) state.onlineUsers[uid]={online:data.online||false,lastSeen:data.lastSeen||null}; } } updateChatHeaderStatus(); refreshChatListOnlineStatus(); }); }
 function updateChatHeaderStatus(){
   if(!state.currentChatUser) return;
   const otherUid=state.currentChatUser.id, userStatus=state.onlineUsers[otherUid];
   const statusEl=document.getElementById('chat-header-status'), onlineIndicator=document.getElementById('chat-header-online-indicator');
-  const isTyping=state.typingUsers[otherUid];
-  if(isTyping){ statusEl.className='chat-header-status typing'; statusEl.innerHTML='جاري الكتابة<div class="typing-dots"><span></span><span></span><span></span></div>'; onlineIndicator.classList.add('show'); }
+  if(state.typingUsers[otherUid]){ statusEl.className='chat-header-status typing'; statusEl.innerHTML='جاري الكتابة<div class="typing-dots"><span></span><span></span><span></span></div>'; onlineIndicator.classList.add('show'); }
   else if(userStatus&&userStatus.online){ statusEl.className='chat-header-status online'; statusEl.textContent='متصل الآن'; onlineIndicator.classList.add('show'); }
   else { statusEl.className='chat-header-status offline'; statusEl.textContent=userStatus?.lastSeen?'آخر ظهور '+formatLastSeen(userStatus.lastSeen):'غير متصل'; onlineIndicator.classList.remove('show'); }
 }
-
 function refreshChatListOnlineStatus(){ document.querySelectorAll('.chat-row').forEach(row=>{ const otherUid=row.dataset.uid, indicator=row.querySelector('.online-indicator'); if(indicator&&otherUid) indicator.classList.toggle('show', state.onlineUsers[otherUid]?.online); }); }
-
-function formatLastSeen(ts){
-  if(!ts) return 'غير معروف'; const d=new Date(ts), now=new Date(), diff=now-d;
-  if(diff<60000) return 'الآن'; if(diff<3600000) return `منذ ${Math.floor(diff/60000)} دقيقة`;
-  if(diff<86400000) return `منذ ${Math.floor(diff/3600000)} ساعة`; if(diff<172800000) return 'أمس';
-  return d.toLocaleDateString('ar-EG',{month:'short',day:'numeric'});
-}
+function formatLastSeen(ts){ if(!ts) return 'غير معروف'; const d=new Date(ts), now=new Date(), diff=now-d; if(diff<60000) return 'الآن'; if(diff<3600000) return `منذ ${Math.floor(diff/60000)} دقيقة`; if(diff<86400000) return `منذ ${Math.floor(diff/3600000)} ساعة`; if(diff<172800000) return 'أمس'; return d.toLocaleDateString('ar-EG',{month:'short',day:'numeric'}); }
 
 // ============ SEARCH ============
 const searchInput=document.getElementById('search-input'), searchResults=document.getElementById('search-results'); let searchDebounce=null;
@@ -1045,11 +1091,7 @@ async function openChatWith(otherUser){
   updateChatHeaderStatus(); goTo('chat');
   listenToMessages(chatId); listenToTyping(chatId);
 }
-
-function listenToTyping(chatId){
-  if(state.unsubTyping){ fb.rtdb.off(fb.rtdb.ref(fb.db,`chats/${chatId}/typing`)); state.unsubTyping=null; }
-  const {db,rtdb}=fb; state.unsubTyping=rtdb.onValue(rtdb.ref(db,`chats/${chatId}/typing`),(snap)=>{ state.typingUsers={}; if(snap.exists()){ const typingData=snap.val(); for(const[uid,isTyping]of Object.entries(typingData)){ if(uid!==state.uid&&isTyping) state.typingUsers[uid]=true; } } updateChatHeaderStatus(); });
-}
+function listenToTyping(chatId){ if(state.unsubTyping){ fb.rtdb.off(fb.rtdb.ref(fb.db,`chats/${chatId}/typing`)); state.unsubTyping=null; } const {db,rtdb}=fb; state.unsubTyping=rtdb.onValue(rtdb.ref(db,`chats/${chatId}/typing`),(snap)=>{ state.typingUsers={}; if(snap.exists()){ const typingData=snap.val(); for(const[uid,isTyping]of Object.entries(typingData)){ if(uid!==state.uid&&isTyping) state.typingUsers[uid]=true; } } updateChatHeaderStatus(); }); }
 
 // ============ TEXT MESSAGE ============
 const composerInputEl = document.getElementById('composer-input');
@@ -1058,7 +1100,6 @@ const voiceRecordingBar = document.getElementById('voice-recording-bar'); const 
 const voiceRecCancelBtn = document.getElementById('voice-rec-cancel'); const composerInputShell = document.getElementById('composer-input-shell');
 const ICON_MIC = '<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
 const ICON_SEND = '<path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
-
 function updateSendButtonMode(){ const hasText = composerInputEl.value.trim().length > 0; sendBtnEl.dataset.mode = hasText ? 'send' : 'mic'; sendBtnIcon.innerHTML = hasText ? ICON_SEND : ICON_MIC; }
 composerInputEl.addEventListener('input', ()=>{ if(state.currentChatId){ const {db,rtdb}=fb; rtdb.set(rtdb.ref(db,`chats/${state.currentChatId}/typing/${state.uid}`),true); clearTimeout(state.typingTimeout); state.typingTimeout = setTimeout(()=> rtdb.set(rtdb.ref(db,`chats/${state.currentChatId}/typing/${state.uid}`),null), 2000); } composerInputEl.style.height = 'auto'; composerInputEl.style.height = Math.min(composerInputEl.scrollHeight, 110) + 'px'; updateSendButtonMode(); });
 async function sendMessage(){
@@ -1074,13 +1115,10 @@ let voiceRecorder = null, voiceChunks = [], voiceStream = null, voiceStartTime =
 let voiceUsingTouch = false, voiceIsBusy = false;
 function setRecordingUI(active){ sendBtnEl.classList.toggle('recording', active); voiceRecordingBar.classList.toggle('show', active); composerInputShell.style.display = active ? 'none' : 'flex'; }
 async function startVoiceRecording(fromTouch){
-  if(!state.currentChatId){ showToast('افتح محادثة الأول','error'); return; }
-  if(sendBtnEl.dataset.mode === 'send' || voiceIsBusy) return;
+  if(!state.currentChatId){ showToast('افتح محادثة الأول','error'); return; } if(sendBtnEl.dataset.mode === 'send' || voiceIsBusy) return;
   voiceUsingTouch = !!fromTouch; voiceIsBusy = true;
-  try { voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
-  catch(e){ showToast('محتاجين إذن الميكروفون','error'); voiceIsBusy=false; return; }
-  voiceChunks = []; voiceCancelled = false;
-  voiceRecorder = new MediaRecorder(voiceStream);
+  try { voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch(e){ showToast('محتاجين إذن الميكروفون','error'); voiceIsBusy=false; return; }
+  voiceChunks = []; voiceCancelled = false; voiceRecorder = new MediaRecorder(voiceStream);
   voiceRecorder.ondataavailable = (e) => { if(e.data.size>0) voiceChunks.push(e.data); };
   voiceRecorder.onstop = () => { if(!voiceCancelled) processAndSendVoice(); };
   voiceRecorder.start(); voiceStartTime = Date.now(); setRecordingUI(true);
@@ -1099,11 +1137,9 @@ async function processAndSendVoice(){
   const blob = new Blob(voiceChunks, { type: 'audio/webm' }); const reader = new FileReader();
   reader.onload = async () => {
     const base64Audio = reader.result;
-    try { const { db, rtdb } = fb; const now = new Date().toISOString(); const newMsgRef = rtdb.push(rtdb.ref(db, `chats/${state.currentChatId}/messages`)); await rtdb.set(newMsgRef, { senderId: state.uid, senderName: state.displayName, type: 'voice', audioBase64: base64Audio, duration: durationSec, createdAt: now, deliveredAt: now }); await rtdb.update(rtdb.ref(db, `chats/${state.currentChatId}`), { lastMessage: '🎤 رسالة صوتية', lastMessageAt: now, lastSenderId: state.uid }); state.msgCount++; updateProfileStats(); }
-    catch(e) { showToast('فشل الإرسال','error'); }
+    try { const { db, rtdb } = fb; const now = new Date().toISOString(); const newMsgRef = rtdb.push(rtdb.ref(db, `chats/${state.currentChatId}/messages`)); await rtdb.set(newMsgRef, { senderId: state.uid, senderName: state.displayName, type: 'voice', audioBase64: base64Audio, duration: durationSec, createdAt: now, deliveredAt: now }); await rtdb.update(rtdb.ref(db, `chats/${state.currentChatId}`), { lastMessage: '🎤 رسالة صوتية', lastMessageAt: now, lastSenderId: state.uid }); state.msgCount++; updateProfileStats(); } catch(e) { showToast('فشل الإرسال','error'); }
     voiceChunks = [];
-  };
-  reader.readAsDataURL(blob);
+  }; reader.readAsDataURL(blob);
 }
 sendBtnEl.addEventListener('touchstart', (e)=>{ if(sendBtnEl.dataset.mode!=='mic') return; e.preventDefault(); startVoiceRecording(true); }, {passive: false});
 sendBtnEl.addEventListener('touchend', (e)=>{ if(!voiceUsingTouch) return; e.preventDefault(); stopVoiceRecording(false); }, {passive: false});
@@ -1137,12 +1173,7 @@ function getMessageStatusIcon(msg){
   return `<span class="msg-status check-sent"><svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
 }
 function buildBubbleContent(m){
-  if(m.type === 'call'){
-    const isMissed = m.callStatus === 'missed';
-    const icon = isMissed ? '📞❌' : '📞';
-    const label = isMissed ? 'مكالمة فائتة' : (m.duration ? `مكالمة ${formatCallDuration(m.duration)}` : 'مكالمة منتهية');
-    return `<div class="call-bubble"><span class="call-bubble-icon">${icon}</span><div><div>${label}</div><div class="call-bubble-duration">${m.duration ? formatCallDuration(m.duration) : ''}</div></div></div>`;
-  }
+  if(m.type === 'call'){ const isMissed = m.callStatus === 'missed'; return `<div class="call-bubble"><span class="call-bubble-icon">${isMissed?'📞❌':'📞'}</span><div><div>${isMissed?'مكالمة فائتة':(m.duration?`مكالمة ${formatCallDuration(m.duration)}`:'مكالمة منتهية')}</div><div class="call-bubble-duration">${m.duration?formatCallDuration(m.duration):''}</div></div></div>`; }
   if(m.type === 'voice'){ const audioSrc = m.audioUrl || m.audioBase64 || ''; if(audioSrc){ const dur = m.duration || 0; const mm = Math.floor(dur/60), ss = dur%60; const bars = Array.from({length: 24}).map((_,i)=>{ const h = 6 + Math.round(Math.abs(Math.sin(i*1.7))*16); return `<span style="height:${h}px;"></span>`; }).join(''); return `<div class="voice-msg"><button class="voice-msg-play-btn" data-url="${escapeAttr(audioSrc)}"><svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></button><div class="voice-msg-wave">${bars}</div><div class="voice-msg-duration">${mm}:${ss.toString().padStart(2,'0')}</div></div>`; } }
   return escapeHtml(m.text || '');
 }
@@ -1183,8 +1214,8 @@ document.getElementById('btn-back-chat').addEventListener('click',()=>{ if(state
 document.getElementById('my-avatar').addEventListener('click',()=>{ updateProfileStats(); goTo('profile'); });
 document.getElementById('btn-back-profile').addEventListener('click',()=>goTo('main'));
 document.querySelector('[data-nav="chats"]').addEventListener('click',()=>goTo('main'));
-document.querySelector('[data-nav="calls"]').addEventListener('click',()=>{ document.getElementById('coming-soon-title').textContent='المكالمات'; document.getElementById('coming-soon-icon').textContent='📞'; document.getElementById('coming-soon-text').textContent='المكالمات الصوتية متاحة في كل محادثة - اضغط على أيقونة الهاتف في الشات.'; goTo('comingSoon'); });
-document.querySelector('[data-nav="communities"]').addEventListener('click',()=>{ document.getElementById('coming-soon-title').textContent='المجتمعات'; document.getElementById('coming-soon-icon').textContent='👥'; document.getElementById('coming-soon-text').textContent='ميزة المجتمعات لسه تحت التطوير، وهتكون متاحة قريبًا إن شاء الله.'; goTo('comingSoon'); });
+document.querySelector('[data-nav="calls"]').addEventListener('click',()=>{ document.getElementById('coming-soon-title').textContent='المكالمات'; document.getElementById('coming-soon-icon').textContent='📞'; document.getElementById('coming-soon-text').textContent='المكالمات الصوتية متاحة في كل محادثة - اضغط على أيقونة الهاتف الأخضر.'; goTo('comingSoon'); });
+document.querySelector('[data-nav="communities"]').addEventListener('click',()=>{ document.getElementById('coming-soon-title').textContent='المجتمعات'; document.getElementById('coming-soon-icon').textContent='👥'; document.getElementById('coming-soon-text').textContent='ميزة المجتمعات لسه تحت التطوير.'; goTo('comingSoon'); });
 document.querySelector('[data-nav="updates"]').addEventListener('click',()=>{ document.getElementById('updates-avatar-btn').textContent=state.displayName.charAt(0).toUpperCase(); goTo('updates'); });
 document.getElementById('btn-back-coming-soon').addEventListener('click',()=>goTo('main'));
 document.querySelectorAll('[data-nav3="chats"]').forEach(el=>el.addEventListener('click',()=>goTo('main')));
@@ -1245,7 +1276,7 @@ document.getElementById('status-viewer-next').addEventListener('click', ()=> sho
 document.getElementById('status-viewer-prev').addEventListener('click', ()=> showStatusAt(statusState.activeIndex-1));
 document.getElementById('status-viewer-close').addEventListener('click', ()=>{ clearTimeout(statusState.timerHandle); document.getElementById('status-viewer').classList.remove('show'); });
 
-console.log('✅ Heye App - مكالمات صوتية + رسائل صوتية Base64 + جميع الصفحات');
+console.log('✅ Heye App - WebRTC Voice Calls + Base64 Voice Messages');
 </script>
 </body>
 </html>
