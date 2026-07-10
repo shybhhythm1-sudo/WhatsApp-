@@ -411,6 +411,10 @@
   .attach-menu-label{font-size:11.5px;color:var(--ink);font-weight:600;}
   .attach-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:149;display:none;}
   .attach-overlay.show{display:block;}
+
+  /* Uploading indicator for voice messages */
+  .voice-uploading-indicator{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--gold-soft);margin-right:4px;}
+  .voice-uploading-spinner{width:10px;height:10px;border-radius:50%;border:1.5px solid rgba(228,199,122,.3);border-top-color:var(--gold-soft);animation:spin .7s linear infinite;}
 </style>
 </head>
 <body>
@@ -1153,7 +1157,7 @@ async function sendMessage(){
 
 composerInputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
 
-// ============ VOICE RECORDING - FIXED (WhatsApp Style) ============
+// ============ VOICE RECORDING - WHATSAPP STYLE WITH PROPER FIREBASE SAVE ============
 let voiceRecorder = null, voiceChunks = [], voiceStream = null, voiceStartTime = 0, voiceTimerInterval = null, voiceCancelled = false;
 let voiceUsingTouch = false;
 let voiceIsBusy = false;
@@ -1226,30 +1230,76 @@ async function stopVoiceRecording(cancel){
     return;
   }
 
-  // ---- WhatsApp style: show voice message immediately in chat using local blob URL ----
+  // Create local blob for immediate display
   const mimeType = voiceRecorder.mimeType || 'audio/webm';
   const localBlob = new Blob(voiceChunks.slice(), { type: mimeType });
   const localUrl = URL.createObjectURL(localBlob);
 
   const tempId = 'temp_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  
+  // Show message immediately in chat (like WhatsApp)
   appendLocalVoiceMessage(localUrl, durationSec, tempId);
 
+  // Reset UI immediately
   setRecordingUI(false);
   voiceIsBusy = false;
   voiceUsingTouch = false;
 
-  // Upload in background
+  // Upload AND save to Firebase in background
+  uploadVoiceAndSaveToFirebase(mimeType, durationSec, tempId);
+}
+
+// NEW: This function handles upload to storage AND saving to Firebase database
+async function uploadVoiceAndSaveToFirebase(mimeType, durationSec, tempId){
   try {
-    const realUrl = await uploadAndSendVoiceMessage(mimeType, durationSec);
-    replaceLocalVoiceUrl(tempId, realUrl);
+    // Upload to Firebase Storage
+    const blob = new Blob(voiceChunks, { type: mimeType });
+    voiceChunks = [];
+    
+    const { storage, storageApi, db, rtdb } = fb;
+    const fileId = 'voice_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+    const ext = mimeType.includes('mp4') ? 'm4a' : 'webm';
+    const path = `voice_messages/${state.currentChatId}/${fileId}.${ext}`;
+    const fileRef = storageApi.storageRef(storage, path);
+    
+    showToast('⏳ جاري رفع الرسالة الصوتية...', '');
+    await storageApi.uploadBytes(fileRef, blob);
+    const downloadUrl = await storageApi.getDownloadURL(fileRef);
+
+    // Save to Firebase Database (so the other person receives it)
+    const now = new Date().toISOString();
+    const newMsgRef = rtdb.push(rtdb.ref(db, `chats/${state.currentChatId}/messages`));
+    await rtdb.set(newMsgRef, {
+      senderId: state.uid,
+      senderName: state.displayName,
+      type: 'voice',
+      audioUrl: downloadUrl,
+      duration: durationSec,
+      createdAt: now,
+      deliveredAt: now
+    });
+
+    // Update chat metadata
+    await rtdb.update(rtdb.ref(db, `chats/${state.currentChatId}`), {
+      lastMessage: '🎤 رسالة صوتية',
+      lastMessageAt: now,
+      lastSenderId: state.uid
+    });
+
+    // Replace local URL with real URL
+    replaceLocalVoiceUrl(tempId, downloadUrl);
+    state.msgCount++;
+    updateProfileStats();
+    showToast('✅ تم إرسال الرسالة الصوتية', 'success');
+
   } catch(e) {
-    console.error('Voice upload failed', e);
+    console.error('Voice upload/save failed', e);
     removeLocalVoiceMessage(tempId);
-    showToast('الرسالة الصوتية متبعتتش، جرب تاني', 'error');
+    showToast('❌ فشل إرسال الرسالة الصوتية، جرب تاني', 'error');
   }
 }
 
-// Helper: add local voice message bubble immediately
+// Add local voice message bubble immediately (optimistic UI)
 function appendLocalVoiceMessage(localUrl, durationSec, tempId) {
   const container = document.getElementById('messages-container');
   if (!container) return;
@@ -1278,6 +1328,7 @@ function appendLocalVoiceMessage(localUrl, durationSec, tempId) {
               <path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </span>
+          <span class="voice-uploading-indicator"><span class="voice-uploading-spinner"></span> جاري الإرسال</span>
         </div>
       </div>
     </div>
@@ -1286,57 +1337,47 @@ function appendLocalVoiceMessage(localUrl, durationSec, tempId) {
   container.insertAdjacentHTML('beforeend', html);
   container.scrollTop = container.scrollHeight;
 
-  const playBtn = container.querySelector(`[data-tempid="${tempId}"] .voice-msg-play-btn`);
-  if (playBtn) {
-    playBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      playVoiceMessage(playBtn.dataset.url, playBtn);
-    });
+  // Add play button functionality
+  const bubbleRow = container.querySelector(`[data-tempid="${tempId}"]`);
+  if (bubbleRow) {
+    const playBtn = bubbleRow.querySelector('.voice-msg-play-btn');
+    if (playBtn) {
+      playBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        playVoiceMessage(playBtn.dataset.url, playBtn);
+      });
+    }
   }
 }
 
+// Replace local URL with real Firebase URL
 function replaceLocalVoiceUrl(tempId, realUrl) {
   const el = document.querySelector(`[data-tempid="${tempId}"]`);
   if (!el) return;
+  
+  // Update play button URL
   const playBtn = el.querySelector('.voice-msg-play-btn');
   if (playBtn) playBtn.dataset.url = realUrl;
+  
+  // Remove "sending" indicator
+  const sendingIndicator = el.querySelector('.voice-uploading-indicator');
+  if (sendingIndicator) sendingIndicator.remove();
+  
+  // Update status to show success
+  const statusEl = el.querySelector('.msg-status');
+  if (statusEl) {
+    statusEl.className = 'msg-status check-delivered';
+    statusEl.innerHTML = '<svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="check-icon" viewBox="0 0 24 24" fill="none" style="margin-right:-8px;"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
 }
 
+// Remove local voice message if upload fails
 function removeLocalVoiceMessage(tempId) {
   const el = document.querySelector(`[data-tempid="${tempId}"]`);
   if (el) el.remove();
 }
 
-async function uploadAndSendVoiceMessage(mimeType, durationSec){
-  try {
-    const blob = new Blob(voiceChunks, { type: mimeType });
-    voiceChunks = [];
-    const { storage, storageApi, db, rtdb } = fb;
-    const fileId = 'voice_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
-    const ext = mimeType.includes('mp4') ? 'm4a' : 'webm';
-    const path = `voice_messages/${state.currentChatId}/${fileId}.${ext}`;
-    const fileRef = storageApi.storageRef(storage, path);
-    await storageApi.uploadBytes(fileRef, blob);
-    const downloadUrl = await storageApi.getDownloadURL(fileRef);
-
-    const now = new Date().toISOString();
-    const newMsgRef = rtdb.push(rtdb.ref(db, `chats/${state.currentChatId}/messages`));
-    await rtdb.set(newMsgRef, {
-      senderId: state.uid, senderName: state.displayName,
-      type: 'voice', audioUrl: downloadUrl, duration: durationSec,
-      createdAt: now, deliveredAt: now
-    });
-    await rtdb.update(rtdb.ref(db, `chats/${state.currentChatId}`), { lastMessage: '🎤 رسالة صوتية', lastMessageAt: now, lastSenderId: state.uid });
-    state.msgCount++; updateProfileStats();
-    
-    return downloadUrl;
-  } catch(e){
-    console.error('Voice send failed', e);
-    throw e;
-  }
-}
-
-// Touch handlers
+// Touch handlers for mobile
 sendBtnEl.addEventListener('touchstart', (e)=>{
   if(sendBtnEl.dataset.mode !== 'mic') return;
   e.preventDefault();
@@ -1349,12 +1390,12 @@ sendBtnEl.addEventListener('touchend', (e)=>{
   stopVoiceRecording(false);
 }, { passive: false });
 
-sendBtnEl.addEventListener('touchcancel', (e)=>{
+sendBtnEl.addEventListener('touchcancel', ()=>{
   if(!voiceUsingTouch) return;
   stopVoiceRecording(true);
 });
 
-// Mouse handlers (desktop)
+// Mouse handlers for desktop
 sendBtnEl.addEventListener('mousedown', (e)=>{
   if(voiceUsingTouch) return;
   if(sendBtnEl.dataset.mode !== 'mic') return;
@@ -1380,7 +1421,7 @@ document.addEventListener('visibilitychange', ()=>{
   }
 });
 
-// Play voice message
+// ============ PLAY VOICE MESSAGE ============
 let currentPlayingAudio = null, currentPlayingBtn = null;
 function playVoiceMessage(url, btnEl){
   if(currentPlayingAudio && currentPlayingBtn === btnEl){
