@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
 <title>Heye - هي</title>
 
-<!-- PWA -->
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E0B14">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -84,9 +83,7 @@
   @keyframes callPulse{0%,100%{box-shadow:0 0 0 0 rgba(76,175,80,.6);}50%{box-shadow:0 0 0 20px rgba(76,175,80,0);}}
   @keyframes micPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
   @keyframes recBlink{0%,100%{opacity:1;}50%{opacity:.3;}}
-  @keyframes micLevelPulse{0%,100%{transform:scaleY(0.3);}50%{transform:scaleY(1);}}
   @keyframes micModalPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(217,112,90,.4);}50%{transform:scale(1.05);box-shadow:0 0 0 20px rgba(217,112,90,0);}}
-  @keyframes slideDown{from{opacity:0;transform:translateY(-30px);}to{opacity:1;transform:translateY(0);}}
 
   #view-loading{align-items:center;justify-content:center;background:var(--bg-deep);gap:18px;}
   .loader-ring{width:44px;height:44px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--gold);animation:spin 0.9s linear infinite;}
@@ -186,9 +183,7 @@
   .chat-badge{flex-shrink:0;min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:var(--gold);color:#1A1206;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(201,162,75,.4);}
   .section-header{padding:20px 16px 12px;font-size:13px;font-weight:600;color:var(--mute-2);letter-spacing:.05em;}
   .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 40px 0;text-align:center;gap:16px;}
-  .empty-state .e-icon{width:80px;height:80px;opacity:.3;}
   .empty-state h3{font-size:18px;font-weight:700;color:var(--ink);}
-  .empty-state p{font-size:14px;color:var(--mute);line-height:1.8;max-width:280px;}
 
   #view-profile{background:var(--bg-deep);}
   .profile-header{padding:max(18px, var(--safe-top)) 20px 14px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--line-soft);background:linear-gradient(180deg, var(--bg-rise) 0%, transparent 100%);}
@@ -208,14 +203,7 @@
   .profile-card-row .value{color:var(--ink);font-weight:600;direction:ltr;}
   .logout-btn{width:100%;height:52px;border-radius:14px;border:1.5px solid rgba(217,112,90,.3);background:rgba(217,112,90,.1);color:var(--danger);font-family:'Cairo',sans-serif;font-size:15px;font-weight:700;margin-top:16px;cursor:pointer;transition:all .2s ease;}
   .logout-btn:active{background:rgba(217,112,90,.2);}
-  .notif-status-card{width:100%;background:var(--bg-panel);border:1px solid var(--line-soft);border-radius:16px;padding:16px 18px;margin-top:6px;display:flex;align-items:center;gap:12px;cursor:pointer;}
-  .notif-status-card .ns-icon{font-size:22px;flex-shrink:0;}
-  .notif-status-card .ns-text{flex:1;}
-  .notif-status-card .ns-title{font-size:14px;font-weight:700;color:var(--ink);}
-  .notif-status-card .ns-sub{font-size:12px;color:var(--mute);margin-top:2px;}
-  .notif-status-card .ns-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 
-  /* ============ SETTINGS VIEW ============ */
   #view-settings{background:var(--bg-deep);}
   .settings-body{flex:1;overflow-y:auto;padding:24px 20px 40px;display:flex;flex-direction:column;gap:18px;}
   .settings-section-title{font-size:13px;font-weight:600;color:var(--mute-2);letter-spacing:.05em;padding:8px 4px;}
@@ -236,10 +224,6 @@
   .perm-badge.prompt{background:rgba(201,162,75,.15);color:var(--gold-soft);border:1px solid rgba(201,162,75,.3);}
   .perm-badge.unknown{background:rgba(138,127,153,.15);color:var(--mute);border:1px solid rgba(138,127,153,.3);}
   .perm-badge .dot{width:7px;height:7px;border-radius:50%;background:currentColor;}
-  .perm-badge.granted .dot{background:var(--ok);}
-  .perm-badge.denied .dot{background:var(--danger);}
-  .perm-badge.prompt .dot{background:var(--gold-soft);}
-
   .mic-test-card{background:var(--bg-panel-2);border:1px solid var(--line-soft);border-radius:14px;padding:16px;display:none;flex-direction:column;gap:12px;}
   .mic-test-card.show{display:flex;}
   .mic-level-visualizer{display:flex;align-items:center;justify-content:center;gap:3px;height:40px;padding:0 10px;}
@@ -253,130 +237,27 @@
   .mic-test-btn.secondary{background:var(--bg-panel);border:1px solid var(--line);color:var(--ink);}
   .mic-test-btn.danger{background:rgba(217,112,90,.15);border:1px solid rgba(217,112,90,.3);color:var(--danger);}
   .mic-test-btn .spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(26,18,6,.3);border-top-color:#1A1206;animation:spin .7s linear infinite;}
-
   .settings-help-box{background:rgba(217,112,90,.08);border:1px solid rgba(217,112,90,.2);border-radius:12px;padding:14px;font-size:12.5px;color:var(--mute);line-height:1.8;display:none;}
   .settings-help-box.show{display:block;}
   .settings-help-box strong{color:var(--danger);font-weight:700;}
-  .settings-help-box code{background:var(--bg-panel);padding:2px 6px;border-radius:4px;font-size:11px;color:var(--ink);direction:ltr;display:inline-block;}
 
-  /* ============ MIC PERMISSION MODAL ============ */
-  .mic-modal-overlay{
-    position:fixed;inset:0;
-    background:rgba(0,0,0,.75);
-    z-index:700;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-    backdrop-filter:blur(8px);
-  }
+  .mic-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:700;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);}
   .mic-modal-overlay.show{display:flex;animation:fadeIn .25s ease;}
-  
-  .mic-modal{
-    background:linear-gradient(180deg, var(--bg-panel-2) 0%, var(--bg-panel) 100%);
-    border:1px solid var(--line);
-    border-radius:24px;
-    padding:28px 24px 24px;
-    max-width:380px;
-    width:100%;
-    box-shadow:0 20px 60px rgba(0,0,0,.6);
-    animation:slideUp .35s cubic-bezier(.16,1,.3,1);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:18px;
-    text-align:center;
-  }
-  
-  .mic-modal-icon{
-    width:84px;
-    height:84px;
-    border-radius:50%;
-    background:linear-gradient(160deg, rgba(217,112,90,.2), rgba(217,112,90,.08));
-    border:2px solid rgba(217,112,90,.3);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    animation:micModalPulse 2.5s ease-in-out infinite;
-  }
+  .mic-modal{background:linear-gradient(180deg, var(--bg-panel-2) 0%, var(--bg-panel) 100%);border:1px solid var(--line);border-radius:24px;padding:28px 24px 24px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:slideUp .35s cubic-bezier(.16,1,.3,1);display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;}
+  .mic-modal-icon{width:84px;height:84px;border-radius:50%;background:linear-gradient(160deg, rgba(217,112,90,.2), rgba(217,112,90,.08));border:2px solid rgba(217,112,90,.3);display:flex;align-items:center;justify-content:center;animation:micModalPulse 2.5s ease-in-out infinite;}
   .mic-modal-icon svg{width:40px;height:40px;}
-  
-  .mic-modal-title{
-    font-size:20px;
-    font-weight:800;
-    color:var(--ink);
-    line-height:1.4;
-  }
-  
-  .mic-modal-subtitle{
-    font-size:13.5px;
-    color:var(--mute);
-    line-height:1.8;
-    max-width:300px;
-  }
-  
-  .mic-modal-steps{
-    background:var(--bg-deep);
-    border:1px solid var(--line-soft);
-    border-radius:14px;
-    padding:14px 16px;
-    width:100%;
-    text-align:right;
-  }
-  
-  .mic-modal-step{
-    display:flex;
-    align-items:flex-start;
-    gap:10px;
-    padding:8px 0;
-    font-size:12.5px;
-    color:var(--mute);
-    line-height:1.7;
-  }
+  .mic-modal-title{font-size:20px;font-weight:800;color:var(--ink);line-height:1.4;}
+  .mic-modal-subtitle{font-size:13.5px;color:var(--mute);line-height:1.8;max-width:300px;}
+  .mic-modal-steps{background:var(--bg-deep);border:1px solid var(--line-soft);border-radius:14px;padding:14px 16px;width:100%;text-align:right;}
+  .mic-modal-step{display:flex;align-items:flex-start;gap:10px;padding:8px 0;font-size:12.5px;color:var(--mute);line-height:1.7;}
   .mic-modal-step:not(:last-child){border-bottom:1px solid var(--line-soft);}
-  .mic-modal-step-num{
-    width:22px;height:22px;border-radius:50%;
-    background:var(--gold);color:#1A1206;
-    font-size:11px;font-weight:800;
-    display:flex;align-items:center;justify-content:center;
-    flex-shrink:0;margin-top:2px;
-  }
+  .mic-modal-step-num{width:22px;height:22px;border-radius:50%;background:var(--gold);color:#1A1206;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
   .mic-modal-step strong{color:var(--ink);font-weight:700;}
-  
-  .mic-modal-actions{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    width:100%;
-    margin-top:4px;
-  }
-  
-  .mic-modal-btn{
-    width:100%;
-    height:50px;
-    border-radius:14px;
-    border:none;
-    font-family:'Cairo',sans-serif;
-    font-size:15px;
-    font-weight:700;
-    cursor:pointer;
-    transition:all .2s ease;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-  }
+  .mic-modal-actions{display:flex;flex-direction:column;gap:10px;width:100%;margin-top:4px;}
+  .mic-modal-btn{width:100%;height:50px;border-radius:14px;border:none;font-family:'Cairo',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s ease;display:flex;align-items:center;justify-content:center;gap:8px;}
   .mic-modal-btn:active{transform:scale(.97);}
-  .mic-modal-btn.primary{
-    background:linear-gradient(160deg, var(--gold-soft), var(--gold));
-    color:#1A1206;
-    box-shadow:0 6px 20px rgba(201,162,75,.35);
-  }
-  .mic-modal-btn.secondary{
-    background:var(--bg-panel);
-    border:1px solid var(--line);
-    color:var(--ink);
-  }
+  .mic-modal-btn.primary{background:linear-gradient(160deg, var(--gold-soft), var(--gold));color:#1A1206;box-shadow:0 6px 20px rgba(201,162,75,.35);}
+  .mic-modal-btn.secondary{background:var(--bg-panel);border:1px solid var(--line);color:var(--ink);}
   .mic-modal-btn svg{width:18px;height:18px;}
 
   #view-chat{background:var(--bg-deep);}
@@ -392,12 +273,10 @@
   .chat-header-status.online{color:var(--online);}
   .chat-header-status.offline{color:var(--mute-2);}
   .chat-header-status.typing{color:var(--typing-color);font-style:italic;}
-  
   .typing-dots{display:inline-flex;align-items:center;gap:3px;margin-right:4px;}
   .typing-dots span{width:5px;height:5px;border-radius:50%;background:var(--typing-color);animation:typingBounce 1.4s infinite;}
   .typing-dots span:nth-child(2){animation-delay:0.2s;}
   .typing-dots span:nth-child(3){animation-delay:0.4s;}
-  
   .chat-actions{display:flex;gap:8px;}
   .chat-action-btn{width:36px;height:36px;border-radius:50%;background:var(--bg-panel);border:1px solid var(--line-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s ease;}
   .chat-action-btn:active{background:var(--bg-panel-2);}
@@ -406,7 +285,6 @@
   .chat-call-btn svg{opacity:1;}
 
   .messages{flex:1;overflow-y:auto;padding:18px 14px 10px;display:flex;flex-direction:column;gap:8px;background:radial-gradient(140% 40% at 50% 0%, #1A1424 0%, transparent 60%), var(--bg-deep);}
-  .day-chip{align-self:center;font-size:11px;color:var(--mute);background:var(--bg-panel);padding:6px 16px;border-radius:999px;margin:12px 0;border:1px solid var(--line-soft);}
   .bubble-row{display:flex;margin:2px 0;position:relative;}
   .bubble-row.me{justify-content:flex-start;}
   .bubble-row.them{justify-content:flex-end;}
@@ -414,42 +292,22 @@
   .bubble:active{transform:scale(.98);}
   .bubble.me{background:linear-gradient(160deg, var(--bubble-me-2), var(--bubble-me));border:1px solid rgba(201,162,75,.15);border-bottom-left-radius:6px;color:var(--ink);}
   .bubble.them{background:var(--bg-panel);border:1px solid var(--line-soft);border-bottom-right-radius:6px;color:var(--ink);}
-  
   .msg-footer{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:4px;font-size:10px;}
   .msg-time{color:var(--mute-2);}
-  
   .msg-status{display:inline-flex;align-items:center;gap:1px;margin-right:2px;}
   .check-icon{width:14px;height:14px;stroke-width:2.5;fill:none;}
   .check-sent{color:var(--mute-2);}
   .check-delivered{color:var(--mute-2);}
   .check-read{color:var(--blue-check);animation:checkPop .4s ease;}
-  
-  .context-menu{
-    position:fixed;
-    background:var(--bg-panel-2);
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:6px;
-    z-index:300;
-    min-width:180px;
-    box-shadow:0 10px 30px rgba(0,0,0,.5);
-    animation:contextMenuIn .2s ease;
-    display:none;
-  }
+  .context-menu{position:fixed;background:var(--bg-panel-2);border:1px solid var(--line);border-radius:14px;padding:6px;z-index:300;min-width:180px;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:contextMenuIn .2s ease;display:none;}
   .context-menu.show{display:block;}
-  .context-menu-item{
-    display:flex;align-items:center;gap:10px;
-    padding:12px 14px;border-radius:10px;
-    cursor:pointer;font-size:14px;font-weight:500;
-    transition:background .2s ease;color:var(--ink);
-  }
+  .context-menu-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:500;transition:background .2s ease;color:var(--ink);}
   .context-menu-item:active{background:var(--bg-panel);}
   .context-menu-item.delete-all{color:var(--danger);}
   .context-menu-item.delete-me{color:var(--mute-2);}
   .context-menu-item .menu-icon{font-size:16px;width:20px;text-align:center;}
   .context-overlay{position:fixed;inset:0;z-index:299;display:none;}
   .context-overlay.show{display:block;}
-  
   .message-info-popup{position:fixed;top:50%;left:50%;transform:translate(-50%, -50%);background:var(--bg-panel-2);border:1px solid var(--line);border-radius:16px;padding:20px;z-index:200;min-width:260px;box-shadow:0 20px 40px rgba(0,0,0,.5);animation:slideUp .3s ease;display:none;}
   .message-info-popup.show{display:block;}
   .message-info-popup h4{font-size:16px;font-weight:700;margin-bottom:16px;text-align:center;color:var(--gold-soft);}
@@ -460,11 +318,8 @@
   .info-value{color:var(--ink);font-weight:600;font-size:12px;}
   .popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199;display:none;}
   .popup-overlay.show{display:block;}
-  
   .chat-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:40px;text-align:center;}
-  .chat-empty .empty-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(160deg, var(--bg-panel-2), var(--bg-panel));border:2px solid var(--line-soft);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;opacity:.6;}
   .chat-empty h3{font-size:16px;font-weight:600;color:var(--ink);}
-  .chat-empty p{color:var(--mute);font-size:13.5px;line-height:1.8;max-width:250px;}
   
   .composer{display:flex;align-items:flex-end;gap:10px;padding:10px 14px max(12px, var(--safe-bottom));background:linear-gradient(0deg, var(--bg-rise) 0%, rgba(23,18,32,.9) 100%);border-top:1px solid var(--line-soft);backdrop-filter:blur(10px);}
   .composer-input{flex:1;min-height:44px;max-height:110px;border-radius:22px;border:1.5px solid var(--line);background:var(--bg-panel);color:var(--ink);font-family:'Cairo',sans-serif;font-size:14.5px;padding:10px 16px;outline:none;resize:none;line-height:1.5;transition:border-color .25s ease;}
@@ -479,21 +334,11 @@
   .toast.error{border-color:var(--danger);}
   .toast.success{border-color:var(--ok);}
 
-  /* ----- CALL UI (Full-Screen Overlay) ----- */
-  .call-overlay{
-    position:fixed;inset:0;background:linear-gradient(180deg, #0a1a0f 0%, #0E0B14 100%);z-index:500;
-    display:none;flex-direction:column;align-items:center;justify-content:center;gap:30px;
-  }
+  .call-overlay{position:fixed;inset:0;background:linear-gradient(180deg, #0a1a0f 0%, #0E0B14 100%);z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;gap:30px;}
   .call-overlay.show{display:flex;animation:fadeIn .3s ease;}
   .call-overlay.incoming .call-avatar{animation:callPulse 2s infinite;}
   .call-overlay.outgoing .call-avatar{animation:callPulse 1.5s infinite;}
-  .call-avatar{
-    width:120px;height:120px;border-radius:50%;
-    background:linear-gradient(160deg, var(--ok), #3a8d5c);
-    display:flex;align-items:center;justify-content:center;
-    font-size:48px;font-weight:800;color:#fff;
-    box-shadow:0 0 40px rgba(76,175,80,.4);
-  }
+  .call-avatar{width:120px;height:120px;border-radius:50%;background:linear-gradient(160deg, var(--ok), #3a8d5c);display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:800;color:#fff;box-shadow:0 0 40px rgba(76,175,80,.4);}
   .call-name{font-size:22px;font-weight:700;color:var(--ink);}
   .call-status{font-size:14px;color:var(--mute);}
   .call-status.ringing{color:var(--ok);animation:fadeUp 1s ease infinite;}
@@ -502,11 +347,7 @@
   .call-quality{font-size:12px;color:var(--mute-2);display:none;}
   .call-quality.show{display:block;}
   .call-actions{display:flex;gap:30px;margin-top:20px;}
-  .call-action-btn{
-    width:64px;height:64px;border-radius:50%;border:none;
-    display:flex;align-items:center;justify-content:center;
-    cursor:pointer;transition:all .2s ease;
-  }
+  .call-action-btn{width:64px;height:64px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s ease;}
   .call-action-btn:active{transform:scale(.9);}
   .call-action-btn svg{width:28px;height:28px;}
   .call-end-btn{background:var(--danger);box-shadow:0 4px 20px rgba(217,112,90,.4);}
@@ -516,45 +357,32 @@
   .call-speaker-btn{background:var(--bg-panel-2);border:1px solid var(--line-soft);}
   .call-speaker-btn.active{background:var(--ok);}
 
-  .call-bubble{
-    background:var(--bg-panel)!important;border:1px solid var(--ok)!important;
-    display:flex;align-items:center;gap:10px;padding:10px 14px;
-  }
+  .call-bubble{background:var(--bg-panel)!important;border:1px solid var(--ok)!important;display:flex;align-items:center;gap:10px;padding:10px 14px;}
   .call-bubble-icon{font-size:20px;}
-  .call-bubble-info{font-size:12px;color:var(--mute);}
   .call-bubble-duration{font-size:11px;color:var(--mute-2);}
 
-  /* ----- VOICE RECORDING UI ----- */
   .composer-input-shell{flex:1;display:flex;align-items:center;gap:6px;background:var(--bg-panel);border:1.5px solid var(--line);border-radius:24px;padding:6px 8px 6px 14px;transition:border-color .25s ease;}
   .composer-input-shell:focus-within{border-color:var(--gold);}
-  .composer-icon-btn{flex-shrink:0;width:34px;height:34px;border-radius:50%;background:transparent;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--mute);}
-  .composer-icon-btn svg{width:20px;height:20px;}
   .composer-input-shell .composer-input{border:none;background:transparent;padding:8px 0;min-height:24px;}
   .composer-input-shell .composer-input:focus{border:none;box-shadow:none;}
-
   .mic-btn{width:44px;height:44px;border-radius:50%;border:none;flex-shrink:0;background:linear-gradient(160deg, var(--gold-soft), var(--gold));display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 15px rgba(201,162,75,.4);transition:transform .15s ease;touch-action:none;user-select:none;-webkit-user-select:none;}
   .mic-btn svg{width:19px;height:19px;}
   .mic-btn.recording{background:linear-gradient(160deg, var(--danger), #B54B39);animation:micPulse 1.4s ease-in-out infinite;}
-
   .voice-recording-bar{display:none;align-items:center;gap:10px;flex:1;padding:8px 14px;background:var(--bg-panel);border:1.5px solid var(--danger);border-radius:24px;}
   .voice-recording-bar.show{display:flex;}
   .voice-rec-dot{width:10px;height:10px;border-radius:50%;background:var(--danger);animation:recBlink 1s ease-in-out infinite;flex-shrink:0;}
   .voice-rec-timer{font-size:14px;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;flex-shrink:0;}
   .voice-rec-hint{flex:1;font-size:12.5px;color:var(--mute);text-align:center;}
   .voice-rec-cancel{flex-shrink:0;font-size:13px;color:var(--danger);font-weight:700;background:none;border:none;padding:4px 8px;}
-
   .voice-msg{display:flex;align-items:center;gap:10px;min-width:190px;padding:4px 2px;}
   .voice-msg-play-btn{width:36px;height:36px;border-radius:50%;background:rgba(201,162,75,.18);border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;}
   .voice-msg-play-btn svg{width:16px;height:16px;}
   .voice-msg-wave{flex:1;height:26px;display:flex;align-items:center;gap:2px;}
   .voice-msg-wave span{width:2.5px;background:var(--gold);border-radius:2px;opacity:.5;flex-shrink:0;}
   .voice-msg-duration{font-size:11px;color:var(--mute-2);flex-shrink:0;}
-
-  /* ----- MEDIA (IMAGES / VIDEOS) IN CHAT ----- */
   .attach-btn{width:38px;height:38px;border-radius:50%;border:none;flex-shrink:0;background:var(--bg-panel);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--mute);transition:all .2s ease;}
   .attach-btn:active{background:var(--bg-panel-2);transform:scale(.92);}
   .attach-btn svg{width:19px;height:19px;}
-
   .attach-sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:399;display:none;}
   .attach-sheet-overlay.show{display:block;animation:fadeIn .2s ease;}
   .attach-sheet{position:fixed;left:0;right:0;bottom:0;z-index:400;background:var(--bg-panel-2);border-radius:22px 22px 0 0;padding:10px 18px max(20px, var(--safe-bottom));display:none;box-shadow:0 -10px 40px rgba(0,0,0,.4);}
@@ -566,7 +394,6 @@
   .attach-sheet-icon.gallery{background:rgba(201,162,75,.16);}
   .attach-sheet-icon.camera{background:rgba(95,191,143,.16);}
   .attach-sheet-text{font-size:15px;font-weight:600;color:var(--ink);}
-
   .media-upload-overlay{position:fixed;inset:0;background:var(--bg-deep);z-index:450;display:none;flex-direction:column;}
   .media-upload-overlay.show{display:flex;animation:fadeIn .2s ease;}
   .media-upload-header{display:flex;align-items:center;justify-content:space-between;padding:max(16px, var(--safe-top)) 16px 10px;}
@@ -580,7 +407,6 @@
   .media-upload-send svg{width:20px;height:20px;}
   .media-upload-send:disabled{opacity:.4;pointer-events:none;}
   .media-upload-progress{position:absolute;bottom:0;left:0;height:3px;background:var(--gold);transition:width .2s ease;}
-
   .msg-image-bubble{max-width:220px;border-radius:14px;overflow:hidden;cursor:pointer;position:relative;}
   .msg-image-bubble img{width:100%;display:block;max-height:280px;object-fit:cover;}
   .msg-video-bubble{max-width:220px;border-radius:14px;overflow:hidden;cursor:pointer;position:relative;background:#000;}
@@ -588,7 +414,6 @@
   .msg-video-play-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;pointer-events:none;}
   .msg-video-play-badge svg{width:20px;height:20px;margin-right:-2px;}
   .msg-media-caption{padding:8px 4px 2px;font-size:13.5px;line-height:1.5;}
-
   .media-viewer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:600;display:none;align-items:center;justify-content:center;flex-direction:column;}
   .media-viewer-overlay.show{display:flex;animation:fadeIn .2s ease;}
   .media-viewer-close{position:absolute;top:max(16px, var(--safe-top));left:16px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;}
@@ -600,11 +425,8 @@
 <body>
 
 <div id="app">
-
-  <!-- LOADING -->
   <div class="view" id="view-loading"><div class="loader-ring"></div><p>لحظة واحدة...</p></div>
 
-  <!-- ONBOARDING -->
   <div class="view hidden" id="view-onboarding">
     <div class="field"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
     <div class="ob-top"><div class="eyebrow">دائرتك الخاصة</div></div>
@@ -619,31 +441,26 @@
     </div>
   </div>
 
-  <!-- NAME -->
   <div class="view hidden" id="view-name">
     <div class="step-top"><button class="back-btn" id="btn-back-name"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div style="width:40px"></div></div>
-    <div class="name-head"><h1>إزيك، تحب نناديك إزاي؟</h1><p>اكتب اسمك، وإحنا هنجهزلك يوزرنيم مميز بالإنجليزي — وهيفتكرك تلقائي في المرات الجاية</p></div>
+    <div class="name-head"><h1>إزيك، تحب نناديك إزاي؟</h1><p>اكتب اسمك، وإحنا هنجهزلك يوزرنيم مميز بالإنجليزي</p></div>
     <div class="field-group">
       <label class="field-label">الاسم</label>
       <div class="input-shell"><input type="text" class="text-input" id="name-input" placeholder="مثلاً: أحمد محمد" autocomplete="off"></div>
-      <div class="username-preview" id="username-preview"><span class="at">@</span><span class="uname" id="username-value">username</span><button class="refresh" id="btn-refresh-username" title="غيّر اليوزرنيم"><svg viewBox="0 0 24 24" fill="none"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+      <div class="username-preview" id="username-preview"><span class="at">@</span><span class="uname" id="username-value">username</span><button class="refresh" id="btn-refresh-username" title="غيّر"><svg viewBox="0 0 24 24" fill="none"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <p class="username-hint">ده هيبقى اليوزرنيم اللي الناس تدور عليك بيه</p>
       <p class="name-error" id="name-error">حصل خطأ، جرب تاني</p>
     </div>
     <div class="name-bottom"><button class="cta" id="btn-continue-name" disabled><span>متابعة</span><svg viewBox="0 0 24 24" fill="none"><path d="M15 6L9 12L15 18" stroke="#1A1206" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
   </div>
 
-  <!-- MAIN -->
   <div class="view hidden" id="view-main">
     <div class="app-header">
       <div class="app-header-row">
         <div class="app-title">هي<span>ي</span></div>
         <div class="header-actions">
           <button class="settings-btn" id="btn-open-settings" title="الإعدادات">
-            <svg viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="3" stroke="#E4C77A" stroke-width="2"/>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="#E4C77A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="#E4C77A" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="#E4C77A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
           <button class="avatar-btn" id="my-avatar">ه</button>
         </div>
@@ -657,7 +474,7 @@
         <span style="font-size:10.5px;color:var(--mute-2);font-weight:600;">المكالمات</span>
       </div>
       <div class="nav-item" data-nav="communities" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;cursor:pointer;flex:1;">
-        <svg viewBox="0 0 24 24" fill="none" style="width:22px;height:22px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="#8A7F99" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="#8A7F99" stroke-width="2"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="#8A7F99" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" style="width:22px;height:22px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="#8A7F99" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="#8A7F99" stroke-width="2"/></svg>
         <span style="font-size:10.5px;color:var(--mute-2);font-weight:600;">المجتمعات</span>
       </div>
       <div class="nav-item" data-nav="updates" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;cursor:pointer;flex:1;">
@@ -671,14 +488,12 @@
     </div>
   </div>
 
-  <!-- ============ SETTINGS VIEW ============ -->
   <div class="view hidden" id="view-settings">
     <div class="profile-header">
       <button class="back-btn" id="btn-back-settings"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <h2>الإعدادات</h2>
     </div>
     <div class="settings-body">
-
       <div class="settings-section-title">الأذونات والصلاحيات</div>
       <div class="settings-card">
         <div class="settings-row">
@@ -691,31 +506,19 @@
             <span class="perm-badge unknown" id="mic-perm-badge"><span class="dot"></span><span id="mic-perm-text">جاري الفحص...</span></span>
           </div>
         </div>
-
         <div class="mic-test-card" id="mic-test-card">
           <div class="mic-level-visualizer" id="mic-level-visualizer"></div>
-          <div class="mic-test-status" id="mic-test-status">اضغط على "اختبر الميكروفون" للتحقق من عمله</div>
-          <button class="mic-test-btn secondary" id="btn-test-mic">
-            <svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            اختبر الميكروفون
-          </button>
+          <div class="mic-test-status" id="mic-test-status">اضغط على "اختبر الميكروفون"</div>
+          <button class="mic-test-btn secondary" id="btn-test-mic">اختبر الميكروفون</button>
           <button class="mic-test-btn danger" id="btn-stop-mic-test" style="display:none;">إيقاف الاختبار</button>
         </div>
-
         <div class="settings-help-box" id="mic-help-box">
-          <strong>⚠️ الميكروفون مرفوض من المتصفح</strong><br>
-          لإعادة تفعيله، افتح إعدادات الموقع في المتصفح:<br>
-          • <strong>Chrome:</strong> اضغط على أيقونة القفل 🔒 بجانب الرابط → "أذونات الموقع" → "الميكروفون" → "سماح"<br>
-          • <strong>Safari:</strong> الإعدادات → المواقع → الميكروفون → سماح لهذا الموقع<br>
-          • ثم أعد تحميل الصفحة
+          <strong>⚠️ الميكروفون مرفوض</strong><br>
+          • <strong>Chrome:</strong> اضغط على 🔒 بجانب الرابط → "أذونات الموقع" → "الميكروفون" → "سماح"<br>
+          • <strong>Safari:</strong> الإعدادات → المواقع → الميكروفون → سماح
         </div>
-
-        <button class="mic-test-btn" id="btn-request-mic" style="display:none;">
-          <svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;"><path d="M23 12l-7 7-1.5-1.5M1 12l7-7 1.5 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 3v18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          اطلب إذن الميكروفون الآن
-        </button>
+        <button class="mic-test-btn" id="btn-request-mic" style="display:none;">اطلب إذن الميكروفون الآن</button>
       </div>
-
       <div class="settings-section-title">الإشعارات</div>
       <div class="settings-card">
         <div class="settings-row">
@@ -730,93 +533,18 @@
         </div>
         <button class="mic-test-btn secondary" id="btn-request-notif" style="display:none;">تفعيل الإشعارات</button>
       </div>
-
-      <div class="settings-section-title">حول التطبيق</div>
-      <div class="settings-card">
-        <div class="settings-row">
-          <div class="settings-row-icon info-icon">📱</div>
-          <div class="settings-row-text">
-            <div class="settings-row-title">هيي - Heye</div>
-            <div class="settings-row-sub">الإصدار 1.0.0 · تطبيق محادثة آمن</div>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
 
-  <!-- UPDATES -->
-  <div class="view hidden" id="view-updates">
-    <div class="app-header" style="padding-bottom:8px;">
-      <div class="app-header-row"><h2 style="font-size:20px;font-weight:700;">التحديثات</h2><button class="avatar-btn" id="updates-avatar-btn">ه</button></div>
-    </div>
-    <div style="flex:1;overflow-y:auto;padding-bottom:90px;position:relative;">
-      <div class="status-section-title">الحالة</div>
-      <div class="my-status-row" id="my-status-row">
-        <div class="my-status-avatar-wrap">
-          <div class="my-status-avatar" id="my-status-avatar-el">ه</div>
-          <div class="my-status-add-btn">+</div>
-        </div>
-        <div class="my-status-info">
-          <div class="my-status-title">حالتي</div>
-          <div class="my-status-sub" id="my-status-sub">اضغط لإضافة حالة</div>
-        </div>
-      </div>
-      <div id="others-status-section" style="display:none;">
-        <div class="status-section-title">حالات جديدة</div>
-        <div class="status-list" id="others-status-list"></div>
-      </div>
-    </div>
-    <button class="status-fab-camera" id="status-fab-camera">📷</button>
-    <div style="display:flex;align-items:center;justify-content:space-around;padding:10px 4px max(10px, var(--safe-bottom));background:var(--bg-rise);border-top:1px solid var(--line-soft);">
-      <div class="nav-item" data-nav3="calls" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;cursor:pointer;flex:1;">
-        <svg viewBox="0 0 24 24" fill="none" style="width:22px;height:22px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#8A7F99" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span style="font-size:10.5px;color:var(--mute-2);font-weight:600;">المكالمات</span>
-      </div>
-      <div class="nav-item" data-nav3="communities" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;cursor:pointer;flex:1;">
-        <svg viewBox="0 0 24 24" fill="none" style="width:22px;height:22px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="#8A7F99" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="#8A7F99" stroke-width="2"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="#8A7F99" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span style="font-size:10.5px;color:var(--mute-2);font-weight:600;">المجتمعات</span>
-      </div>
-      <div class="nav-item active" data-nav3="updates" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;cursor:pointer;flex:1;">
-        <svg viewBox="0 0 24 24" fill="none" style="width:22px;height:22px;"><circle cx="12" cy="12" r="10" stroke="#E4C77A" stroke-width="2"/><path d="M12 6v6l4 2" stroke="#E4C77A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span style="font-size:10.5px;color:var(--gold-soft);font-weight:600;">التحديثات</span>
-      </div>
-      <div class="nav-item" data-nav3="chats" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;cursor:pointer;flex:1;">
-        <svg viewBox="0 0 24 24" fill="none" style="width:22px;height:22px;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="#8A7F99" stroke-width="2" stroke-linejoin="round"/></svg>
-        <span style="font-size:10.5px;color:var(--mute-2);font-weight:600;">الدردشات</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- COMING SOON -->
   <div class="view hidden" id="view-coming-soon">
     <div class="profile-header"><button class="back-btn" id="btn-back-coming-soon"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h2 id="coming-soon-title">قريبًا</h2></div>
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:40px;text-align:center;">
       <div style="width:88px;height:88px;border-radius:50%;background:linear-gradient(160deg, var(--bg-panel-2), var(--bg-panel));border:2px solid var(--line-soft);display:flex;align-items:center;justify-content:center;font-size:36px;" id="coming-soon-icon">✨</div>
       <h3 style="font-size:19px;font-weight:700;color:var(--ink);">قريبًا</h3>
-      <p style="color:var(--mute);font-size:14px;line-height:1.9;max-width:280px;" id="coming-soon-text">الميزة دي لسه تحت التطوير، وهتكون متاحة قريبًا إن شاء الله.</p>
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-around;padding:10px 4px max(10px, var(--safe-bottom));background:var(--bg-rise);border-top:1px solid var(--line-soft);">
-      <div class="nav-item" data-nav2="calls" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;cursor:pointer;flex:1;">
-        <svg viewBox="0 0 24 24" fill="none" style="width:22px;height:22px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#8A7F99" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span style="font-size:10.5px;color:var(--mute-2);font-weight:600;">المكالمات</span>
-      </div>
-      <div class="nav-item" data-nav2="communities" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;cursor:pointer;flex:1;">
-        <svg viewBox="0 0 24 24" fill="none" style="width:22px;height:22px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="#8A7F99" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="#8A7F99" stroke-width="2"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="#8A7F99" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span style="font-size:10.5px;color:var(--mute-2);font-weight:600;">المجتمعات</span>
-      </div>
-      <div class="nav-item" data-nav2="updates" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;cursor:pointer;flex:1;">
-        <svg viewBox="0 0 24 24" fill="none" style="width:22px;height:22px;"><circle cx="12" cy="12" r="10" stroke="#8A7F99" stroke-width="2"/><path d="M12 6v6l4 2" stroke="#8A7F99" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span style="font-size:10.5px;color:var(--mute-2);font-weight:600;">التحديثات</span>
-      </div>
-      <div class="nav-item" data-nav2="chats" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;cursor:pointer;flex:1;">
-        <svg viewBox="0 0 24 24" fill="none" style="width:22px;height:22px;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="#8A7F99" stroke-width="2" stroke-linejoin="round"/></svg>
-        <span style="font-size:10.5px;color:var(--mute-2);font-weight:600;">الدردشات</span>
-      </div>
+      <p style="color:var(--mute);font-size:14px;line-height:1.9;max-width:280px;" id="coming-soon-text">الميزة دي لسه تحت التطوير.</p>
     </div>
   </div>
 
-  <!-- PROFILE -->
   <div class="view hidden" id="view-profile">
     <div class="profile-header"><button class="back-btn" id="btn-back-profile"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h2>حسابي</h2></div>
     <div class="profile-body">
@@ -824,15 +552,14 @@
       <div><div class="profile-name" id="profile-name">الاسم</div><div class="profile-username" id="profile-username">@username</div></div>
       <div class="profile-stats"><div class="stat-item"><div class="stat-number" id="chat-count">0</div><div class="stat-label">محادثة</div></div><div class="stat-item"><div class="stat-number" id="msg-count">0</div><div class="stat-label">رسالة</div></div></div>
       <div class="profile-card"><div class="profile-card-row"><span class="label">الاسم</span><span class="value" id="pc-name">-</span></div><div class="profile-card-row"><span class="label">اليوزرنيم</span><span class="value" id="pc-username">-</span></div><div class="profile-card-row"><span class="label">تاريخ الانضمام</span><span class="value" id="pc-date">-</span></div></div>
-      <button class="logout-btn" id="btn-logout">🚪 تسجيل الخروج من هذا الجهاز</button>
+      <button class="logout-btn" id="btn-logout">🚪 تسجيل الخروج</button>
     </div>
   </div>
 
-  <!-- CHAT -->
   <div class="view hidden" id="view-chat">
     <div class="chat-header">
       <button class="back-btn" id="btn-back-chat"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-      <div class="chat-header-info" id="chat-header-info-click">
+      <div class="chat-header-info">
         <div class="chat-header-avatar-wrapper"><div class="chat-header-avatar" id="chat-header-avatar">ل</div><div class="chat-header-online-indicator" id="chat-header-online-indicator"></div></div>
         <div style="min-width:0;"><div class="chat-header-name" id="chat-header-name">اسم</div><div class="chat-header-status offline" id="chat-header-status">غير متصل</div></div>
       </div>
@@ -844,7 +571,7 @@
     </div>
     <div class="messages" id="messages-container"></div>
     <div class="composer">
-      <button class="attach-btn" id="btn-attach" title="إرفاق صورة أو فيديو">
+      <button class="attach-btn" id="btn-attach" title="إرفاق">
         <svg viewBox="0 0 24 24" fill="none"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <div class="composer-input-shell" id="composer-input-shell">
@@ -852,9 +579,9 @@
       </div>
       <div class="voice-recording-bar" id="voice-recording-bar">
         <button class="voice-rec-cancel" id="voice-rec-cancel">إلغاء</button>
-        <div class="voice-rec-hint" id="voice-rec-hint">اسحب لأعلى للإلغاء</div>
+        <div class="voice-rec-hint">اسحب لأعلى للإلغاء</div>
         <div class="voice-rec-timer" id="voice-rec-timer">0:00</div>
-        <div class="voice-rec-dot" id="voice-rec-dot"></div>
+        <div class="voice-rec-dot"></div>
       </div>
       <button class="mic-btn" id="btn-send" data-mode="mic">
         <svg id="btn-send-icon" viewBox="0 0 24 24" fill="none"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -862,34 +589,21 @@
     </div>
   </div>
 
-  <!-- CALL OVERLAY -->
   <div class="call-overlay" id="call-overlay">
     <div class="call-avatar" id="call-avatar">ل</div>
     <div class="call-name" id="call-name">اسم</div>
     <div class="call-status" id="call-status">جاري الاتصال...</div>
     <div class="call-timer" id="call-timer">00:00</div>
     <div class="call-quality" id="call-quality">جاري الاتصال بالطرف الآخر...</div>
-    <div class="call-actions" id="call-actions">
-      <button class="call-action-btn call-mute-btn" id="call-mute-btn" title="كتم الميكروفون">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <button class="call-action-btn call-end-btn" id="call-end-btn" title="إنهاء المكالمة">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(135 12 12)"/></svg>
-      </button>
-      <button class="call-action-btn call-speaker-btn" id="call-speaker-btn" title="مكبر الصوت">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M11 5L6 9H2v6h4l5 4V5z" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-    </div>
+    <div class="call-actions" id="call-actions"></div>
   </div>
 
-  <!-- CONTEXT MENU -->
   <div class="context-overlay" id="context-overlay"></div>
   <div class="context-menu" id="context-menu">
     <div class="context-menu-item delete-all" id="delete-for-all"><span class="menu-icon">🗑️</span> حذف للجميع</div>
     <div class="context-menu-item delete-me" id="delete-for-me"><span class="menu-icon">🙈</span> حذف عندي فقط</div>
   </div>
 
-  <!-- MESSAGE INFO POPUP -->
   <div class="popup-overlay" id="popup-overlay"></div>
   <div class="message-info-popup" id="message-info-popup">
     <h4>📋 معلومات الرسالة</h4>
@@ -898,7 +612,6 @@
     <div class="info-row"><span class="info-icon">💙</span><span class="info-label">تمت القراءة</span><span class="info-value" id="info-read">-</span></div>
   </div>
 
-  <!-- ATTACH SHEET -->
   <div class="attach-sheet-overlay" id="attach-sheet-overlay"></div>
   <div class="attach-sheet" id="attach-sheet">
     <div class="attach-sheet-handle"></div>
@@ -914,7 +627,6 @@
   <input type="file" id="media-gallery-input" accept="image/*,video/*" style="display:none;">
   <input type="file" id="media-camera-input" accept="image/*" capture="environment" style="display:none;">
 
-  <!-- MEDIA UPLOAD PREVIEW -->
   <div class="media-upload-overlay" id="media-upload-overlay">
     <div class="media-upload-header"><button class="media-upload-close" id="media-upload-close">✕</button><div class="media-upload-info" id="media-upload-size-info"></div></div>
     <div class="media-upload-preview" id="media-upload-preview"></div>
@@ -928,14 +640,12 @@
     <div class="media-upload-progress" id="media-upload-progress" style="width:0%;"></div>
   </div>
 
-  <!-- MEDIA FULLSCREEN VIEWER -->
   <div class="media-viewer-overlay" id="media-viewer-overlay">
     <button class="media-viewer-close" id="media-viewer-close">✕</button>
     <div class="media-viewer-content" id="media-viewer-content"></div>
     <div class="media-viewer-caption" id="media-viewer-caption" style="display:none;"></div>
   </div>
 
-  <!-- ============ MIC PERMISSION MODAL ============ -->
   <div class="mic-modal-overlay" id="mic-modal-overlay">
     <div class="mic-modal">
       <div class="mic-modal-icon">
@@ -948,63 +658,22 @@
         </svg>
       </div>
       <div class="mic-modal-title">🎤 الميكروفون مش شغّال</div>
-      <div class="mic-modal-subtitle">عشان تبعت رسالة صوتية أو تعمل مكالمة، محتاجين إذن الميكروفون. اتبع الخطوات دي عشان تفعّله:</div>
-      
+      <div class="mic-modal-subtitle">عشان تبعت رسالة صوتية أو تعمل مكالمة، محتاجين إذن الميكروفون.</div>
       <div class="mic-modal-steps">
-        <div class="mic-modal-step">
-          <div class="mic-modal-step-num">1</div>
-          <div>اضغط على <strong>أيقونة القفل 🔒</strong> اللي في شريط العنوان فوق (جانب الرابط)</div>
-        </div>
-        <div class="mic-modal-step">
-          <div class="mic-modal-step-num">2</div>
-          <div>اختار <strong>"أذونات الموقع"</strong> أو <strong>"Permissions"</strong></div>
-        </div>
-        <div class="mic-modal-step">
-          <div class="mic-modal-step-num">3</div>
-          <div>دوّر على <strong>"الميكروفون"</strong> وغيّرها إلى <strong>"سماح"</strong> أو <strong>"Allow"</strong></div>
-        </div>
-        <div class="mic-modal-step">
-          <div class="mic-modal-step-num">4</div>
-          <div>ارجع للتطبيق واضغط على <strong>"حاول مرة تانية"</strong></div>
-        </div>
+        <div class="mic-modal-step"><div class="mic-modal-step-num">1</div><div>اضغط على <strong>أيقونة القفل 🔒</strong> في شريط العنوان</div></div>
+        <div class="mic-modal-step"><div class="mic-modal-step-num">2</div><div>اختار <strong>"أذونات الموقع"</strong></div></div>
+        <div class="mic-modal-step"><div class="mic-modal-step-num">3</div><div>غيّر <strong>"الميكروفون"</strong> إلى <strong>"سماح"</strong></div></div>
+        <div class="mic-modal-step"><div class="mic-modal-step-num">4</div><div>اضغط <strong>"حاول مرة تانية"</strong></div></div>
       </div>
-
       <div class="mic-modal-actions">
-        <button class="mic-modal-btn primary" id="mic-modal-retry">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M1 4v6h6M23 20v-6h-6" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          حاول مرة تانية
-        </button>
-        <button class="mic-modal-btn secondary" id="mic-modal-open-settings">
-          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          افتح الإعدادات
-        </button>
+        <button class="mic-modal-btn primary" id="mic-modal-retry">🔄 حاول مرة تانية</button>
+        <button class="mic-modal-btn secondary" id="mic-modal-open-settings">⚙️ افتح الإعدادات</button>
         <button class="mic-modal-btn secondary" id="mic-modal-close">إغلاق</button>
       </div>
     </div>
   </div>
 
-  <!-- TOAST -->
   <div class="toast" id="toast"></div>
-
-  <!-- STATUS INPUTS (HIDDEN) -->
-  <input type="file" id="status-file-input" accept="image/*" style="display:none;">
-  <div class="status-upload-overlay" id="status-upload-overlay">
-    <div class="status-upload-header"><button class="status-upload-close" id="status-upload-close">✕</button></div>
-    <div class="status-upload-preview" id="status-upload-preview"><img id="status-upload-img" src="" alt=""></div>
-    <input type="text" class="status-upload-caption-input" id="status-upload-caption" placeholder="أضف تعليق...">
-    <div class="status-upload-footer"><button class="status-upload-send" id="status-upload-send"><svg viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-  </div>
-  <div class="status-viewer" id="status-viewer">
-    <div class="status-viewer-progress" id="status-viewer-progress"></div>
-    <div class="status-viewer-header">
-      <div class="status-viewer-avatar" id="status-viewer-avatar"><img src="" alt=""></div>
-      <div><div class="status-viewer-name" id="status-viewer-name"></div><div class="status-viewer-time" id="status-viewer-time"></div></div>
-      <button class="status-viewer-close" id="status-viewer-close">✕</button>
-    </div>
-    <div class="status-viewer-content" id="status-viewer-content"><img id="status-viewer-img" src="" alt=""><div class="status-viewer-nav prev" id="status-viewer-prev"></div><div class="status-viewer-nav next" id="status-viewer-next"></div></div>
-    <div class="status-viewer-caption" id="status-viewer-caption" style="display:none;"></div>
-  </div>
-
 </div>
 
 <script type="module">
@@ -1042,9 +711,16 @@ const state = {
     startTime: 0, timerInterval: null,
     localStream: null, peerConnection: null,
     isMuted: false, isSpeakerOn: false,
-    offerSent: false, remoteSet: false, callId: null
+    offerSent: false, answerHandled: false,
+    callId: null
   },
   incomingCallData: null,
+  // Listeners للمكالمات
+  unsubIncomingCall: null,
+  unsubOutgoingCall: null,
+  unsubIncomingIce: null,
+  unsubOutgoingIce: null,
+  // Settings
   micTestStream: null, micTestAnalyser: null, micTestRaf: null
 };
 
@@ -1062,8 +738,7 @@ const views = {
   loading: document.getElementById('view-loading'), onboarding: document.getElementById('view-onboarding'),
   name: document.getElementById('view-name'), main: document.getElementById('view-main'),
   profile: document.getElementById('view-profile'), chat: document.getElementById('view-chat'),
-  comingSoon: document.getElementById('view-coming-soon'), updates: document.getElementById('view-updates'),
-  settings: document.getElementById('view-settings')
+  comingSoon: document.getElementById('view-coming-soon'), settings: document.getElementById('view-settings')
 };
 
 function goTo(viewName){ Object.values(views).forEach(v => v.classList.add('hidden')); views[viewName].classList.remove('hidden'); }
@@ -1084,52 +759,27 @@ function getOrCreateLocalUid(){
 }
 
 const arabicToLatinMap = {'ا':'a','أ':'a','إ':'a','آ':'a','ب':'b','ت':'t','ث':'th','ج':'j','ح':'h','خ':'kh','د':'d','ذ':'th','ر':'r','ز':'z','س':'s','ش':'sh','ص':'s','ض':'d','ط':'t','ظ':'z','ع':'a','غ':'gh','ف':'f','ق':'q','ك':'k','ل':'l','م':'m','ن':'n','ه':'h','ة':'a','و':'w','ي':'y','ى':'a','ئ':'y','ء':'a','ؤ':'w'};
-
 function transliterate(t){ let o=''; for(const c of t){ if(arabicToLatinMap[c]) o+=arabicToLatinMap[c]; else if(/[a-zA-Z0-9]/.test(c)) o+=c; else if(c===' ') o+=' '; } return o; }
 function generateUsernameBase(n){ const b = /[\u0600-\u06FF]/.test(n) ? transliterate(n) : n; let s = b.trim().toLowerCase().replace(/\s+/g,'.').replace(/[^a-z0-9.]/g,'').replace(/\.+/g,'.').replace(/^\.|\.$/g,''); if(!s) s='user'; if(s.length>16) s=s.slice(0,16).replace(/\.$/,''); return s; }
 function generateUsernameSync(n){ return `${generateUsernameBase(n)}${Math.floor(100+Math.random()*900)}`; }
 
 // ============ MIC PERMISSION MODAL ============
 const micModalOverlay = document.getElementById('mic-modal-overlay');
-
-function showMicPermissionModal(){
-  micModalOverlay.classList.add('show');
-}
-
-function hideMicPermissionModal(){
-  micModalOverlay.classList.remove('show');
-}
-
+function showMicPermissionModal(){ micModalOverlay.classList.add('show'); }
+function hideMicPermissionModal(){ micModalOverlay.classList.remove('show'); }
 document.getElementById('mic-modal-close').addEventListener('click', hideMicPermissionModal);
-micModalOverlay.addEventListener('click', (e) => {
-  if(e.target === micModalOverlay) hideMicPermissionModal();
-});
-
+micModalOverlay.addEventListener('click', (e) => { if(e.target === micModalOverlay) hideMicPermissionModal(); });
 document.getElementById('mic-modal-retry').addEventListener('click', async () => {
-  const btn = document.getElementById('mic-modal-retry');
-  btn.disabled = true;
-  btn.innerHTML = '<div class="spin" style="width:16px;height:16px;border-radius:50%;border:2px solid rgba(26,18,6,.3);border-top-color:#1A1206;animation:spin .7s linear infinite;"></div> جاري الطلب...';
-  
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    // Success - stop immediately
     stream.getTracks().forEach(t => t.stop());
     hideMicPermissionModal();
-    showToast('✅ تم تفعيل الميكروفون! جرب تاني','success');
+    showToast('✅ تم تفعيل الميكروفون!','success');
   } catch(e){
-    console.error('Retry mic failed:', e);
-    if(e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError'){
-      // Still denied - keep modal open, user needs to change in browser settings
-      showToast('❌ لسه الإذن مرفوض. اتبع الخطوات فوق.','error');
-    } else {
-      showToast('❌ فشل: ' + (e.message || 'خطأ'),'error');
-    }
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" style="width:18px;height:18px;"><path d="M1 4v6h6M23 20v-6h-6" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" stroke="#1A1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> حاول مرة تانية';
+    if(e.name === 'NotAllowedError') showToast('❌ لسه الإذن مرفوض','error');
+    else showToast('❌ فشل: ' + (e.message || 'خطأ'),'error');
   }
 });
-
 document.getElementById('mic-modal-open-settings').addEventListener('click', () => {
   hideMicPermissionModal();
   goTo('settings');
@@ -1173,13 +823,13 @@ function showCallUI(type, partnerName){
   callQuality.classList.remove('show');
   
   let html = `
-    <button class="call-action-btn call-mute-btn" id="call-mute-btn" title="كتم الميكروفون">
+    <button class="call-action-btn call-mute-btn" id="call-mute-btn" title="كتم">
       <svg viewBox="0 0 24 24" fill="none"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
-    <button class="call-action-btn call-end-btn" id="call-end-btn" title="إنهاء المكالمة">
+    <button class="call-action-btn call-end-btn" id="call-end-btn" title="إنهاء">
       <svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(135 12 12)"/></svg>
     </button>
-    <button class="call-action-btn call-speaker-btn" id="call-speaker-btn" title="مكبر الصوت">
+    <button class="call-action-btn call-speaker-btn" id="call-speaker-btn" title="مكبر">
       <svg viewBox="0 0 24 24" fill="none"><path d="M11 5L6 9H2v6h4l5 4V5z" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" stroke="#F5F0E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>`;
   
@@ -1226,6 +876,7 @@ const rtcConfig = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
     { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
     { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
     { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
@@ -1233,8 +884,8 @@ const rtcConfig = {
   iceCandidatePoolSize: 10
 };
 
-// ============ CALL SIGNALING (VIA FIREBASE) ============
-let iceListenerAttached = false;
+// ============ CALL SIGNALING - FIXED ============
+let iceQueue = [];
 
 function resetCallState(){
   state.callState.active = false;
@@ -1243,64 +894,88 @@ function resetCallState(){
   state.callState.partnerName = '';
   state.callState.startTime = 0;
   state.callState.offerSent = false;
-  state.callState.remoteSet = false;
+  state.callState.answerHandled = false;
   state.callState.callId = null;
   state.incomingCallData = null;
 }
 
+function cleanupCallListeners(){
+  const { db, rtdb } = fb;
+  if(state.unsubIncomingCall){
+    rtdb.off(rtdb.ref(db, `calls/${state.uid}`));
+    state.unsubIncomingCall = null;
+  }
+  if(state.unsubOutgoingCall && state.callState.partnerUid){
+    rtdb.off(rtdb.ref(db, `calls/${state.callState.partnerUid}`));
+    state.unsubOutgoingCall = null;
+  }
+  if(state.unsubIncomingIce){
+    rtdb.off(rtdb.ref(db, `calls/${state.uid}/iceIn`));
+    state.unsubIncomingIce = null;
+  }
+  if(state.unsubOutgoingIce && state.callState.partnerUid){
+    rtdb.off(rtdb.ref(db, `calls/${state.callState.partnerUid}/iceIn`));
+    state.unsubOutgoingIce = null;
+  }
+}
+
+async function applyOrQueueIce(candidate){
+  const pc = state.callState.peerConnection;
+  if(pc && pc.remoteDescription && pc.remoteDescription.type){
+    try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch(e){ console.warn('ICE add failed:', e); }
+  } else {
+    iceQueue.push(candidate);
+  }
+}
+
+async function drainIceQueue(){
+  const pc = state.callState.peerConnection;
+  if(!pc) return;
+  while(iceQueue.length){
+    const c = iceQueue.shift();
+    try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch(e){}
+  }
+}
+
+// ===== LISTENER للمكالمات الواردة (أنا callee) =====
 function listenForIncomingCalls(){
   if(!state.uid) return;
   const { db, rtdb } = fb;
-
-  rtdb.onValue(rtdb.ref(db, `calls/${state.uid}/status`), async (snap) => {
+  
+  if(state.unsubIncomingCall) rtdb.off(rtdb.ref(db, `calls/${state.uid}`));
+  
+  state.unsubIncomingCall = rtdb.onValue(rtdb.ref(db, `calls/${state.uid}`), async (snap) => {
     if(!snap.exists()) return;
-    const status = snap.val();
-
-    if(status === 'ringing' && !state.callState.active){
-      const callerSnap = await rtdb.get(rtdb.ref(db, `calls/${state.uid}`));
-      const callData = callerSnap.val();
-      if(!callData) return;
-      state.incomingCallData = callData;
-      state.callState.callId = callData.callId || null;
-      showCallUI('incoming', callData.callerName || 'مستخدم');
+    const data = snap.val();
+    
+    // مكالمة واردة جديدة
+    if(data.status === 'ringing' && !state.callState.active){
+      state.incomingCallData = data;
+      state.callState.callId = data.callId || null;
+      showCallUI('incoming', data.callerName || 'مستخدم');
       playRingtone();
       if('Notification' in window && Notification.permission === 'granted'){
-        new Notification('📞 مكالمة واردة', { body: `${callData.callerName} بيتصل بك`, icon: './icon-192.png' });
+        new Notification('📞 مكالمة واردة', { body: `${data.callerName} بيتصل بك` });
       }
       return;
     }
-
-    if(status === 'answered' && state.callState.type === 'outgoing' && !state.callState.offerSent){
-      stopRingtone();
-      callStatus.textContent = 'جاري تجهيز الاتصال...';
-      callStatus.className = 'call-status ringing';
-      callQuality.textContent = 'جاري الاتصال بالطرف الآخر...';
-      callQuality.classList.add('show');
-      state.callState.offerSent = true;
-      await createAndSendOffer();
-      return;
+    
+    // جالي offer من الـ caller (أنا callee)
+    if(data.offer && state.callState.active && state.callState.type === 'incoming' && !state.callState.peerConnection?.currentRemoteDescription){
+      console.log('📥 Received offer, sending answer...');
+      await handleOffer(data.offer);
+      await drainIceQueue();
     }
-
-    if(status === 'ended'){
-      if(state.callState.active) endCall(true);
+    
+    // المكالمة اتنهت
+    if(data.status === 'ended' && state.callState.active){
+      endCall(true);
     }
   });
-
-  rtdb.onValue(rtdb.ref(db, `calls/${state.uid}/offer`), async (snap) => {
-    if(!snap.exists() || !state.callState.peerConnection || state.callState.remoteSet) return;
-    state.callState.remoteSet = true;
-    await handleOffer(snap.val());
-    await drainIceQueue();
-  });
-
-  rtdb.onValue(rtdb.ref(db, `calls/${state.uid}/answer`), async (snap) => {
-    if(!snap.exists() || !state.callState.peerConnection) return;
-    if(state.callState.peerConnection.currentRemoteDescription) return;
-    await handleAnswer(snap.val());
-    await drainIceQueue();
-  });
-
-  rtdb.onValue(rtdb.ref(db, `calls/${state.uid}/iceIn`), async (snap) => {
+  
+  // ICE candidates الجاية لي (أنا callee)
+  if(state.unsubIncomingIce) rtdb.off(rtdb.ref(db, `calls/${state.uid}/iceIn`));
+  state.unsubIncomingIce = rtdb.onValue(rtdb.ref(db, `calls/${state.uid}/iceIn`), async (snap) => {
     if(!snap.exists()) return;
     const items = snap.val();
     for(const [key, candidate] of Object.entries(items)){
@@ -1309,22 +984,53 @@ function listenForIncomingCalls(){
   });
 }
 
-let iceQueue = [];
-async function applyOrQueueIce(candidate){
-  const pc = state.callState.peerConnection;
-  if(pc && pc.remoteDescription && pc.remoteDescription.type){
-    try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch(e){}
-  } else {
-    iceQueue.push(candidate);
-  }
-}
-async function drainIceQueue(){
-  const pc = state.callState.peerConnection;
-  if(!pc) return;
-  while(iceQueue.length){
-    const c = iceQueue.shift();
-    try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch(e){}
-  }
+// ===== LISTENER للمكالمات الصادرة (أنا caller) =====
+function listenForOutgoingCallResponse(partnerUid){
+  const { db, rtdb } = fb;
+  
+  if(state.unsubOutgoingCall) rtdb.off(rtdb.ref(db, `calls/${partnerUid}`));
+  
+  state.unsubOutgoingCall = rtdb.onValue(rtdb.ref(db, `calls/${partnerUid}`), async (snap) => {
+    if(!snap.exists()) return;
+    const data = snap.val();
+    
+    // الطرف التاني رد (status = 'answered')
+    if(data.status === 'answered' && state.callState.type === 'outgoing' && !state.callState.offerSent){
+      console.log('✅ Partner answered! Sending offer...');
+      stopRingtone();
+      callStatus.textContent = 'جاري تجهيز الاتصال...';
+      callStatus.className = 'call-status ringing';
+      callQuality.textContent = 'جاري الاتصال بالطرف الآخر...';
+      callQuality.classList.add('show');
+      state.callState.offerSent = true;
+      await createAndSendOffer();
+    }
+    
+    // جالي answer من الـ callee (أنا caller)
+    if(data.answer && state.callState.type === 'outgoing' && !state.callState.answerHandled){
+      console.log('📥 Received answer, connecting...');
+      state.callState.answerHandled = true;
+      if(state.callState.peerConnection && !state.callState.peerConnection.currentRemoteDescription){
+        await handleAnswer(data.answer);
+        await drainIceQueue();
+      }
+    }
+    
+    // المكالمة اتنهت
+    if(data.status === 'ended' && state.callState.active){
+      endCall(true);
+    }
+  });
+  
+  // ICE candidates الجاية لي من الطرف التاني (أنا caller)
+  if(state.unsubOutgoingIce) rtdb.off(rtdb.ref(db, `calls/${partnerUid}/iceIn`));
+  state.unsubOutgoingIce = rtdb.onValue(rtdb.ref(db, `calls/${partnerUid}/iceIn`), async (snap) => {
+    if(!snap.exists()) return;
+    const items = snap.val();
+    for(const [key, candidate] of Object.entries(items)){
+      await applyOrQueueIce(candidate);
+    }
+  });
 }
 
 async function ensureLocalStream(){
@@ -1351,16 +1057,23 @@ async function startCall(){
     if(e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError'){
       showMicPermissionModal();
     } else {
-      showToast('محتاجين إذن الميكروفون عشان تتصل','error');
+      showToast('محتاجين إذن الميكروفون','error');
     }
     return;
   }
 
-  state.callState.active = true; state.callState.type = 'outgoing';
-  state.callState.partnerUid = partnerUid; state.callState.partnerName = partnerName;
+  state.callState.active = true;
+  state.callState.type = 'outgoing';
+  state.callState.partnerUid = partnerUid;
+  state.callState.partnerName = partnerName;
   state.callState.callId = 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+  state.callState.offerSent = false;
+  state.callState.answerHandled = false;
 
   await createPeerConnection(stream);
+  
+  // أبدأ أسمع على رد الطرف التاني
+  listenForOutgoingCallResponse(partnerUid);
 
   showCallUI('outgoing', partnerName);
   playRingtone();
@@ -1389,18 +1102,22 @@ async function acceptCall(){
     if(e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError'){
       showMicPermissionModal();
     } else {
-      showToast('محتاجين إذن الميكروفون عشان ترد على المكالمة','error');
+      showToast('محتاجين إذن الميكروفون','error');
     }
   }
 
-  state.callState.active = true; state.callState.type = 'incoming';
-  state.callState.partnerUid = callerId; state.callState.partnerName = callerName || 'مستخدم';
+  state.callState.active = true;
+  state.callState.type = 'incoming';
+  state.callState.partnerUid = callerId;
+  state.callState.partnerName = callerName || 'مستخدم';
   state.callState.callId = state.incomingCallData.callId || null;
+  state.callState.answerHandled = false;
 
   await createPeerConnection(stream);
 
   stopRingtone();
-  callStatus.textContent = 'جاري تجهيز الاتصال...'; callStatus.className = 'call-status ringing';
+  callStatus.textContent = 'جاري تجهيز الاتصال...';
+  callStatus.className = 'call-status ringing';
   callQuality.textContent = 'جاري الاتصال بالطرف الآخر...';
   callQuality.classList.add('show');
 
@@ -1411,7 +1128,10 @@ async function acceptCall(){
 }
 
 async function createPeerConnection(providedStream){
-  if(state.callState.peerConnection) return;
+  if(state.callState.peerConnection){
+    state.callState.peerConnection.close();
+    state.callState.peerConnection = null;
+  }
 
   const pc = new RTCPeerConnection(rtcConfig);
   state.callState.peerConnection = pc;
@@ -1420,12 +1140,14 @@ async function createPeerConnection(providedStream){
   try {
     const stream = providedStream || await ensureLocalStream();
     stream.getTracks().forEach(track => pc.addTrack(track, stream));
+    console.log('🎤 Added local tracks:', stream.getTracks().length);
   } catch(e){
     console.error('Mic access failed:', e);
-    showToast('مش قادرين نوصل للميكروفون، هتقدر تسمع بس','error');
+    showToast('مش قادرين نوصل للميكروفون','error');
   }
 
   pc.ontrack = (event) => {
+    console.log('🔊 Received remote track!');
     let audioEl = document.querySelector('audio[data-peer="remote"]');
     if(!audioEl){
       audioEl = document.createElement('audio');
@@ -1435,20 +1157,35 @@ async function createPeerConnection(providedStream){
       document.body.appendChild(audioEl);
     }
     audioEl.srcObject = event.streams[0];
-    audioEl.play().catch(()=>{});
+    audioEl.play().catch(e => console.warn('Audio play failed:', e));
     if(state.callState.isSpeakerOn && audioEl.setSinkId){
       audioEl.setSinkId('speaker').catch(()=>{});
     }
   };
 
   pc.onconnectionstatechange = () => {
+    console.log('🔗 Connection state:', pc.connectionState);
     if(pc.connectionState === 'connected'){
-      callQuality.textContent = 'الاتصال مستقر ✅';
-      setTimeout(()=> callQuality.classList.remove('show'), 2000);
-    } else if(pc.connectionState === 'failed' || pc.connectionState === 'disconnected'){
-      callQuality.textContent = 'ضعف في الاتصال...';
+      callStatus.textContent = 'متصل ✅';
+      callStatus.className = 'call-status';
+      callQuality.textContent = 'الاتصال مستقر';
+      callQuality.classList.add('show');
+      setTimeout(()=> callQuality.classList.remove('show'), 2500);
+      startCallTimer();
+    } else if(pc.connectionState === 'failed'){
+      callQuality.textContent = 'فشل الاتصال ❌';
+      callQuality.classList.add('show');
+    } else if(pc.connectionState === 'disconnected'){
+      callQuality.textContent = 'انقطع الاتصال...';
+      callQuality.classList.add('show');
+    } else if(pc.connectionState === 'connecting'){
+      callQuality.textContent = 'جاري الاتصال...';
       callQuality.classList.add('show');
     }
+  };
+
+  pc.oniceconnectionstatechange = () => {
+    console.log('🧊 ICE state:', pc.iceConnectionState);
   };
 
   pc.onicecandidate = (event) => {
@@ -1464,35 +1201,52 @@ async function createAndSendOffer(){
   const pc = state.callState.peerConnection;
   if(!pc) return;
 
-  const offer = await pc.createOffer();
-  await pc.setLocalDescription(offer);
+  try {
+    const offer = await pc.createOffer({
+      offerToReceiveAudio: true,
+      offerToReceiveVideo: false
+    });
+    await pc.setLocalDescription(offer);
+    console.log('📤 Sending offer...');
 
-  const { db, rtdb } = fb;
-  await rtdb.update(rtdb.ref(db, `calls/${state.callState.partnerUid}`), {
-    offer: { type: offer.type, sdp: offer.sdp }
-  });
+    const { db, rtdb } = fb;
+    await rtdb.update(rtdb.ref(db, `calls/${state.callState.partnerUid}`), {
+      offer: { type: offer.type, sdp: offer.sdp }
+    });
+  } catch(e){
+    console.error('Create offer failed:', e);
+    showToast('فشل إنشاء الاتصال','error');
+  }
 }
 
 async function handleOffer(offer){
   const pc = state.callState.peerConnection;
   if(!pc) return;
 
-  await pc.setRemoteDescription(new RTCSessionDescription(offer));
-  const answer = await pc.createAnswer();
-  await pc.setLocalDescription(answer);
+  try {
+    await pc.setRemoteDescription(new RTCSessionDescription(offer));
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    console.log('📤 Sending answer...');
 
-  const { db, rtdb } = fb;
-  await rtdb.update(rtdb.ref(db, `calls/${state.callState.partnerUid}`), {
-    answer: { type: answer.type, sdp: answer.sdp }
-  });
+    const { db, rtdb } = fb;
+    await rtdb.update(rtdb.ref(db, `calls/${state.uid}`), {
+      answer: { type: answer.type, sdp: answer.sdp }
+    });
+  } catch(e){
+    console.error('Handle offer failed:', e);
+    showToast('فشل الرد على المكالمة','error');
+  }
 }
 
 async function handleAnswer(answer){
   const pc = state.callState.peerConnection;
   if(!pc) return;
-  await pc.setRemoteDescription(new RTCSessionDescription(answer));
-  callStatus.textContent = 'متصل'; callStatus.className = 'call-status';
-  startCallTimer();
+  try {
+    await pc.setRemoteDescription(new RTCSessionDescription(answer));
+  } catch(e){
+    console.error('Handle answer failed:', e);
+  }
 }
 
 function endCall(skipRemoteUpdate){
@@ -1512,21 +1266,22 @@ function endCall(skipRemoteUpdate){
   if(audioEl) audioEl.remove();
 
   if(!skipRemoteUpdate && state.callState.partnerUid){
-    rtdb.update(rtdb.ref(db, `calls/${state.callState.partnerUid}`), { status: 'ended' });
+    rtdb.update(rtdb.ref(db, `calls/${state.callState.partnerUid}`), { status: 'ended' }).catch(()=>{});
   }
   if(state.uid){
-    rtdb.remove(rtdb.ref(db, `calls/${state.uid}`));
+    rtdb.remove(rtdb.ref(db, `calls/${state.uid}`)).catch(()=>{});
   }
 
+  cleanupCallListeners();
   hideCallUI();
   iceQueue = [];
   resetCallState();
 }
 
 function startCallTimer(){
+  if(state.callState.timerInterval) return;
   state.callState.startTime = Date.now();
   callTimer.classList.add('show');
-  if(state.callState.timerInterval) clearInterval(state.callState.timerInterval);
   state.callState.timerInterval = setInterval(() => {
     const elapsed = Math.floor((Date.now() - state.callState.startTime) / 1000);
     callTimer.textContent = `${Math.floor(elapsed/60).toString().padStart(2,'0')}:${(elapsed%60).toString().padStart(2,'0')}`;
@@ -1545,7 +1300,7 @@ async function saveCallLog(status, startTime){
 
 function formatCallDuration(sec){ const mm=Math.floor(sec/60); const ss=sec%60; return `${mm}:${ss.toString().padStart(2,'0')}`; }
 
-// ============ SETTINGS - MIC PERMISSION ============
+// ============ SETTINGS ============
 async function checkMicPermission(){
   const badge = document.getElementById('mic-perm-badge');
   const text = document.getElementById('mic-perm-text');
@@ -1562,33 +1317,16 @@ async function checkMicPermission(){
   try {
     const result = await navigator.permissions.query({ name: 'microphone' });
     updateMicBadge(result.state);
-
     result.onchange = () => {
       updateMicBadge(result.state);
-      if(result.state === 'granted'){
-        helpBox.classList.remove('show');
-        requestBtn.style.display = 'none';
-      } else if(result.state === 'denied'){
-        helpBox.classList.add('show');
-        requestBtn.style.display = 'none';
-      } else {
-        helpBox.classList.remove('show');
-        requestBtn.style.display = 'block';
-      }
+      if(result.state === 'granted'){ helpBox.classList.remove('show'); requestBtn.style.display = 'none'; }
+      else if(result.state === 'denied'){ helpBox.classList.add('show'); requestBtn.style.display = 'none'; }
+      else { helpBox.classList.remove('show'); requestBtn.style.display = 'block'; }
     };
-
-    if(result.state === 'granted'){
-      helpBox.classList.remove('show');
-      requestBtn.style.display = 'none';
-    } else if(result.state === 'denied'){
-      helpBox.classList.add('show');
-      requestBtn.style.display = 'none';
-    } else {
-      helpBox.classList.remove('show');
-      requestBtn.style.display = 'block';
-    }
+    if(result.state === 'granted'){ helpBox.classList.remove('show'); requestBtn.style.display = 'none'; }
+    else if(result.state === 'denied'){ helpBox.classList.add('show'); requestBtn.style.display = 'none'; }
+    else { helpBox.classList.remove('show'); requestBtn.style.display = 'block'; }
   } catch(e){
-    console.error('Permission check failed:', e);
     badge.className = 'perm-badge unknown';
     text.textContent = 'غير معروف';
     requestBtn.style.display = 'block';
@@ -1598,11 +1336,7 @@ async function checkMicPermission(){
 function updateMicBadge(permState){
   const badge = document.getElementById('mic-perm-badge');
   const text = document.getElementById('mic-perm-text');
-  const map = {
-    granted: { cls: 'granted', txt: 'مسموح ✅' },
-    denied: { cls: 'denied', txt: 'مرفوض ❌' },
-    prompt: { cls: 'prompt', txt: 'لم يُطلب بعد' }
-  };
+  const map = { granted: { cls: 'granted', txt: 'مسموح ✅' }, denied: { cls: 'denied', txt: 'مرفوض ❌' }, prompt: { cls: 'prompt', txt: 'لم يُطلب' } };
   const info = map[permState] || { cls: 'unknown', txt: 'غير معروف' };
   badge.className = 'perm-badge ' + info.cls;
   text.textContent = info.txt;
@@ -1613,21 +1347,9 @@ async function checkNotifPermission(){
   const text = document.getElementById('notif-perm-text');
   const sub = document.getElementById('notif-perm-sub');
   const requestBtn = document.getElementById('btn-request-notif');
-
-  if(!('Notification' in window)){
-    badge.className = 'perm-badge denied';
-    text.textContent = 'غير مدعوم';
-    sub.textContent = 'المتصفح لا يدعم الإشعارات';
-    requestBtn.style.display = 'none';
-    return;
-  }
-
+  if(!('Notification' in window)){ badge.className = 'perm-badge denied'; text.textContent = 'غير مدعوم'; sub.textContent = 'المتصفح لا يدعم الإشعارات'; requestBtn.style.display = 'none'; return; }
   const perm = Notification.permission;
-  const map = {
-    granted: { cls: 'granted', txt: 'مفعّلة ✅', sub: 'الإشعارات مفعّلة حاليًا' },
-    denied: { cls: 'denied', txt: 'مرفوضة ❌', sub: 'الإشعارات مرفوضة من المتصفح' },
-    default: { cls: 'prompt', txt: 'لم تُفعَّل', sub: 'اضغط للتفعيل' }
-  };
+  const map = { granted: { cls: 'granted', txt: 'مفعّلة ✅', sub: 'مفعّلة' }, denied: { cls: 'denied', txt: 'مرفوضة ❌', sub: 'مرفوضة' }, default: { cls: 'prompt', txt: 'لم تُفعَّل', sub: 'اضغط للتفعيل' } };
   const info = map[perm] || { cls: 'unknown', txt: 'غير معروف', sub: '' };
   badge.className = 'perm-badge ' + info.cls;
   text.textContent = info.txt;
@@ -1651,62 +1373,44 @@ async function startMicTest(){
   const testBtn = document.getElementById('btn-test-mic');
   const stopBtn = document.getElementById('btn-stop-mic-test');
   const statusEl = document.getElementById('mic-test-status');
-
   testCard.classList.add('show');
   testBtn.style.display = 'none';
   stopBtn.style.display = 'block';
   stopBtn.disabled = true;
   stopBtn.innerHTML = '<div class="spin"></div> جاري التفعيل...';
   statusEl.className = 'mic-test-status';
-  statusEl.textContent = 'جاري طلب إذن الميكروفون...';
-
+  statusEl.textContent = 'جاري طلب الإذن...';
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     state.micTestStream = stream;
-
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const source = audioCtx.createMediaStreamSource(stream);
     const analyser = audioCtx.createAnalyser();
     analyser.fftSize = 64;
     source.connect(analyser);
     state.micTestAnalyser = analyser;
-
     buildMicVisualizer();
     const bars = document.querySelectorAll('.mic-level-bar');
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
     stopBtn.disabled = false;
-    stopBtn.innerHTML = '⏹ إيقاف الاختبار';
+    stopBtn.innerHTML = '⏹ إيقاف';
     statusEl.className = 'mic-test-status ok';
-    statusEl.textContent = '🎤 الميكروفون يعمل! تحدث الآن لرؤية المستوى';
-
+    statusEl.textContent = '🎤 الميكروفون يعمل! تحدث الآن';
     function animate(){
       analyser.getByteFrequencyData(dataArray);
       bars.forEach((bar, i) => {
         const value = dataArray[i] || 0;
-        const height = Math.max(3, (value / 255) * 36);
-        bar.style.height = height + 'px';
+        bar.style.height = Math.max(3, (value / 255) * 36) + 'px';
         bar.style.background = value > 150 ? 'var(--ok)' : value > 50 ? 'var(--gold-soft)' : 'var(--mute)';
       });
       state.micTestRaf = requestAnimationFrame(animate);
     }
     animate();
-
     checkMicPermission();
-
   } catch(e){
-    console.error('Mic test failed:', e);
     statusEl.className = 'mic-test-status error';
-    if(e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError'){
-      statusEl.textContent = '❌ تم رفض إذن الميكروفون. افتح إعدادات المتصفح للسماح.';
-      document.getElementById('mic-help-box').classList.add('show');
-    } else if(e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError'){
-      statusEl.textContent = '❌ لم يتم العثور على ميكروفون في جهازك.';
-    } else if(e.name === 'NotReadableError'){
-      statusEl.textContent = '❌ الميكروفون مستخدم من تطبيق آخر. أغلق التطبيقات الأخرى وحاول مجددًا.';
-    } else {
-      statusEl.textContent = '❌ فشل الوصول للميكروفون: ' + (e.message || 'خطأ غير معروف');
-    }
+    if(e.name === 'NotAllowedError'){ statusEl.textContent = '❌ تم رفض الإذن'; document.getElementById('mic-help-box').classList.add('show'); }
+    else statusEl.textContent = '❌ فشل: ' + (e.message || 'خطأ');
     testBtn.style.display = 'block';
     stopBtn.style.display = 'none';
     checkMicPermission();
@@ -1715,38 +1419,22 @@ async function startMicTest(){
 
 function stopMicTest(){
   if(state.micTestRaf){ cancelAnimationFrame(state.micTestRaf); state.micTestRaf = null; }
-  if(state.micTestStream){
-    state.micTestStream.getTracks().forEach(t => t.stop());
-    state.micTestStream = null;
-  }
+  if(state.micTestStream){ state.micTestStream.getTracks().forEach(t => t.stop()); state.micTestStream = null; }
   state.micTestAnalyser = null;
-
-  const testBtn = document.getElementById('btn-test-mic');
-  const stopBtn = document.getElementById('btn-stop-mic-test');
-  testBtn.style.display = 'block';
-  stopBtn.style.display = 'none';
+  document.getElementById('btn-test-mic').style.display = 'block';
+  document.getElementById('btn-stop-mic-test').style.display = 'none';
 }
 
 async function requestMicPermission(){
-  const statusEl = document.getElementById('mic-test-status');
-  const testCard = document.getElementById('mic-test-card');
-  testCard.classList.add('show');
-
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     stream.getTracks().forEach(t => t.stop());
-    showToast('✅ تم السماح بالمايكروفون','success');
+    showToast('✅ تم السماح','success');
     checkMicPermission();
     document.getElementById('mic-help-box').classList.remove('show');
     document.getElementById('btn-request-mic').style.display = 'none';
   } catch(e){
-    console.error('Request mic failed:', e);
-    if(e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError'){
-      showToast('❌ تم رفض الإذن','error');
-      document.getElementById('mic-help-box').classList.add('show');
-    } else {
-      showToast('❌ فشل: ' + (e.message || 'خطأ'),'error');
-    }
+    showToast('❌ فشل','error');
     checkMicPermission();
   }
 }
@@ -1756,11 +1444,8 @@ async function requestNotifPermission(){
   try {
     const result = await Notification.requestPermission();
     checkNotifPermission();
-    if(result === 'granted') showToast('✅ تم تفعيل الإشعارات','success');
-    else showToast('لم يتم التفعيل','');
-  } catch(e){
-    showToast('فشل تفعيل الإشعارات','error');
-  }
+    if(result === 'granted') showToast('✅ تم','success');
+  } catch(e){}
 }
 
 // ============ BOOT ============
@@ -1770,11 +1455,11 @@ whenReady(async () => {
     const { db, rtdb } = fb;
     const snap = await rtdb.get(rtdb.ref(db, `users/${uid}`));
     if (snap.exists()){ const d = snap.val(); state.displayName = d.displayName; state.username = d.username; enterApp(); return; }
-  } catch(e){ console.error('Boot check failed', e); }
+  } catch(e){}
   goTo('onboarding');
 });
 
-// ============ ONBOARDING & NAME ============
+// ============ ONBOARDING ============
 document.getElementById('btn-start').addEventListener('click', ()=>{ goTo('name'); setTimeout(()=>document.getElementById('name-input').focus(),200); });
 document.getElementById('btn-back-name').addEventListener('click', ()=>goTo('onboarding'));
 
@@ -1796,17 +1481,16 @@ continueBtn.addEventListener('click', async ()=>{
   try {
     const {db,rtdb}=fb;
     const snap=await Promise.race([rtdb.get(rtdb.ref(db,`usernames/${pendingUsername}`)),new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),5000))]).catch(()=>({exists:()=>false}));
-    if(snap.exists&&snap.exists()){ pendingUsername=generateUsernameSync(v); usernameValue.textContent=pendingUsername; continueBtn.disabled=false; continueBtn.innerHTML='<span>متابعة</span><svg viewBox="0 0 24 24" fill="none"><path d="M15 6L9 12L15 18" stroke="#1A1206" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'; showToast('تم تغيير اليوزرنيم تلقائياً، اضغط متابعة',''); return; }
+    if(snap.exists&&snap.exists()){ pendingUsername=generateUsernameSync(v); usernameValue.textContent=pendingUsername; continueBtn.disabled=false; continueBtn.innerHTML='<span>متابعة</span><svg viewBox="0 0 24 24" fill="none"><path d="M15 6L9 12L15 18" stroke="#1A1206" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'; showToast('تم تغيير اليوزرنيم',''); return; }
     const now=new Date().toISOString();
     const updates={};
     updates[`users/${state.uid}`]={displayName:v,username:pendingUsername,usernameLower:pendingUsername.toLowerCase(),nameLower:v.toLowerCase(),createdAt:now,lastSeen:now,online:true};
     updates[`usernames/${pendingUsername}`]=state.uid;
     await rtdb.update(rtdb.ref(db),updates);
     state.displayName=v; state.username=pendingUsername; enterApp();
-  } catch(e){ console.error(e); document.getElementById('name-error').style.display='block'; continueBtn.disabled=false; continueBtn.innerHTML='<span>متابعة</span><svg viewBox="0 0 24 24" fill="none"><path d="M15 6L9 12L15 18" stroke="#1A1206" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'; showToast('حصل خطأ في الاتصال، جرب تاني','error'); }
+  } catch(e){ document.getElementById('name-error').style.display='block'; continueBtn.disabled=false; continueBtn.innerHTML='<span>متابعة</span><svg viewBox="0 0 24 24" fill="none"><path d="M15 6L9 12L15 18" stroke="#1A1206" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'; showToast('حصل خطأ','error'); }
 });
 
-// ============ ENTER APP ============
 function enterApp(){
   const initial=state.displayName.charAt(0).toUpperCase();
   document.getElementById('my-avatar').textContent=initial; document.getElementById('profile-avatar').textContent=initial;
@@ -1817,7 +1501,6 @@ function enterApp(){
   listenForIncomingCalls();
 }
 
-// ============ ONLINE PRESENCE ============
 function setupOnlinePresence(){ const {db,rtdb}=fb; const userStatusRef=rtdb.ref(db,`users/${state.uid}`); rtdb.onValue(rtdb.ref(db,'.info/connected'),(snap)=>{ if(snap.val()===true){ rtdb.update(userStatusRef,{online:true,lastSeen:new Date().toISOString()}); rtdb.onDisconnect(userStatusRef).update({online:false,lastSeen:new Date().toISOString()}); } }); }
 function listenToOnlineUsers(){ const {db,rtdb}=fb; rtdb.onValue(rtdb.ref(db,'users'),(snap)=>{ if(snap.exists()){ state.onlineUsers={}; const users=snap.val(); for(const[uid,data]of Object.entries(users)){ if(uid!==state.uid) state.onlineUsers[uid]={online:data.online||false,lastSeen:data.lastSeen||null}; } } updateChatHeaderStatus(); refreshChatListOnlineStatus(); }); }
 function updateChatHeaderStatus(){
@@ -1831,24 +1514,22 @@ function updateChatHeaderStatus(){
 function refreshChatListOnlineStatus(){ document.querySelectorAll('.chat-row').forEach(row=>{ const otherUid=row.dataset.uid, indicator=row.querySelector('.online-indicator'); if(indicator&&otherUid) indicator.classList.toggle('show', state.onlineUsers[otherUid]?.online); }); }
 function formatLastSeen(ts){ if(!ts) return 'غير معروف'; const d=new Date(ts), now=new Date(), diff=now-d; if(diff<60000) return 'الآن'; if(diff<3600000) return `منذ ${Math.floor(diff/60000)} دقيقة`; if(diff<86400000) return `منذ ${Math.floor(diff/3600000)} ساعة`; if(diff<172800000) return 'أمس'; return d.toLocaleDateString('ar-EG',{month:'short',day:'numeric'}); }
 
-// ============ SEARCH ============
 const searchInput=document.getElementById('search-input'), searchResults=document.getElementById('search-results'); let searchDebounce=null;
 searchInput.addEventListener('input',()=>{ clearTimeout(searchDebounce); const q=searchInput.value.trim(); if(q.length<2){ searchResults.classList.remove('show'); searchResults.innerHTML=''; return; } searchDebounce=setTimeout(()=>runSearch(q),300); });
 async function runSearch(qText){
   whenReady(async()=>{
     try { const {db,rtdb}=fb; const qLower=qText.toLowerCase(); const snap=await rtdb.get(rtdb.query(rtdb.ref(db,'users'),rtdb.limitToFirst(50))); const results=[]; if(snap.exists()){ for(const[id,data]of Object.entries(snap.val())){ if(id!==state.uid&&((data.usernameLower?.includes(qLower))||(data.nameLower?.includes(qLower)))){ results.push({id,...data}); if(results.length>=10) break; } } } renderSearchResults(results); }
-    catch(e){ searchResults.innerHTML='<div class="search-empty">مش قادرين نبحث دلوقتي</div>'; searchResults.classList.add('show'); }
+    catch(e){ searchResults.innerHTML='<div class="search-empty">مش قادرين نبحث</div>'; searchResults.classList.add('show'); }
   });
 }
 function renderSearchResults(results){
-  if(!results.length){ searchResults.innerHTML='<div class="search-empty">😕 مفيش حد بالاسم ده</div>'; searchResults.classList.add('show'); return; }
+  if(!results.length){ searchResults.innerHTML='<div class="search-empty">😕 مفيش حد</div>'; searchResults.classList.add('show'); return; }
   searchResults.innerHTML=results.map(u=>`<div class="search-result-row" data-uid="${u.id}" data-name="${escapeAttr(u.displayName)}"><div class="sr-avatar">${(u.displayName||'?').charAt(0).toUpperCase()}</div><div class="sr-info"><div class="sr-name">${escapeHtml(u.displayName)}</div><div class="sr-username">@${escapeHtml(u.username)}</div></div></div>`).join('');
   searchResults.classList.add('show');
   searchResults.querySelectorAll('.search-result-row').forEach(row=>{ row.addEventListener('click',()=>{ searchInput.value=''; searchResults.classList.remove('show'); openChatWith({id:row.dataset.uid,displayName:row.dataset.name,username:''}); }); });
 }
 document.addEventListener('click',(e)=>{ if(!e.target.closest('.search-shell')) searchResults.classList.remove('show'); });
 
-// ============ CHATS ============
 function chatIdFor(uidA,uidB){ return [uidA,uidB].sort().join('__'); }
 async function openChatWith(otherUser){
   const chatId=chatIdFor(state.uid,otherUser.id); state.currentChatId=chatId; state.currentChatUser=otherUser;
@@ -1862,7 +1543,6 @@ async function openChatWith(otherUser){
 }
 function listenToTyping(chatId){ if(state.unsubTyping){ fb.rtdb.off(fb.rtdb.ref(fb.db,`chats/${chatId}/typing`)); state.unsubTyping=null; } const {db,rtdb}=fb; state.unsubTyping=rtdb.onValue(rtdb.ref(db,`chats/${chatId}/typing`),(snap)=>{ state.typingUsers={}; if(snap.exists()){ const typingData=snap.val(); for(const[uid,isTyping]of Object.entries(typingData)){ if(uid!==state.uid&&isTyping) state.typingUsers[uid]=true; } } updateChatHeaderStatus(); }); }
 
-// ============ TEXT MESSAGE ============
 const composerInputEl = document.getElementById('composer-input');
 const sendBtnEl = document.getElementById('btn-send'); const sendBtnIcon = document.getElementById('btn-send-icon');
 const voiceRecordingBar = document.getElementById('voice-recording-bar'); const voiceRecTimer = document.getElementById('voice-rec-timer');
@@ -1879,33 +1559,13 @@ async function sendMessage(){
 }
 composerInputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
 
-// ============ VOICE RECORDING - BASE64 ============
 let voiceRecorder = null, voiceChunks = [], voiceStream = null, voiceStartTime = 0, voiceTimerInterval = null, voiceCancelled = false;
 let voiceUsingTouch = false, voiceIsBusy = false;
 function setRecordingUI(active){ sendBtnEl.classList.toggle('recording', active); voiceRecordingBar.classList.toggle('show', active); composerInputShell.style.display = active ? 'none' : 'flex'; }
 async function startVoiceRecording(fromTouch){
   if(!state.currentChatId){ showToast('افتح محادثة الأول','error'); return; } if(sendBtnEl.dataset.mode === 'send' || voiceIsBusy) return;
   voiceUsingTouch = !!fromTouch; voiceIsBusy = true;
-  try { 
-    voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true }); 
-  } catch(e){ 
-    console.error('Voice recording mic error:', e);
-    voiceIsBusy = false;
-    voiceStream = null;
-    
-    // Check if permission was denied
-    if(e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError'){
-      // Show the helpful modal instead of just a toast
-      showMicPermissionModal();
-    } else if(e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError'){
-      showToast('❌ مفيش ميكروفون في جهازك','error');
-    } else if(e.name === 'NotReadableError'){
-      showToast('❌ الميكروفون مستخدم من تطبيق تاني','error');
-    } else {
-      showToast('❌ فشل الوصول للميكروفون','error');
-    }
-    return; 
-  }
+  try { voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch(e){ voiceIsBusy = false; voiceStream = null; if(e.name === 'NotAllowedError') showMicPermissionModal(); else showToast('❌ فشل الوصول للمايك','error'); return; }
   voiceChunks = []; voiceCancelled = false; voiceRecorder = new MediaRecorder(voiceStream);
   voiceRecorder.ondataavailable = (e) => { if(e.data.size>0) voiceChunks.push(e.data); };
   voiceRecorder.onstop = () => { if(!voiceCancelled) processAndSendVoice(); };
@@ -1914,12 +1574,9 @@ async function startVoiceRecording(fromTouch){
 }
 async function stopVoiceRecording(cancel){
   if(!voiceIsBusy) return; voiceCancelled = !!cancel; clearInterval(voiceTimerInterval);
-  if(voiceRecorder && voiceRecorder.state === 'recording'){
-    if(typeof voiceRecorder.requestData === 'function'){ try { voiceRecorder.requestData(); } catch(e){} }
-    voiceRecorder.stop();
-  }
+  if(voiceRecorder && voiceRecorder.state === 'recording'){ try { voiceRecorder.requestData(); } catch(e){} voiceRecorder.stop(); }
   if(voiceStream){ voiceStream.getTracks().forEach(t=>t.stop()); voiceStream=null; }
-  setRecordingUI(false); voiceIsBusy = false; if(voiceCancelled){ voiceChunks=[]; }
+  setRecordingUI(false); voiceIsBusy = false; if(voiceCancelled) voiceChunks=[];
 }
 async function processAndSendVoice(){
   if(voiceCancelled || voiceChunks.length===0) return;
@@ -1941,7 +1598,6 @@ sendBtnEl.addEventListener('click', ()=>{ if(sendBtnEl.dataset.mode==='send') se
 voiceRecCancelBtn.addEventListener('click', ()=>{ stopVoiceRecording(true); });
 document.addEventListener('visibilitychange', ()=>{ if(document.hidden&&voiceIsBusy&&voiceRecorder&&voiceRecorder.state==='recording') stopVoiceRecording(true); });
 
-// ============ PLAY VOICE ============
 let currentPlayingAudio = null, currentPlayingBtn = null;
 function playVoiceMessage(url, btnEl){
   if(currentPlayingAudio && currentPlayingBtn === btnEl){ currentPlayingAudio.pause(); currentPlayingAudio=null; currentPlayingBtn=null; btnEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>'; return; }
@@ -1951,7 +1607,6 @@ function playVoiceMessage(url, btnEl){
   audio.play(); audio.onended = ()=>{ btnEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>'; currentPlayingAudio=null; currentPlayingBtn=null; };
 }
 
-// ============ MEDIA (IMAGES / VIDEOS) ============
 const MAX_IMAGE_DIM = 1280;
 const IMAGE_QUALITY = 0.72;
 const MAX_VIDEO_BYTES = 8 * 1024 * 1024;
@@ -1965,7 +1620,7 @@ const mediaCameraInput = document.getElementById('media-camera-input');
 
 function openAttachSheet(){ attachSheet.classList.add('show'); attachSheetOverlay.classList.add('show'); }
 function closeAttachSheet(){ attachSheet.classList.remove('show'); attachSheetOverlay.classList.remove('show'); }
-attachBtn.addEventListener('click', ()=>{ if(!state.currentChatId){ showToast('افتح محادثة الأول','error'); return; } openAttachSheet(); });
+attachBtn.addEventListener('click', ()=>{ if(!state.currentChatId){ showToast('افتح محادثة','error'); return; } openAttachSheet(); });
 attachSheetOverlay.addEventListener('click', closeAttachSheet);
 document.getElementById('attach-row-gallery').addEventListener('click', ()=>{ closeAttachSheet(); mediaGalleryInput.click(); });
 document.getElementById('attach-row-camera').addEventListener('click', ()=>{ closeAttachSheet(); mediaCameraInput.click(); });
@@ -1984,51 +1639,38 @@ async function handleMediaFileChosen(file){
   if(!file) return;
   const isVideo = file.type.startsWith('video/');
   const isImage = file.type.startsWith('image/');
-  if(!isVideo && !isImage){ showToast('الملف ده مش صورة أو فيديو','error'); return; }
-
+  if(!isVideo && !isImage){ showToast('الملف مش صورة أو فيديو','error'); return; }
   resetMediaUploadUI();
   const previewEl = document.getElementById('media-upload-preview');
   previewEl.innerHTML = '';
-
   if(isImage){
     try {
       const compressed = await compressImageFile(file);
       pendingMedia = { file, type: 'image', dataUrl: compressed };
       const img = document.createElement('img'); img.src = compressed;
       previewEl.appendChild(img);
-      const sizeKb = Math.round((compressed.length * 0.75) / 1024);
-      document.getElementById('media-upload-size-info').textContent = `${sizeKb} كيلوبايت تقريبًا`;
+      document.getElementById('media-upload-size-info').textContent = `${Math.round((compressed.length * 0.75) / 1024)} كيلوبايت`;
       document.getElementById('media-upload-overlay').classList.add('show');
     } catch(e){ showToast('مش قادرين نفتح الصورة','error'); }
     return;
   }
-
-  if(file.size > MAX_VIDEO_BYTES){
-    showToast(`الفيديو أكبر من ${Math.round(MAX_VIDEO_BYTES/1024/1024)} ميجا، اختار فيديو أصغر`,'error');
-    return;
-  }
+  if(file.size > MAX_VIDEO_BYTES){ showToast(`الفيديو أكبر من ${Math.round(MAX_VIDEO_BYTES/1024/1024)} ميجا`,'error'); return; }
   const videoUrl = URL.createObjectURL(file);
   const tempVideo = document.createElement('video');
   tempVideo.src = videoUrl; tempVideo.preload = 'metadata';
   tempVideo.onloadedmetadata = () => {
-    if(tempVideo.duration > MAX_VIDEO_SECONDS){
-      showToast(`الفيديو أطول من ${MAX_VIDEO_SECONDS} ثانية، اختار فيديو أقصر`,'error');
-      URL.revokeObjectURL(videoUrl);
-      return;
-    }
+    if(tempVideo.duration > MAX_VIDEO_SECONDS){ showToast(`الفيديو أطول من ${MAX_VIDEO_SECONDS} ثانية`,'error'); URL.revokeObjectURL(videoUrl); return; }
     const reader = new FileReader();
     reader.onload = () => {
       pendingMedia = { file, type: 'video', dataUrl: reader.result };
       const vid = document.createElement('video');
       vid.src = reader.result; vid.controls = true; vid.playsInline = true;
       previewEl.appendChild(vid);
-      const sizeKb = Math.round(file.size / 1024);
-      document.getElementById('media-upload-size-info').textContent = `${sizeKb} كيلوبايت`;
+      document.getElementById('media-upload-size-info').textContent = `${Math.round(file.size / 1024)} كيلوبايت`;
       document.getElementById('media-upload-overlay').classList.add('show');
     };
     reader.readAsDataURL(file);
   };
-  tempVideo.onerror = () => showToast('مش قادرين نقرأ الفيديو','error');
 }
 
 function compressImageFile(file){
@@ -2087,20 +1729,16 @@ document.getElementById('media-upload-send').addEventListener('click', async ()=
       pendingMedia = { file: null, type: null, dataUrl: null };
     }, 150);
   } catch(e){
-    showToast('فشل إرسال الملف، جرب تاني أو اختار ملف أصغر','error');
+    showToast('فشل الإرسال','error');
     sendBtn.disabled = false;
-    document.getElementById('media-upload-status').textContent = '';
   }
 });
 
 function openMediaViewer(url, type, caption){
   const content = document.getElementById('media-viewer-content');
   content.innerHTML = '';
-  if(type === 'image'){
-    const img = document.createElement('img'); img.src = url; content.appendChild(img);
-  } else {
-    const vid = document.createElement('video'); vid.src = url; vid.controls = true; vid.autoplay = true; vid.playsInline = true; content.appendChild(vid);
-  }
+  if(type === 'image'){ const img = document.createElement('img'); img.src = url; content.appendChild(img); }
+  else { const vid = document.createElement('video'); vid.src = url; vid.controls = true; vid.autoplay = true; vid.playsInline = true; content.appendChild(vid); }
   const capEl = document.getElementById('media-viewer-caption');
   if(caption){ capEl.textContent = caption; capEl.style.display = 'block'; } else { capEl.style.display = 'none'; }
   document.getElementById('media-viewer-overlay').classList.add('show');
@@ -2110,7 +1748,6 @@ document.getElementById('media-viewer-close').addEventListener('click', ()=>{
   document.getElementById('media-viewer-content').innerHTML = '';
 });
 
-// ============ MESSAGES & BUBBLES ============
 async function markMessagesAsRead(chatId){
   const {db,rtdb}=fb; const snap=await rtdb.get(rtdb.ref(db,`chats/${chatId}/messages`));
   if(!snap.exists()) return; const messages=snap.val(); const now=new Date().toISOString(); const updates={};
@@ -2123,7 +1760,7 @@ function getMessageStatusIcon(msg){
   return `<span class="msg-status check-sent"><svg class="check-icon" viewBox="0 0 24 24" fill="none"><path d="M4 12l4 4L20 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
 }
 function buildBubbleContent(m){
-  if(m.type === 'call'){ const isMissed = m.callStatus === 'missed'; return `<div class="call-bubble"><span class="call-bubble-icon">${isMissed?'📞❌':'📞'}</span><div><div>${isMissed?'مكالمة فائتة':(m.duration?`مكالمة ${formatCallDuration(m.duration)}`:'مكالمة منتهية')}</div><div class="call-bubble-duration">${m.duration?formatCallDuration(m.duration):''}</div></div></div>`; }
+  if(m.type === 'call'){ const isMissed = m.callStatus === 'missed'; return `<div class="call-bubble"><span class="call-bubble-icon">${isMissed?'📞❌':'📞'}</span><div><div>${isMissed?'مكالمة فائتة':(m.duration?`مكالمة ${formatCallDuration(m.duration)}`:'مكالمة')}</div><div class="call-bubble-duration">${m.duration?formatCallDuration(m.duration):''}</div></div></div>`; }
   if(m.type === 'voice'){ const audioSrc = m.audioUrl || m.audioBase64 || ''; if(audioSrc){ const dur = m.duration || 0; const mm = Math.floor(dur/60), ss = dur%60; const bars = Array.from({length: 24}).map((_,i)=>{ const h = 6 + Math.round(Math.abs(Math.sin(i*1.7))*16); return `<span style="height:${h}px;"></span>`; }).join(''); return `<div class="voice-msg"><button class="voice-msg-play-btn" data-url="${escapeAttr(audioSrc)}"><svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></button><div class="voice-msg-wave">${bars}</div><div class="voice-msg-duration">${mm}:${ss.toString().padStart(2,'0')}</div></div>`; } }
   if(m.type === 'image'){
     const src = m.mediaBase64 || '';
@@ -2155,67 +1792,43 @@ function listenToMessages(chatId){
   });
 }
 
-// ============ DELETE ============
 const contextMenu = document.getElementById('context-menu'); const contextOverlay = document.getElementById('context-overlay');
 function showDeleteMenu(e, msgId, isMine){ if(!isMine) return; e.preventDefault(); state.selectedMsgId = msgId; const x = e.touches ? e.touches[0].clientX : e.clientX; const y = e.touches ? e.touches[0].clientY : e.clientY; contextMenu.style.left = Math.min(x, window.innerWidth - 200) + 'px'; contextMenu.style.top = Math.min(y, window.innerHeight - 120) + 'px'; contextMenu.classList.add('show'); contextOverlay.classList.add('show'); }
 function hideDeleteMenu(){ contextMenu.classList.remove('show'); contextOverlay.classList.remove('show'); state.selectedMsgId = null; }
 contextOverlay.addEventListener('click', hideDeleteMenu);
-document.getElementById('delete-for-all').addEventListener('click', async ()=>{ if(!state.selectedMsgId||!state.currentChatId) return; hideDeleteMenu(); try { await fb.rtdb.remove(fb.rtdb.ref(fb.db,`chats/${state.currentChatId}/messages/${state.selectedMsgId}`)); showToast('🗑️ تم الحذف للجميع','success'); } catch(e){ showToast('مش قادرين نحذف','error'); } });
-document.getElementById('delete-for-me').addEventListener('click', async ()=>{ if(!state.selectedMsgId||!state.currentChatId) return; hideDeleteMenu(); try { await fb.rtdb.update(fb.rtdb.ref(fb.db,`chats/${state.currentChatId}/messages/${state.selectedMsgId}`),{[`deletedFor.${state.uid}`]:true}); showToast('🙈 تم الحذف عندك فقط','success'); } catch(e){ showToast('مش قادرين نحذف','error'); } });
-function showMessageInfo(bubbleElement){
-  document.getElementById('info-sent').textContent=bubbleElement.dataset.sent?new Date(bubbleElement.dataset.sent).toLocaleString('ar-EG',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'}):'-';
-  document.getElementById('info-delivered').textContent=bubbleElement.dataset.delivered?new Date(bubbleElement.dataset.delivered).toLocaleString('ar-EG',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'}):'لم يتم التسليم';
-  document.getElementById('info-read').textContent=bubbleElement.dataset.read?new Date(bubbleElement.dataset.read).toLocaleString('ar-EG',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'}):'لم تُقرأ بعد';
-  document.getElementById('message-info-popup').classList.add('show'); document.getElementById('popup-overlay').classList.add('show');
-}
-document.getElementById('popup-overlay').addEventListener('click',()=>{ document.getElementById('message-info-popup').classList.remove('show'); document.getElementById('popup-overlay').classList.remove('show'); });
+document.getElementById('delete-for-all').addEventListener('click', async ()=>{ if(!state.selectedMsgId||!state.currentChatId) return; hideDeleteMenu(); try { await fb.rtdb.remove(fb.rtdb.ref(fb.db,`chats/${state.currentChatId}/messages/${state.selectedMsgId}`)); showToast('🗑️ تم الحذف','success'); } catch(e){ showToast('مش قادرين نحذف','error'); } });
+document.getElementById('delete-for-me').addEventListener('click', async ()=>{ if(!state.selectedMsgId||!state.currentChatId) return; hideDeleteMenu(); try { await fb.rtdb.update(fb.rtdb.ref(fb.db,`chats/${state.currentChatId}/messages/${state.selectedMsgId}`),{[`deletedFor.${state.uid}`]:true}); showToast('🙈 تم الحذف','success'); } catch(e){ showToast('مش قادرين نحذف','error'); } });
 
-// ============ NAVIGATION ============
 document.getElementById('btn-back-chat').addEventListener('click',()=>{ if(state.unsubMessages){ fb.rtdb.off(fb.rtdb.ref(fb.db,`chats/${state.currentChatId}/messages`)); state.unsubMessages=null; } if(state.unsubTyping){ fb.rtdb.off(fb.rtdb.ref(fb.db,`chats/${state.currentChatId}/typing`)); state.unsubTyping=null; } state.currentChatUser=null; state.currentChatId=null; goTo('main'); });
 document.getElementById('my-avatar').addEventListener('click',()=>{ updateProfileStats(); goTo('profile'); });
 document.getElementById('btn-back-profile').addEventListener('click',()=>goTo('main'));
 document.querySelector('[data-nav="chats"]').addEventListener('click',()=>goTo('main'));
-document.querySelector('[data-nav="calls"]').addEventListener('click',()=>{ document.getElementById('coming-soon-title').textContent='المكالمات'; document.getElementById('coming-soon-icon').textContent='📞'; document.getElementById('coming-soon-text').textContent='المكالمات الصوتية متاحة في كل محادثة - اضغط على أيقونة الهاتف الأخضر.'; goTo('comingSoon'); });
-document.querySelector('[data-nav="communities"]').addEventListener('click',()=>{ document.getElementById('coming-soon-title').textContent='المجتمعات'; document.getElementById('coming-soon-icon').textContent='👥'; document.getElementById('coming-soon-text').textContent='ميزة المجتمعات لسه تحت التطوير.'; goTo('comingSoon'); });
-document.querySelector('[data-nav="updates"]').addEventListener('click',()=>{ document.getElementById('updates-avatar-btn').textContent=state.displayName.charAt(0).toUpperCase(); goTo('updates'); });
+document.querySelector('[data-nav="calls"]').addEventListener('click',()=>{ document.getElementById('coming-soon-title').textContent='المكالمات'; document.getElementById('coming-soon-icon').textContent='📞'; document.getElementById('coming-soon-text').textContent='المكالمات الصوتية متاحة في كل محادثة.'; goTo('comingSoon'); });
+document.querySelector('[data-nav="communities"]').addEventListener('click',()=>{ document.getElementById('coming-soon-title').textContent='المجتمعات'; document.getElementById('coming-soon-icon').textContent='👥'; document.getElementById('coming-soon-text').textContent='قريبًا'; goTo('comingSoon'); });
+document.querySelector('[data-nav="updates"]').addEventListener('click',()=>goTo('comingSoon'));
 document.getElementById('btn-back-coming-soon').addEventListener('click',()=>goTo('main'));
-document.querySelectorAll('[data-nav3="chats"]').forEach(el=>el.addEventListener('click',()=>goTo('main')));
-document.querySelectorAll('[data-nav3="calls"]').forEach(el=>el.addEventListener('click',()=>{ document.getElementById('coming-soon-title').textContent='المكالمات'; document.getElementById('coming-soon-icon').textContent='📞'; goTo('comingSoon'); }));
-document.querySelectorAll('[data-nav3="communities"]').forEach(el=>el.addEventListener('click',()=>{ document.getElementById('coming-soon-title').textContent='المجتمعات'; document.getElementById('coming-soon-icon').textContent='👥'; goTo('comingSoon'); }));
-document.querySelectorAll('[data-nav2="chats"]').forEach(el=>el.addEventListener('click',()=>goTo('main')));
-document.querySelectorAll('[data-nav2="updates"]').forEach(el=>el.addEventListener('click',()=>{ document.getElementById('updates-avatar-btn').textContent=state.displayName.charAt(0).toUpperCase(); goTo('updates'); }));
 
-// ============ SETTINGS NAVIGATION ============
-document.getElementById('btn-open-settings').addEventListener('click', ()=>{
-  goTo('settings');
-  checkMicPermission();
-  checkNotifPermission();
-});
-document.getElementById('btn-back-settings').addEventListener('click', ()=>{
-  stopMicTest();
-  goTo('main');
-});
+document.getElementById('btn-open-settings').addEventListener('click', ()=>{ goTo('settings'); checkMicPermission(); checkNotifPermission(); });
+document.getElementById('btn-back-settings').addEventListener('click', ()=>{ stopMicTest(); goTo('main'); });
 document.getElementById('btn-test-mic').addEventListener('click', startMicTest);
 document.getElementById('btn-stop-mic-test').addEventListener('click', stopMicTest);
 document.getElementById('btn-request-mic').addEventListener('click', requestMicPermission);
 document.getElementById('btn-request-notif').addEventListener('click', requestNotifPermission);
 
-// ============ CALL BUTTON IN CHAT ============
 document.getElementById('btn-call').addEventListener('click', () => {
   if(!state.currentChatUser){ showToast('افتح محادثة الأول','error'); return; }
-  if(state.callState.active){ showToast('فيه مكالمة شغالة بالفعل',''); return; }
+  if(state.callState.active){ showToast('فيه مكالمة شغالة',''); return; }
   startCall();
 });
 
-// ============ CHAT LIST ============
 function listenToChatList(){
   if(state.unsubChats){ fb.rtdb.off(fb.rtdb.ref(fb.db,'chats')); state.unsubChats=null; }
   const {db,rtdb}=fb; const listEl=document.getElementById('chat-list');
   state.unsubChats=rtdb.onValue(rtdb.query(rtdb.ref(db,'chats'),rtdb.limitToFirst(100)),(snap)=>{
-    if(!snap.exists()){ listEl.innerHTML='<div class="empty-state"><h3>📭 مفيش محادثات لسه</h3></div>'; state.chatCount=0; updateProfileStats(); return; }
+    if(!snap.exists()){ listEl.innerHTML='<div class="empty-state"><h3>📭 مفيش محادثات</h3></div>'; state.chatCount=0; updateProfileStats(); return; }
     const chats=snap.val(); const myChats=Object.entries(chats).filter(([id,c])=>c.participants?.[state.uid]).sort((a,b)=>(b[1].lastMessageAt||'').localeCompare(a[1].lastMessageAt||''));
     state.chatCount=myChats.length; updateProfileStats();
-    if(!myChats.length){ listEl.innerHTML='<div class="empty-state"><h3>📭 مفيش محادثات لسه</h3></div>'; return; }
+    if(!myChats.length){ listEl.innerHTML='<div class="empty-state"><h3>📭 مفيش محادثات</h3></div>'; return; }
     let html='<div class="section-header">المحادثات الأخيرة</div>';
     myChats.forEach(([chatId,c])=>{
       const otherUid=Object.keys(c.participants).find(p=>p!==state.uid), otherName=c.participantNames?.[otherUid]||'مستخدم';
@@ -2229,30 +1842,9 @@ function listenToChatList(){
 function formatTime(ts){ const d=new Date(ts),now=new Date(),diff=now-d; if(diff<60000) return 'الآن'; if(diff<3600000) return `${Math.floor(diff/60000)} د`; if(diff<86400000) return d.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'}); return d.toLocaleDateString('ar-EG',{month:'short',day:'numeric'}); }
 function updateProfileStats(){ document.getElementById('chat-count').textContent=state.chatCount; document.getElementById('msg-count').textContent=state.msgCount; }
 
-// ============ LOGOUT ============
-document.getElementById('btn-logout').addEventListener('click',()=>{ if(confirm('⚠️ متأكد من تسجيل الخروج؟')){ const {db,rtdb}=fb; rtdb.update(rtdb.ref(db,`users/${state.uid}`),{online:false,lastSeen:new Date().toISOString()}); localStorage.removeItem('heye_uid'); location.reload(); } });
+document.getElementById('btn-logout').addEventListener('click',()=>{ if(confirm('⚠️ متأكد؟')){ const {db,rtdb}=fb; rtdb.update(rtdb.ref(db,`users/${state.uid}`),{online:false,lastSeen:new Date().toISOString()}); localStorage.removeItem('heye_uid'); location.reload(); } });
 
-// ============ STATUS SYSTEM ============
-const STATUS_LIFETIME_MS = 24 * 60 * 60 * 1000;
-let statusState = { pendingFile: null, activeList: [], activeIndex: 0, timerHandle: null };
-document.getElementById('my-status-row').addEventListener('click',()=>document.getElementById('status-file-input').click());
-document.getElementById('status-fab-camera').addEventListener('click',()=>document.getElementById('status-file-input').click());
-document.getElementById('status-file-input').addEventListener('change', (e)=>{ const file = e.target.files[0]; if(!file) return; statusState.pendingFile = file; document.getElementById('status-upload-img').src = URL.createObjectURL(file); document.getElementById('status-upload-overlay').classList.add('show'); e.target.value = ''; });
-document.getElementById('status-upload-close').addEventListener('click',()=>{ document.getElementById('status-upload-overlay').classList.remove('show'); statusState.pendingFile = null; });
-document.getElementById('status-upload-send').addEventListener('click', async ()=>{ if(!statusState.pendingFile) return; const reader = new FileReader(); reader.onload = async () => { const { db, rtdb } = fb; const now = Date.now(); const newStatusRef = rtdb.push(rtdb.ref(db, `statuses/${state.uid}/items`)); await rtdb.set(newStatusRef, { imageBase64: reader.result, caption: document.getElementById('status-upload-caption').value.trim() || '', createdAt: now, expiresAt: now + STATUS_LIFETIME_MS }); await rtdb.update(rtdb.ref(db, `statusOwners/${state.uid}`), { displayName: state.displayName, lastStatusAt: now }); document.getElementById('status-upload-overlay').classList.remove('show'); statusState.pendingFile = null; showToast('✅ تم نشر الحالة','success'); loadStatuses(); }; reader.readAsDataURL(statusState.pendingFile); });
-async function loadStatuses(){
-  const { db, rtdb } = fb;
-  try { const mySnap = await rtdb.get(rtdb.ref(db, `statuses/${state.uid}/items`)); if(mySnap.exists()){ const items = Object.values(mySnap.val()).filter(it => it.expiresAt > Date.now()).sort((a,b)=>a.createdAt-b.createdAt); if(items.length){ document.getElementById('my-status-avatar-el').classList.add('has-status'); document.getElementById('my-status-avatar-el').innerHTML = `<img src="${escapeAttr(items[items.length-1].imageBase64)}" alt="">`; } } } catch(e){}
-  rtdb.onValue(rtdb.ref(db, 'statusOwners'), async (ownersSnap)=>{ if(!ownersSnap.exists()) return; const owners = Object.entries(ownersSnap.val()).filter(([uid]) => uid !== state.uid); const listEl = document.getElementById('others-status-list'); const sectionEl = document.getElementById('others-status-section'); if(!owners.length){ sectionEl.style.display='none'; return; } const rows = []; for(const [uid, ownerData] of owners){ const itemsSnap = await rtdb.get(rtdb.ref(db, `statuses/${uid}/items`)); if(!itemsSnap.exists()) continue; const items = Object.values(itemsSnap.val()).filter(it => it.expiresAt > Date.now()).sort((a,b)=>a.createdAt-b.createdAt); if(!items.length) continue; rows.push({ uid, name: ownerData.displayName || 'مستخدم', items, latestImg: items[items.length-1].imageBase64, latestTime: items[items.length-1].createdAt }); } if(!rows.length){ sectionEl.style.display='none'; return; } sectionEl.style.display='block'; listEl.innerHTML = rows.map(r => `<div class="status-row" data-uid="${r.uid}"><div class="status-ring"><div class="status-avatar-inner"><img src="${escapeAttr(r.latestImg)}" alt=""></div></div><div><div class="status-row-name">${escapeHtml(r.name)}</div><div class="status-row-time">${formatStatusTime(r.latestTime)}</div></div></div>`).join(''); listEl.querySelectorAll('.status-row').forEach(row=>{ row.addEventListener('click',()=>{ const found = rows.find(r=>r.uid===row.dataset.uid); if(found) openStatusViewer(found.items, found.name); }); }); });
-}
-function formatStatusTime(ts){ const diff = Date.now() - ts; if(diff < 60000) return 'الآن'; if(diff < 3600000) return `منذ ${Math.floor(diff/60000)} دقيقة`; return `منذ ${Math.floor(diff/3600000)} ساعة`; }
-function openStatusViewer(items, ownerName){ statusState.activeList = items; statusState.activeIndex = 0; document.getElementById('status-viewer-name').textContent = ownerName; document.getElementById('status-viewer-progress').innerHTML = items.map(()=>'<div class="status-viewer-bar"><div class="status-viewer-bar-fill"></div></div>').join(''); showStatusAt(0); document.getElementById('status-viewer').classList.add('show'); }
-function showStatusAt(index){ clearTimeout(statusState.timerHandle); if(index < 0 || index >= statusState.activeList.length){ document.getElementById('status-viewer').classList.remove('show'); return; } statusState.activeIndex = index; const item = statusState.activeList[index]; document.getElementById('status-viewer-img').src = item.imageBase64; document.getElementById('status-viewer-time').textContent = formatStatusTime(item.createdAt); document.getElementById('status-viewer-caption').style.display = item.caption ? 'block' : 'none'; if(item.caption) document.getElementById('status-viewer-caption').textContent = item.caption; document.querySelectorAll('.status-viewer-bar-fill').forEach((b,i)=>{ b.style.transition='none'; b.style.width = i < index ? '100%' : '0%'; }); void document.getElementById('status-viewer-progress').offsetWidth; const bar = document.querySelectorAll('.status-viewer-bar-fill')[index]; if(bar){ bar.style.transition = 'width 5s linear'; requestAnimationFrame(()=>{ bar.style.width = '100%'; }); } statusState.timerHandle = setTimeout(()=> showStatusAt(index+1), 5000); }
-document.getElementById('status-viewer-next').addEventListener('click', ()=> showStatusAt(statusState.activeIndex+1));
-document.getElementById('status-viewer-prev').addEventListener('click', ()=> showStatusAt(statusState.activeIndex-1));
-document.getElementById('status-viewer-close').addEventListener('click', ()=>{ clearTimeout(statusState.timerHandle); document.getElementById('status-viewer').classList.remove('show'); });
-
-console.log('✅ Heye App - Mic Permission Modal + WebRTC Voice Calls + Base64 Voice Messages');
+console.log('✅ Heye App - FIXED WebRTC Bidirectional Calls');
 </script>
 </body>
 </html>
