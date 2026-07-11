@@ -84,6 +84,7 @@
   @keyframes micPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
   @keyframes recBlink{0%,100%{opacity:1;}50%{opacity:.3;}}
   @keyframes micModalPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(217,112,90,.4);}50%{transform:scale(1.05);box-shadow:0 0 0 20px rgba(217,112,90,0);}}
+  @keyframes connectingPulse{0%,100%{opacity:1;}50%{opacity:.5;}}
 
   #view-loading{align-items:center;justify-content:center;background:var(--bg-deep);gap:18px;}
   .loader-ring{width:44px;height:44px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--gold);animation:spin 0.9s linear infinite;}
@@ -341,7 +342,9 @@
   .call-avatar{width:120px;height:120px;border-radius:50%;background:linear-gradient(160deg, var(--ok), #3a8d5c);display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:800;color:#fff;box-shadow:0 0 40px rgba(76,175,80,.4);}
   .call-name{font-size:22px;font-weight:700;color:var(--ink);}
   .call-status{font-size:14px;color:var(--mute);}
-  .call-status.ringing{color:var(--ok);animation:fadeUp 1s ease infinite;}
+  .call-status.ringing{color:var(--ok);animation:connectingPulse 1.2s ease infinite;}
+  .call-status.connected{color:var(--ok);}
+  .call-status.connecting{color:var(--gold-soft);animation:connectingPulse 0.8s ease infinite;}
   .call-timer{font-size:18px;color:var(--ink);font-variant-numeric:tabular-nums;display:none;}
   .call-timer.show{display:block;}
   .call-quality{font-size:12px;color:var(--mute-2);display:none;}
@@ -420,6 +423,10 @@
   .media-viewer-content{max-width:100%;max-height:85vh;display:flex;align-items:center;justify-content:center;}
   .media-viewer-content img,.media-viewer-content video{max-width:100%;max-height:85vh;object-fit:contain;}
   .media-viewer-caption{color:#fff;font-size:14px;padding:16px 24px 0;text-align:center;max-width:90%;}
+  
+  /* Call debug info */
+  .call-debug{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--mute-2);text-align:center;background:rgba(0,0,0,.6);padding:4px 12px;border-radius:8px;display:none;max-width:90%;direction:ltr;}
+  .call-debug.show{display:block;}
 </style>
 </head>
 <body>
@@ -596,6 +603,7 @@
     <div class="call-timer" id="call-timer">00:00</div>
     <div class="call-quality" id="call-quality">جاري الاتصال بالطرف الآخر...</div>
     <div class="call-actions" id="call-actions"></div>
+    <div class="call-debug" id="call-debug"></div>
   </div>
 
   <div class="context-overlay" id="context-overlay"></div>
@@ -716,7 +724,9 @@ const state = {
     // === FIX: إضافات لتتبع الـ Signaling ===
     signalingStarted: false,
     offerReceived: false,
-    answerReceived: false
+    answerReceived: false,
+    connectionAttempts: 0,
+    maxConnectionAttempts: 5
   },
   incomingCallData: null,
   // Listeners للمكالمات
@@ -816,15 +826,23 @@ const callStatus = document.getElementById('call-status');
 const callTimer = document.getElementById('call-timer');
 const callQuality = document.getElementById('call-quality');
 const callActions = document.getElementById('call-actions');
+const callDebug = document.getElementById('call-debug');
+
+function updateCallStatus(status, type, extra){
+  callStatus.textContent = status;
+  callStatus.className = 'call-status ' + type;
+  if(extra) callQuality.textContent = extra;
+  callQuality.classList.add('show');
+  if(type === 'connected') callQuality.classList.remove('show');
+}
 
 function showCallUI(type, partnerName){
   callOverlay.className = 'call-overlay show ' + type;
   callAvatar.textContent = partnerName.charAt(0).toUpperCase();
   callName.textContent = partnerName;
-  callStatus.textContent = type === 'outgoing' ? 'جاري الاتصال...' : 'مكالمة واردة...';
-  callStatus.className = 'call-status ringing';
+  updateCallStatus(type === 'outgoing' ? 'جاري الاتصال...' : 'مكالمة واردة...', 'ringing', 'جاري الاتصال بالطرف الآخر...');
   callTimer.classList.remove('show');
-  callQuality.classList.remove('show');
+  callDebug.classList.remove('show');
   
   let html = `
     <button class="call-action-btn call-mute-btn" id="call-mute-btn" title="كتم">
@@ -854,6 +872,7 @@ function hideCallUI(){
   callOverlay.classList.remove('show', 'incoming', 'outgoing');
   stopRingtone();
   if(state.callState.timerInterval) clearInterval(state.callState.timerInterval);
+  callDebug.classList.remove('show');
 }
 
 function toggleMute(){
@@ -881,11 +900,16 @@ const rtcConfig = {
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
     { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun3.l.google.com:19302' },
+    { urls: 'stun:stun4.l.google.com:19302' },
     { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
     { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
     { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
   ],
-  iceCandidatePoolSize: 10
+  iceCandidatePoolSize: 10,
+  iceTransportPolicy: 'all',
+  bundlePolicy: 'max-bundle',
+  rtcpMuxPolicy: 'require'
 };
 
 // ============ CALL SIGNALING - FIXED ============
@@ -903,7 +927,9 @@ function resetCallState(){
   state.callState.signalingStarted = false;
   state.callState.offerReceived = false;
   state.callState.answerReceived = false;
+  state.callState.connectionAttempts = 0;
   state.incomingCallData = null;
+  iceQueue = [];
 }
 
 function cleanupCallListeners(){
@@ -938,16 +964,24 @@ async function applyOrQueueIce(candidate){
 async function drainIceQueue(){
   const pc = state.callState.peerConnection;
   if(!pc) return;
-  while(iceQueue.length){
+  let count = 0;
+  while(iceQueue.length > 0 && count < 50){
     const c = iceQueue.shift();
-    try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch(e){}
+    try { await pc.addIceCandidate(new RTCIceCandidate(c)); count++; } catch(e){ console.warn('ICE add failed:', e); }
+  }
+  if(iceQueue.length > 0) {
+    console.log('Still have', iceQueue.length, 'ICE candidates in queue');
+    setTimeout(drainIceQueue, 500);
   }
 }
 
 // ===== FIX: تحسين معالجة الـ Signaling =====
 function processSignalingData(data) {
   const pc = state.callState.peerConnection;
-  if (!pc) return;
+  if (!pc) {
+    console.warn('No peer connection for signaling');
+    return;
+  }
   
   // === معالجة الـ Offer (أنا callee) ===
   if (data.offer && !state.callState.offerReceived && state.callState.type === 'incoming') {
@@ -1057,12 +1091,12 @@ function listenForOutgoingCallResponse(partnerUid){
         }
       }
       stopRingtone();
-      callStatus.textContent = 'جاري تجهيز الاتصال...';
-      callStatus.className = 'call-status ringing';
-      callQuality.textContent = 'جاري الاتصال بالطرف الآخر...';
-      callQuality.classList.add('show');
+      updateCallStatus('جاري تجهيز الاتصال...', 'connecting', 'جاري تجهيز الاتصال...');
       state.callState.offerSent = true;
-      await createAndSendOffer();
+      // ننتظر شوية عشان الـ PC يتجهز
+      setTimeout(async () => {
+        await createAndSendOffer();
+      }, 300);
     }
     
     // === FIX: معالجة الـ Signaling Data بشكل موحد ===
@@ -1105,6 +1139,7 @@ async function startCall(){
   const partnerUid = state.currentChatUser.id;
   const partnerName = state.currentChatUser.displayName;
 
+  // التأكد من إذن الميكروفون
   let stream;
   try { stream = await ensureLocalStream(); }
   catch(e){
@@ -1124,7 +1159,9 @@ async function startCall(){
   state.callState.offerSent = false;
   state.callState.answerReceived = false;
   state.callState.signalingStarted = false;
+  state.callState.connectionAttempts = 0;
 
+  // إنشاء Peer Connection
   await createPeerConnection(stream);
   
   // أبدأ أسمع على رد الطرف التاني
@@ -1176,13 +1213,19 @@ async function acceptCall(){
   await createPeerConnection(stream);
 
   stopRingtone();
-  callStatus.textContent = 'جاري تجهيز الاتصال...';
-  callStatus.className = 'call-status ringing';
-  callQuality.textContent = 'جاري الاتصال بالطرف الآخر...';
-  callQuality.classList.add('show');
+  updateCallStatus('جاري تجهيز الاتصال...', 'connecting', 'جاري تجهيز الاتصال...');
 
   const { db, rtdb } = fb;
   await rtdb.update(rtdb.ref(db, `calls/${state.uid}`), { status: 'answered', answeredAt: Date.now() });
+
+  // لو فيه offer موجود، نعالجه
+  if (state.incomingCallData.offer) {
+    setTimeout(() => {
+      if (state.callState.peerConnection && !state.callState.offerReceived) {
+        processSignalingData({ offer: state.incomingCallData.offer });
+      }
+    }, 500);
+  }
 
   saveCallLog('completed', createdAt || Date.now());
 }
@@ -1196,10 +1239,16 @@ async function createPeerConnection(providedStream){
   const pc = new RTCPeerConnection(rtcConfig);
   state.callState.peerConnection = pc;
   iceQueue = [];
+  
+  // تفعيل الـ Debug
+  callDebug.classList.add('show');
 
   try {
     const stream = providedStream || await ensureLocalStream();
-    stream.getTracks().forEach(track => pc.addTrack(track, stream));
+    stream.getTracks().forEach(track => {
+      pc.addTrack(track, stream);
+      console.log('🎤 Added track:', track.kind);
+    });
     console.log('🎤 Added local tracks:', stream.getTracks().length);
   } catch(e){
     console.error('Mic access failed:', e);
@@ -1207,7 +1256,7 @@ async function createPeerConnection(providedStream){
   }
 
   pc.ontrack = (event) => {
-    console.log('🔊 Received remote track!');
+    console.log('🔊 Received remote track!', event.track.kind);
     let audioEl = document.querySelector('audio[data-peer="remote"]');
     if(!audioEl){
       audioEl = document.createElement('audio');
@@ -1221,35 +1270,66 @@ async function createPeerConnection(providedStream){
     if(state.callState.isSpeakerOn && audioEl.setSinkId){
       audioEl.setSinkId('speaker').catch(()=>{});
     }
+    
+    // تحديث حالة المكالمة
+    updateCallStatus('متصل ✅', 'connected', '');
   };
 
   pc.onconnectionstatechange = () => {
-    console.log('🔗 Connection state:', pc.connectionState);
-    if(pc.connectionState === 'connected'){
-      callStatus.textContent = 'متصل ✅';
-      callStatus.className = 'call-status';
-      callQuality.textContent = 'الاتصال مستقر';
-      callQuality.classList.add('show');
-      setTimeout(()=> callQuality.classList.remove('show'), 2500);
+    const stateStr = pc.connectionState;
+    console.log('🔗 Connection state:', stateStr);
+    callDebug.textContent = `🧊 ICE: ${pc.iceConnectionState} | 🔗 ${stateStr}`;
+    
+    if(stateStr === 'connected'){
+      updateCallStatus('متصل ✅', 'connected', '');
+      callQuality.classList.remove('show');
       startCallTimer();
-    } else if(pc.connectionState === 'failed'){
-      callQuality.textContent = 'فشل الاتصال ❌';
-      callQuality.classList.add('show');
-    } else if(pc.connectionState === 'disconnected'){
-      callQuality.textContent = 'انقطع الاتصال...';
-      callQuality.classList.add('show');
-    } else if(pc.connectionState === 'connecting'){
-      callQuality.textContent = 'جاري الاتصال...';
-      callQuality.classList.add('show');
+    } else if(stateStr === 'failed'){
+      updateCallStatus('فشل الاتصال ❌', 'connecting', 'فشل الاتصال ❌');
+      // نحاول نعيد المحاولة
+      if(state.callState.connectionAttempts < state.callState.maxConnectionAttempts) {
+        state.callState.connectionAttempts++;
+        setTimeout(() => {
+          if(state.callState.active && state.callState.peerConnection) {
+            console.log('🔄 Retrying connection...');
+            // نعيد إنشاء الـ offer
+            if(state.callState.type === 'outgoing') {
+              createAndSendOffer();
+            }
+          }
+        }, 2000);
+      } else {
+        endCall();
+        showToast('فشل الاتصال بعد محاولات متعددة','error');
+      }
+    } else if(stateStr === 'disconnected'){
+      updateCallStatus('انقطع الاتصال...', 'connecting', 'انقطع الاتصال...');
+      // نحاول نعيد الاتصال
+      setTimeout(() => {
+        if(state.callState.active && state.callState.peerConnection) {
+          console.log('🔄 Reconnecting...');
+          if(state.callState.type === 'outgoing') {
+            createAndSendOffer();
+          }
+        }
+      }, 3000);
+    } else if(stateStr === 'connecting'){
+      updateCallStatus('جاري الاتصال...', 'connecting', 'جاري الاتصال بالطرف الآخر...');
     }
   };
 
   pc.oniceconnectionstatechange = () => {
     console.log('🧊 ICE state:', pc.iceConnectionState);
+    callDebug.textContent = `🧊 ICE: ${pc.iceConnectionState} | 🔗 ${pc.connectionState}`;
+    if(pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') {
+      // نضيف الـ ICE Queue
+      setTimeout(drainIceQueue, 100);
+    }
   };
 
   pc.onicecandidate = (event) => {
     if(event.candidate && state.callState.partnerUid){
+      console.log('🧊 Sending ICE candidate');
       const { db, rtdb } = fb;
       const newRef = rtdb.push(rtdb.ref(db, `calls/${state.callState.partnerUid}/iceIn`));
       rtdb.set(newRef, event.candidate.toJSON());
@@ -1268,7 +1348,13 @@ async function createPeerConnection(providedStream){
 
 async function createAndSendOffer(){
   const pc = state.callState.peerConnection;
-  if(!pc) return;
+  if(!pc) {
+    console.warn('No peer connection to create offer');
+    return;
+  }
+
+  // نضيف تأخير صغير للتأكد من أن الـ PC جاهز
+  await new Promise(r => setTimeout(r, 200));
 
   try {
     const offer = await pc.createOffer({
@@ -1282,15 +1368,26 @@ async function createAndSendOffer(){
     await rtdb.update(rtdb.ref(db, `calls/${state.callState.partnerUid}`), {
       offer: { type: offer.type, sdp: offer.sdp }
     });
+    
+    // نضيف الـ ICE Queue بعد إرسال الـ offer
+    setTimeout(drainIceQueue, 500);
   } catch(e){
     console.error('Create offer failed:', e);
     showToast('فشل إنشاء الاتصال','error');
+    // نحاول مرة تانية
+    if(state.callState.connectionAttempts < state.callState.maxConnectionAttempts) {
+      state.callState.connectionAttempts++;
+      setTimeout(createAndSendOffer, 1500);
+    }
   }
 }
 
 async function handleOffer(offer){
   const pc = state.callState.peerConnection;
-  if(!pc) return;
+  if(!pc) {
+    console.warn('No peer connection to handle offer');
+    return;
+  }
 
   try {
     await pc.setRemoteDescription(new RTCSessionDescription(offer));
@@ -1313,13 +1410,25 @@ async function handleOffer(offer){
 
 async function handleAnswer(answer){
   const pc = state.callState.peerConnection;
-  if(!pc) return;
+  if(!pc) {
+    console.warn('No peer connection to handle answer');
+    return;
+  }
   try {
     await pc.setRemoteDescription(new RTCSessionDescription(answer));
     // نضيف الـ ICE Queue
     setTimeout(drainIceQueue, 300);
   } catch(e){
     console.error('Handle answer failed:', e);
+    // نحاول مرة تانية
+    setTimeout(async () => {
+      try {
+        await pc.setRemoteDescription(new RTCSessionDescription(answer));
+        setTimeout(drainIceQueue, 300);
+      } catch(e2) {
+        console.error('Retry handle answer failed:', e2);
+      }
+    }, 1000);
   }
 }
 
@@ -1918,14 +2027,44 @@ function updateProfileStats(){ document.getElementById('chat-count').textContent
 
 document.getElementById('btn-logout').addEventListener('click',()=>{ if(confirm('⚠️ متأكد؟')){ const {db,rtdb}=fb; rtdb.update(rtdb.ref(db,`users/${state.uid}`),{online:false,lastSeen:new Date().toISOString()}); localStorage.removeItem('heye_uid'); location.reload(); } });
 
-console.log('✅ Heye App - FIXED WebRTC Bidirectional Calls');
+console.log('✅ Heye App - FIXED WebRTC Bidirectional Calls with Retry & Debug');
 
-// ===== FIX: إضافة إعادة محاولة لـ ICE بعد تأخير =====
-setTimeout(() => {
-  if (state.callState.active && state.callState.peerConnection) {
+// ===== FIX: إضافة إعادة محاولة مستمرة لـ ICE =====
+setInterval(() => {
+  if (state.callState.active && state.callState.peerConnection && iceQueue.length > 0) {
+    console.log('🔄 Periodic ICE drain, remaining:', iceQueue.length);
     drainIceQueue();
   }
-}, 2000);
+}, 3000);
+
+// ===== FIX: إعادة محاولة إرسال الـ Offer لو لسه ما اتبعتش =====
+setInterval(() => {
+  if (state.callState.active && state.callState.type === 'outgoing' && 
+      state.callState.offerSent && !state.callState.answerReceived &&
+      state.callState.connectionAttempts < state.callState.maxConnectionAttempts) {
+    console.log('🔄 Retrying offer...');
+    state.callState.connectionAttempts++;
+    createAndSendOffer();
+  }
+}, 5000);
+
+// ===== FIX: إعادة محاولة استقبال الـ Answer لو لسه موصلش =====
+setInterval(() => {
+  if (state.callState.active && state.callState.type === 'incoming' && 
+      state.callState.offerReceived && !state.callState.answerReceived &&
+      state.callState.connectionAttempts < state.callState.maxConnectionAttempts) {
+    console.log('🔄 Retrying answer...');
+    state.callState.connectionAttempts++;
+    // نعيد إرسال الـ answer
+    if (state.callState.peerConnection && state.callState.peerConnection.localDescription) {
+      const { db, rtdb } = fb;
+      rtdb.update(rtdb.ref(db, `calls/${state.uid}`), {
+        answer: { type: state.callState.peerConnection.localDescription.type, 
+                  sdp: state.callState.peerConnection.localDescription.sdp }
+      });
+    }
+  }
+}, 5000);
 </script>
 </body>
 </html>
