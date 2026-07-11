@@ -16,6 +16,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
+<!-- ===== LIVEKIT CLIENT SDK ===== -->
+<script src="https://cdn.jsdelivr.net/npm/livekit-client@2.0.5/dist/livekit-client.umd.min.js">
+</script>
+
 <style>
   :root{
     --bg-deep:#0E0B14;
@@ -85,6 +89,7 @@
   @keyframes recBlink{0%,100%{opacity:1;}50%{opacity:.3;}}
   @keyframes micModalPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(217,112,90,.4);}50%{transform:scale(1.05);box-shadow:0 0 0 20px rgba(217,112,90,0);}}
   @keyframes connectingPulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+  @keyframes livekitPulse{0%,100%{box-shadow:0 0 0 0 rgba(95,191,143,.4);}50%{box-shadow:0 0 0 15px rgba(95,191,143,0);}}
 
   #view-loading{align-items:center;justify-content:center;background:var(--bg-deep);gap:18px;}
   .loader-ring{width:44px;height:44px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--gold);animation:spin 0.9s linear infinite;}
@@ -241,6 +246,11 @@
   .settings-help-box{background:rgba(217,112,90,.08);border:1px solid rgba(217,112,90,.2);border-radius:12px;padding:14px;font-size:12.5px;color:var(--mute);line-height:1.8;display:none;}
   .settings-help-box.show{display:block;}
   .settings-help-box strong{color:var(--danger);font-weight:700;}
+  .settings-livekit-status{background:var(--bg-panel-2);border:1px solid var(--line-soft);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;font-size:13px;color:var(--mute);}
+  .settings-livekit-status .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .settings-livekit-status .dot.online{background:var(--ok);animation:livekitPulse 2s infinite;}
+  .settings-livekit-status .dot.offline{background:var(--danger);}
+  .settings-livekit-status .dot.connecting{background:var(--gold-soft);animation:connectingPulse 1s infinite;}
 
   .mic-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:700;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);}
   .mic-modal-overlay.show{display:flex;animation:fadeIn .25s ease;}
@@ -424,7 +434,6 @@
   .media-viewer-content img,.media-viewer-content video{max-width:100%;max-height:85vh;object-fit:contain;}
   .media-viewer-caption{color:#fff;font-size:14px;padding:16px 24px 0;text-align:center;max-width:90%;}
   
-  /* Call debug info */
   .call-debug{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--mute-2);text-align:center;background:rgba(0,0,0,.6);padding:4px 12px;border-radius:8px;display:none;max-width:90%;direction:ltr;}
   .call-debug.show{display:block;}
 </style>
@@ -501,6 +510,13 @@
       <h2>الإعدادات</h2>
     </div>
     <div class="settings-body">
+      <div class="settings-section-title">المكالمات الصوتية - LiveKit</div>
+      <div class="settings-card">
+        <div class="settings-livekit-status" id="livekit-status">
+          <span class="dot connecting" id="livekit-dot"></span>
+          <span id="livekit-status-text">جاري الاتصال بسيرفر المكالمات...</span>
+        </div>
+      </div>
       <div class="settings-section-title">الأذونات والصلاحيات</div>
       <div class="settings-card">
         <div class="settings-row">
@@ -705,7 +721,53 @@
 </script>
 
 <script>
+// ================================================================
+// ============ WAIT FOR LIVEKIT TO LOAD ============
+// ================================================================
+function waitForLiveKit() {
+  return new Promise((resolve) => {
+    if (typeof LiveKit !== 'undefined') {
+      resolve(LiveKit);
+      return;
+    }
+    let attempts = 0;
+    const maxAttempts = 50;
+    const checkInterval = setInterval(() => {
+      attempts++;
+      if (typeof LiveKit !== 'undefined') {
+        clearInterval(checkInterval);
+        resolve(LiveKit);
+      } else if (attempts >= maxAttempts) {
+        clearInterval(checkInterval);
+        console.warn('LiveKit not loaded after 5 seconds, retrying...');
+        // Try loading again
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/livekit-client@2.0.5/dist/livekit-client.umd.min.js';
+        document.head.appendChild(script);
+        setTimeout(() => {
+          if (typeof LiveKit !== 'undefined') {
+            resolve(LiveKit);
+          } else {
+            resolve(null);
+          }
+        }, 2000);
+      }
+    }, 100);
+  });
+}
+
+// ================================================================
+// ============ LIVEKIT CONFIGURATION ============
+// ================================================================
+const LIVEKIT_CONFIG = {
+  url: 'wss://twsl-5lqfelb3.livekit.cloud',
+  apiKey: 'APIBxSxvDPeE4aq',
+  apiSecret: 'wQ2agX22VHvDfzTNbJnkcWKBplcF44exUc4FpMxbJgb'
+};
+
+// ================================================================
 // ============ STATE ============
+// ================================================================
 const state = {
   uid: null, displayName: '', username: '',
   currentChatId: null, currentChatUser: null,
@@ -713,31 +775,34 @@ const state = {
   chatCount: 0, msgCount: 0,
   onlineUsers: {}, typingUsers: {},
   typingTimeout: null, selectedMsgId: null,
+  
+  // ===== LIVEKIT CALL STATE =====
   callState: {
-    active: false, type: null,
-    partnerUid: null, partnerName: '',
-    startTime: 0, timerInterval: null,
-    localStream: null, peerConnection: null,
-    isMuted: false, isSpeakerOn: false,
-    offerSent: false, answerHandled: false,
-    callId: null,
-    // === FIX: إضافات لتتبع الـ Signaling ===
-    signalingStarted: false,
-    offerReceived: false,
-    answerReceived: false,
-    connectionAttempts: 0,
-    maxConnectionAttempts: 5
+    active: false,
+    type: null,
+    partnerUid: null,
+    partnerName: '',
+    room: null,
+    roomName: null,
+    localTrack: null,
+    remoteTrack: null,
+    isMuted: false,
+    isSpeakerOn: false,
+    startTime: 0,
+    timerInterval: null,
+    callId: null
   },
   incomingCallData: null,
-  // Listeners للمكالمات
   unsubIncomingCall: null,
   unsubOutgoingCall: null,
-  unsubIncomingIce: null,
-  unsubOutgoingIce: null,
-  // Settings
-  micTestStream: null, micTestAnalyser: null, micTestRaf: null
+  liveKitRoom: null,
+  liveKitConnected: false,
+  liveKitReady: false
 };
 
+// ================================================================
+// ============ FIREBASE SETUP ============
+// ================================================================
 let fb = null, fbReady = false;
 const readyQueue = [];
 
@@ -748,6 +813,9 @@ window.addEventListener('heye-firebase-ready', () => {
 
 function whenReady(fn){ if (fbReady) fn(); else readyQueue.push(fn); }
 
+// ================================================================
+// ============ UTILITY FUNCTIONS ============
+// ================================================================
 const views = {
   loading: document.getElementById('view-loading'), onboarding: document.getElementById('view-onboarding'),
   name: document.getElementById('view-name'), main: document.getElementById('view-main'),
@@ -777,7 +845,9 @@ function transliterate(t){ let o=''; for(const c of t){ if(arabicToLatinMap[c]) 
 function generateUsernameBase(n){ const b = /[\u0600-\u06FF]/.test(n) ? transliterate(n) : n; let s = b.trim().toLowerCase().replace(/\s+/g,'.').replace(/[^a-z0-9.]/g,'').replace(/\.+/g,'.').replace(/^\.|\.$/g,''); if(!s) s='user'; if(s.length>16) s=s.slice(0,16).replace(/\.$/,''); return s; }
 function generateUsernameSync(n){ return `${generateUsernameBase(n)}${Math.floor(100+Math.random()*900)}`; }
 
+// ================================================================
 // ============ MIC PERMISSION MODAL ============
+// ================================================================
 const micModalOverlay = document.getElementById('mic-modal-overlay');
 function showMicPermissionModal(){ micModalOverlay.classList.add('show'); }
 function hideMicPermissionModal(){ micModalOverlay.classList.remove('show'); }
@@ -801,7 +871,9 @@ document.getElementById('mic-modal-open-settings').addEventListener('click', () 
   checkNotifPermission();
 });
 
+// ================================================================
 // ============ RINGTONE ============
+// ================================================================
 let ringtoneAudio = null;
 function playRingtone(){
   try {
@@ -818,7 +890,9 @@ function playRingtone(){
 }
 function stopRingtone(){ try { if(ringtoneAudio){ ringtoneAudio.osc.stop(); ringtoneAudio.ctx.close(); ringtoneAudio = null; } } catch(e){} }
 
+// ================================================================
 // ============ CALL UI ============
+// ================================================================
 const callOverlay = document.getElementById('call-overlay');
 const callAvatar = document.getElementById('call-avatar');
 const callName = document.getElementById('call-name');
@@ -842,7 +916,7 @@ function showCallUI(type, partnerName){
   callName.textContent = partnerName;
   updateCallStatus(type === 'outgoing' ? 'جاري الاتصال...' : 'مكالمة واردة...', 'ringing', 'جاري الاتصال بالطرف الآخر...');
   callTimer.classList.remove('show');
-  callDebug.classList.remove('show');
+  callDebug.classList.add('show');
   
   let html = `
     <button class="call-action-btn call-mute-btn" id="call-mute-btn" title="كتم">
@@ -877,8 +951,8 @@ function hideCallUI(){
 
 function toggleMute(){
   state.callState.isMuted = !state.callState.isMuted;
-  if(state.callState.localStream){
-    state.callState.localStream.getAudioTracks().forEach(track => track.enabled = !state.callState.isMuted);
+  if(state.callState.localTrack){
+    state.callState.localTrack.enabled = !state.callState.isMuted;
   }
   const btn = document.getElementById('call-mute-btn');
   if(btn) btn.classList.toggle('muted', state.callState.isMuted);
@@ -888,126 +962,299 @@ function toggleSpeaker(){
   state.callState.isSpeakerOn = !state.callState.isSpeakerOn;
   const btn = document.getElementById('call-speaker-btn');
   if(btn) btn.classList.toggle('active', state.callState.isSpeakerOn);
-  const audioEl = document.querySelector('audio[data-peer="remote"]');
+  const audioEl = document.querySelector('audio[data-livekit="remote"]');
   if(audioEl && audioEl.setSinkId){
     audioEl.setSinkId(state.callState.isSpeakerOn ? 'speaker' : 'default').catch(()=>{});
   }
 }
 
-// ============ WebRTC CONFIGURATION ============
-const rtcConfig = {
-  iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun2.l.google.com:19302' },
-    { urls: 'stun:stun3.l.google.com:19302' },
-    { urls: 'stun:stun4.l.google.com:19302' },
-    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
-    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
-  ],
-  iceCandidatePoolSize: 10,
-  iceTransportPolicy: 'all',
-  bundlePolicy: 'max-bundle',
-  rtcpMuxPolicy: 'require'
-};
+// ================================================================
+// ============ LIVEKIT CONNECTION ============
+// ================================================================
+let liveKitClient = null;
+let liveKitLib = null;
 
-// ============ CALL SIGNALING - FIXED ============
-let iceQueue = [];
-
-function resetCallState(){
-  state.callState.active = false;
-  state.callState.type = null;
-  state.callState.partnerUid = null;
-  state.callState.partnerName = '';
-  state.callState.startTime = 0;
-  state.callState.offerSent = false;
-  state.callState.answerHandled = false;
-  state.callState.callId = null;
-  state.callState.signalingStarted = false;
-  state.callState.offerReceived = false;
-  state.callState.answerReceived = false;
-  state.callState.connectionAttempts = 0;
-  state.incomingCallData = null;
-  iceQueue = [];
-}
-
-function cleanupCallListeners(){
-  const { db, rtdb } = fb;
-  if(state.unsubIncomingCall){
-    rtdb.off(rtdb.ref(db, `calls/${state.uid}`));
-    state.unsubIncomingCall = null;
-  }
-  if(state.unsubOutgoingCall && state.callState.partnerUid){
-    rtdb.off(rtdb.ref(db, `calls/${state.callState.partnerUid}`));
-    state.unsubOutgoingCall = null;
-  }
-  if(state.unsubIncomingIce){
-    rtdb.off(rtdb.ref(db, `calls/${state.uid}/iceIn`));
-    state.unsubIncomingIce = null;
-  }
-  if(state.unsubOutgoingIce && state.callState.partnerUid){
-    rtdb.off(rtdb.ref(db, `calls/${state.callState.partnerUid}/iceIn`));
-    state.unsubOutgoingIce = null;
+async function initLiveKit() {
+  try {
+    liveKitLib = await waitForLiveKit();
+    if (!liveKitLib) {
+      console.error('❌ LiveKit library not available');
+      document.getElementById('livekit-dot').className = 'dot offline';
+      document.getElementById('livekit-status-text').textContent = '❌ مكتبة LiveKit غير متوفرة';
+      return false;
+    }
+    console.log('✅ LiveKit library loaded');
+    state.liveKitReady = true;
+    return true;
+  } catch(e) {
+    console.error('❌ Failed to load LiveKit:', e);
+    return false;
   }
 }
 
-async function applyOrQueueIce(candidate){
-  const pc = state.callState.peerConnection;
-  if(pc && pc.remoteDescription && pc.remoteDescription.type){
-    try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch(e){ console.warn('ICE add failed:', e); }
-  } else {
-    iceQueue.push(candidate);
-  }
-}
-
-async function drainIceQueue(){
-  const pc = state.callState.peerConnection;
-  if(!pc) return;
-  let count = 0;
-  while(iceQueue.length > 0 && count < 50){
-    const c = iceQueue.shift();
-    try { await pc.addIceCandidate(new RTCIceCandidate(c)); count++; } catch(e){ console.warn('ICE add failed:', e); }
-  }
-  if(iceQueue.length > 0) {
-    console.log('Still have', iceQueue.length, 'ICE candidates in queue');
-    setTimeout(drainIceQueue, 500);
-  }
-}
-
-// ===== FIX: تحسين معالجة الـ Signaling =====
-function processSignalingData(data) {
-  const pc = state.callState.peerConnection;
-  if (!pc) {
-    console.warn('No peer connection for signaling');
-    return;
+async function connectToLiveKit() {
+  if (!state.liveKitReady) {
+    const ready = await initLiveKit();
+    if (!ready) return null;
   }
   
-  // === معالجة الـ Offer (أنا callee) ===
-  if (data.offer && !state.callState.offerReceived && state.callState.type === 'incoming') {
-    state.callState.offerReceived = true;
-    console.log('📥 Received offer, sending answer...');
-    handleOffer(data.offer);
-    return;
+  try {
+    const { Room } = liveKitLib;
+    
+    const room = new Room({
+      audioCaptureDefaults: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      }
+    });
+    
+    state.liveKitRoom = room;
+    
+    // Generate token
+    const token = await generateLiveKitToken(state.uid, state.displayName);
+    if (!token) {
+      throw new Error('Failed to generate token');
+    }
+    
+    // Connect to room
+    await room.connect(LIVEKIT_CONFIG.url, token);
+    state.liveKitConnected = true;
+    
+    document.getElementById('livekit-dot').className = 'dot online';
+    document.getElementById('livekit-status-text').textContent = '✅ متصل بسيرفر المكالمات';
+    
+    console.log('✅ LiveKit connected successfully');
+    return room;
+  } catch(e) {
+    console.error('❌ LiveKit connection failed:', e.message);
+    document.getElementById('livekit-dot').className = 'dot offline';
+    document.getElementById('livekit-status-text').textContent = '❌ فشل الاتصال: ' + e.message;
+    return null;
+  }
+}
+
+async function generateLiveKitToken(identity, name) {
+  try {
+    if (!state.liveKitReady) {
+      await initLiveKit();
+    }
+    if (!state.liveKitReady || !liveKitLib) {
+      console.warn('LiveKit not ready for token generation');
+      return null;
+    }
+    
+    const { AccessToken } = liveKitLib;
+    const token = new AccessToken(LIVEKIT_CONFIG.apiKey, LIVEKIT_CONFIG.apiSecret, {
+      identity: identity,
+      name: name || identity,
+      ttl: 3600
+    });
+    token.addGrant({ roomJoin: true, room: identity + '_room' });
+    
+    return await token.toJwt();
+  } catch(e) {
+    console.error('Token generation failed:', e);
+    return null;
+  }
+}
+
+// ================================================================
+// ============ LIVEKIT CALL FUNCTIONS ============
+// ================================================================
+
+async function startLiveKitCall() {
+  if(!state.currentChatUser || state.callState.active) return;
+  if(!state.liveKitConnected) {
+    const room = await connectToLiveKit();
+    if(!room) {
+      showToast('❌ فشل الاتصال بسيرفر المكالمات', 'error');
+      return;
+    }
   }
   
-  // === معالجة الـ Answer (أنا caller) ===
-  if (data.answer && !state.callState.answerReceived && state.callState.type === 'outgoing') {
-    state.callState.answerReceived = true;
-    console.log('📥 Received answer, connecting...');
-    handleAnswer(data.answer);
-    return;
+  const partnerUid = state.currentChatUser.id;
+  const partnerName = state.currentChatUser.displayName;
+  
+  try {
+    const roomName = `call_${[state.uid, partnerUid].sort().join('_')}_${Date.now()}`;
+    state.callState.roomName = roomName;
+    state.callState.partnerUid = partnerUid;
+    state.callState.partnerName = partnerName;
+    state.callState.type = 'outgoing';
+    state.callState.active = true;
+    state.callState.callId = 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+    
+    await joinLiveKitRoom(roomName, true);
+    showCallUI('outgoing', partnerName);
+    playRingtone();
+    
+    const { db, rtdb } = fb;
+    await rtdb.set(rtdb.ref(db, `calls/${partnerUid}`), {
+      callerId: state.uid,
+      callerName: state.displayName,
+      roomName: roomName,
+      status: 'ringing',
+      createdAt: Date.now(),
+      callId: state.callState.callId
+    });
+    
+    listenForOutgoingCallResponse(partnerUid);
+    
+    setTimeout(() => {
+      if(state.callState.active && state.callState.type === 'outgoing' && !callTimer.classList.contains('show')){
+        endCall();
+        saveCallLog('missed', Date.now());
+      }
+    }, 30000);
+    
+  } catch(e) {
+    console.error('❌ Start call failed:', e);
+    showToast('❌ فشل بدء المكالمة', 'error');
+    endCall();
+  }
+}
+
+async function acceptLiveKitCall() {
+  if(!state.incomingCallData) return;
+  const { callerId, callerName, roomName, createdAt } = state.incomingCallData;
+  
+  if(!state.liveKitConnected) {
+    const room = await connectToLiveKit();
+    if(!room) {
+      showToast('❌ فشل الاتصال بالسيرفر', 'error');
+      return;
+    }
   }
   
-  // === معالجة الـ ICE Candidates ===
-  if (data.iceIn) {
-    for (const [key, candidate] of Object.entries(data.iceIn)) {
-      applyOrQueueIce(candidate);
+  try {
+    state.callState.type = 'incoming';
+    state.callState.partnerUid = callerId;
+    state.callState.partnerName = callerName || 'مستخدم';
+    state.callState.active = true;
+    state.callState.callId = state.incomingCallData.callId || null;
+    
+    await joinLiveKitRoom(roomName, false);
+    
+    stopRingtone();
+    showCallUI('incoming', callerName || 'مستخدم');
+    updateCallStatus('جاري التوصيل...', 'connecting', 'جاري التوصيل...');
+    
+    const { db, rtdb } = fb;
+    await rtdb.update(rtdb.ref(db, `calls/${state.uid}`), { 
+      status: 'answered', 
+      answeredAt: Date.now() 
+    });
+    
+    saveCallLog('completed', createdAt || Date.now());
+    
+  } catch(e) {
+    console.error('❌ Accept call failed:', e);
+    showToast('❌ فشل قبول المكالمة', 'error');
+    endCall();
+  }
+}
+
+async function joinLiveKitRoom(roomName, isCaller) {
+  if (!state.liveKitReady || !liveKitLib) {
+    await initLiveKit();
+  }
+  if (!state.liveKitReady || !liveKitLib) {
+    throw new Error('LiveKit not available');
+  }
+  
+  const room = state.liveKitRoom;
+  if(!room) throw new Error('LiveKit not connected');
+  
+  try {
+    const token = await generateLiveKitToken(state.uid, state.displayName);
+    if (!token) throw new Error('Failed to generate token');
+    
+    await room.connect(LIVEKIT_CONFIG.url, token, { 
+      roomName: roomName,
+      autoSubscribe: true
+    });
+    
+    room.once('connected', () => {
+      console.log('📞 Connected to LiveKit room:', roomName);
+      updateCallStatus('متصل ✅', 'connected', '');
+      startCallTimer();
+      
+      if(isCaller) {
+        publishAudioTrack();
+      }
+    });
+    
+    room.on('participantConnected', (participant) => {
+      console.log('👤 Participant connected:', participant.identity);
+      if(!isCaller) {
+        publishAudioTrack();
+      }
+    });
+    
+    room.on('trackSubscribed', (track, publication, participant) => {
+      console.log('🔊 Remote track subscribed:', track.kind, participant.identity);
+      if(track.kind === 'audio') {
+        const audioEl = document.createElement('audio');
+        audioEl.setAttribute('data-livekit', 'remote');
+        audioEl.autoplay = true;
+        audioEl.playsInline = true;
+        audioEl.srcObject = new MediaStream([track.mediaStreamTrack]);
+        document.body.appendChild(audioEl);
+        audioEl.play().catch(e => console.warn('Audio play failed:', e));
+        
+        state.callState.remoteTrack = track;
+        updateCallStatus('متصل ✅', 'connected', '');
+      }
+    });
+    
+    room.on('disconnected', () => {
+      console.log('📞 Disconnected from room');
+      endCall();
+    });
+    
+    state.callState.room = room;
+    state.callState.roomName = roomName;
+    
+  } catch(e) {
+    console.error('❌ Join room failed:', e);
+    throw e;
+  }
+}
+
+async function publishAudioTrack() {
+  const room = state.callState.room;
+  if(!room) return;
+  
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      }
+    });
+    
+    const audioTrack = stream.getAudioTracks()[0];
+    if(audioTrack) {
+      await room.localParticipant.publishTrack(audioTrack);
+      state.callState.localTrack = audioTrack;
+      console.log('🎤 Audio track published');
+    }
+  } catch(e) {
+    console.error('❌ Failed to publish audio:', e);
+    if(e.name === 'NotAllowedError') {
+      showMicPermissionModal();
+    } else {
+      showToast('❌ فشل تشغيل الميكروفون', 'error');
     }
   }
 }
 
-// ===== LISTENER للمكالمات الواردة (أنا callee) - FIXED =====
+// ================================================================
+// ============ FIREBASE CALL SIGNALING ============
+// ================================================================
+
 function listenForIncomingCalls(){
   if(!state.uid) return;
   const { db, rtdb } = fb;
@@ -1018,54 +1265,29 @@ function listenForIncomingCalls(){
     if(!snap.exists()) return;
     const data = snap.val();
     
-    // مكالمة واردة جديدة
     if(data.status === 'ringing' && !state.callState.active){
       state.incomingCallData = data;
       state.callState.callId = data.callId || null;
-      state.callState.type = 'incoming';
-      state.callState.partnerUid = data.callerId;
-      state.callState.partnerName = data.callerName || 'مستخدم';
+      
       showCallUI('incoming', data.callerName || 'مستخدم');
       playRingtone();
+      
       if('Notification' in window && Notification.permission === 'granted'){
         new Notification('📞 مكالمة واردة', { body: `${data.callerName} بيتصل بك` });
       }
-      // نجهز الـ Peer Connection عشان نستقبل الـ Offer
-      if (!state.callState.peerConnection) {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          state.callState.localStream = stream;
-          await createPeerConnection(stream);
-        } catch(e) {
-          console.warn('Mic not ready yet, will retry on accept');
-        }
+      
+      if(!state.liveKitConnected) {
+        connectToLiveKit();
       }
       return;
     }
     
-    // === FIX: معالجة الـ Signaling Data بشكل موحد ===
-    if (state.callState.active || state.callState.type === 'incoming') {
-      processSignalingData(data);
-    }
-    
-    // المكالمة اتنهت
     if(data.status === 'ended' && state.callState.active){
       endCall(true);
     }
   });
-  
-  // ICE candidates الجاية لي (أنا callee)
-  if(state.unsubIncomingIce) rtdb.off(rtdb.ref(db, `calls/${state.uid}/iceIn`));
-  state.unsubIncomingIce = rtdb.onValue(rtdb.ref(db, `calls/${state.uid}/iceIn`), async (snap) => {
-    if(!snap.exists()) return;
-    const items = snap.val();
-    for(const [key, candidate] of Object.entries(items)){
-      await applyOrQueueIce(candidate);
-    }
-  });
 }
 
-// ===== LISTENER للمكالمات الصادرة (أنا caller) - FIXED =====
 function listenForOutgoingCallResponse(partnerUid){
   const { db, rtdb } = fb;
   
@@ -1075,390 +1297,58 @@ function listenForOutgoingCallResponse(partnerUid){
     if(!snap.exists()) return;
     const data = snap.val();
     
-    // الطرف التاني رد (status = 'answered')
-    if(data.status === 'answered' && state.callState.type === 'outgoing' && !state.callState.offerSent) {
-      console.log('✅ Partner answered! Sending offer...');
-      // نجهز الـ Peer Connection لو مش موجود
-      if (!state.callState.peerConnection) {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          state.callState.localStream = stream;
-          await createPeerConnection(stream);
-        } catch(e) {
-          showToast('مش قادرين نفتح المايك','error');
-          endCall();
-          return;
-        }
-      }
+    if(data.status === 'answered' && state.callState.type === 'outgoing') {
+      console.log('✅ Partner answered!');
       stopRingtone();
-      updateCallStatus('جاري تجهيز الاتصال...', 'connecting', 'جاري تجهيز الاتصال...');
-      state.callState.offerSent = true;
-      // ننتظر شوية عشان الـ PC يتجهز
-      setTimeout(async () => {
-        await createAndSendOffer();
-      }, 300);
+      updateCallStatus('جاري التوصيل...', 'connecting', 'جاري التوصيل...');
     }
     
-    // === FIX: معالجة الـ Signaling Data بشكل موحد ===
-    if (state.callState.type === 'outgoing') {
-      processSignalingData(data);
-    }
-    
-    // المكالمة اتنهت
     if(data.status === 'ended' && state.callState.active){
       endCall(true);
     }
   });
-  
-  // ICE candidates الجاية لي من الطرف التاني (أنا caller)
-  if(state.unsubOutgoingIce) rtdb.off(rtdb.ref(db, `calls/${partnerUid}/iceIn`));
-  state.unsubOutgoingIce = rtdb.onValue(rtdb.ref(db, `calls/${partnerUid}/iceIn`), async (snap) => {
-    if(!snap.exists()) return;
-    const items = snap.val();
-    for(const [key, candidate] of Object.entries(items)){
-      await applyOrQueueIce(candidate);
-    }
-  });
-}
-
-async function ensureLocalStream(){
-  if(state.callState.localStream) return state.callState.localStream;
-  const stream = await navigator.mediaDevices.getUserMedia({
-    audio: {
-      echoCancellation: true,
-      noiseSuppression: true,
-      autoGainControl: true
-    }
-  });
-  state.callState.localStream = stream;
-  return stream;
-}
-
-async function startCall(){
-  if(!state.currentChatUser || state.callState.active) return;
-  const partnerUid = state.currentChatUser.id;
-  const partnerName = state.currentChatUser.displayName;
-
-  // التأكد من إذن الميكروفون
-  let stream;
-  try { stream = await ensureLocalStream(); }
-  catch(e){
-    if(e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError'){
-      showMicPermissionModal();
-    } else {
-      showToast('محتاجين إذن الميكروفون','error');
-    }
-    return;
-  }
-
-  state.callState.active = true;
-  state.callState.type = 'outgoing';
-  state.callState.partnerUid = partnerUid;
-  state.callState.partnerName = partnerName;
-  state.callState.callId = 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
-  state.callState.offerSent = false;
-  state.callState.answerReceived = false;
-  state.callState.signalingStarted = false;
-  state.callState.connectionAttempts = 0;
-
-  // إنشاء Peer Connection
-  await createPeerConnection(stream);
-  
-  // أبدأ أسمع على رد الطرف التاني
-  listenForOutgoingCallResponse(partnerUid);
-
-  showCallUI('outgoing', partnerName);
-  playRingtone();
-
-  const { db, rtdb } = fb;
-  const now = Date.now();
-  await rtdb.set(rtdb.ref(db, `calls/${partnerUid}`), {
-    callerId: state.uid, callerName: state.displayName, status: 'ringing',
-    createdAt: now, callId: state.callState.callId
-  });
-
-  // طالما لسه في حالة Outgoing بعد 45 ثانية ننهي المكالمة
-  setTimeout(() => {
-    if(state.callState.active && state.callState.type === 'outgoing' && !callTimer.classList.contains('show')){
-      endCall(); 
-      saveCallLog('missed', now);
-    }
-  }, 45000);
-}
-
-async function acceptCall(){
-  if(!state.incomingCallData) return;
-  const { callerId, callerName, createdAt } = state.incomingCallData;
-
-  // جهز الـ Stream
-  let stream;
-  try { stream = await ensureLocalStream(); }
-  catch(e){
-    if(e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError'){
-      showMicPermissionModal();
-    } else {
-      showToast('محتاجين إذن الميكروفون','error');
-    }
-    return;
-  }
-
-  state.callState.active = true;
-  state.callState.type = 'incoming';
-  state.callState.partnerUid = callerId;
-  state.callState.partnerName = callerName || 'مستخدم';
-  state.callState.callId = state.incomingCallData.callId || null;
-  state.callState.answerReceived = false;
-  state.callState.offerReceived = false;
-
-  await createPeerConnection(stream);
-
-  stopRingtone();
-  updateCallStatus('جاري تجهيز الاتصال...', 'connecting', 'جاري تجهيز الاتصال...');
-
-  const { db, rtdb } = fb;
-  await rtdb.update(rtdb.ref(db, `calls/${state.uid}`), { status: 'answered', answeredAt: Date.now() });
-
-  // لو فيه offer موجود، نعالجه
-  if (state.incomingCallData.offer) {
-    setTimeout(() => {
-      if (state.callState.peerConnection && !state.callState.offerReceived) {
-        processSignalingData({ offer: state.incomingCallData.offer });
-      }
-    }, 500);
-  }
-
-  saveCallLog('completed', createdAt || Date.now());
-}
-
-async function createPeerConnection(providedStream){
-  if(state.callState.peerConnection){
-    state.callState.peerConnection.close();
-    state.callState.peerConnection = null;
-  }
-
-  const pc = new RTCPeerConnection(rtcConfig);
-  state.callState.peerConnection = pc;
-  iceQueue = [];
-  
-  // تفعيل الـ Debug
-  callDebug.classList.add('show');
-
-  try {
-    const stream = providedStream || await ensureLocalStream();
-    stream.getTracks().forEach(track => {
-      pc.addTrack(track, stream);
-      console.log('🎤 Added track:', track.kind);
-    });
-    console.log('🎤 Added local tracks:', stream.getTracks().length);
-  } catch(e){
-    console.error('Mic access failed:', e);
-    showToast('مش قادرين نوصل للميكروفون','error');
-  }
-
-  pc.ontrack = (event) => {
-    console.log('🔊 Received remote track!', event.track.kind);
-    let audioEl = document.querySelector('audio[data-peer="remote"]');
-    if(!audioEl){
-      audioEl = document.createElement('audio');
-      audioEl.setAttribute('data-peer', 'remote');
-      audioEl.autoplay = true;
-      audioEl.playsInline = true;
-      document.body.appendChild(audioEl);
-    }
-    audioEl.srcObject = event.streams[0];
-    audioEl.play().catch(e => console.warn('Audio play failed:', e));
-    if(state.callState.isSpeakerOn && audioEl.setSinkId){
-      audioEl.setSinkId('speaker').catch(()=>{});
-    }
-    
-    // تحديث حالة المكالمة
-    updateCallStatus('متصل ✅', 'connected', '');
-  };
-
-  pc.onconnectionstatechange = () => {
-    const stateStr = pc.connectionState;
-    console.log('🔗 Connection state:', stateStr);
-    callDebug.textContent = `🧊 ICE: ${pc.iceConnectionState} | 🔗 ${stateStr}`;
-    
-    if(stateStr === 'connected'){
-      updateCallStatus('متصل ✅', 'connected', '');
-      callQuality.classList.remove('show');
-      startCallTimer();
-    } else if(stateStr === 'failed'){
-      updateCallStatus('فشل الاتصال ❌', 'connecting', 'فشل الاتصال ❌');
-      // نحاول نعيد المحاولة
-      if(state.callState.connectionAttempts < state.callState.maxConnectionAttempts) {
-        state.callState.connectionAttempts++;
-        setTimeout(() => {
-          if(state.callState.active && state.callState.peerConnection) {
-            console.log('🔄 Retrying connection...');
-            // نعيد إنشاء الـ offer
-            if(state.callState.type === 'outgoing') {
-              createAndSendOffer();
-            }
-          }
-        }, 2000);
-      } else {
-        endCall();
-        showToast('فشل الاتصال بعد محاولات متعددة','error');
-      }
-    } else if(stateStr === 'disconnected'){
-      updateCallStatus('انقطع الاتصال...', 'connecting', 'انقطع الاتصال...');
-      // نحاول نعيد الاتصال
-      setTimeout(() => {
-        if(state.callState.active && state.callState.peerConnection) {
-          console.log('🔄 Reconnecting...');
-          if(state.callState.type === 'outgoing') {
-            createAndSendOffer();
-          }
-        }
-      }, 3000);
-    } else if(stateStr === 'connecting'){
-      updateCallStatus('جاري الاتصال...', 'connecting', 'جاري الاتصال بالطرف الآخر...');
-    }
-  };
-
-  pc.oniceconnectionstatechange = () => {
-    console.log('🧊 ICE state:', pc.iceConnectionState);
-    callDebug.textContent = `🧊 ICE: ${pc.iceConnectionState} | 🔗 ${pc.connectionState}`;
-    if(pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') {
-      // نضيف الـ ICE Queue
-      setTimeout(drainIceQueue, 100);
-    }
-  };
-
-  pc.onicecandidate = (event) => {
-    if(event.candidate && state.callState.partnerUid){
-      console.log('🧊 Sending ICE candidate');
-      const { db, rtdb } = fb;
-      const newRef = rtdb.push(rtdb.ref(db, `calls/${state.callState.partnerUid}/iceIn`));
-      rtdb.set(newRef, event.candidate.toJSON());
-    }
-  };
-  
-  // === FIX: لو الـ PC اتجهز والـ offer موجود بالفعل من الطرف التاني ===
-  if (state.callState.type === 'incoming' && state.incomingCallData?.offer) {
-    setTimeout(() => {
-      if (state.callState.peerConnection && !state.callState.offerReceived) {
-        processSignalingData({ offer: state.incomingCallData.offer });
-      }
-    }, 500);
-  }
-}
-
-async function createAndSendOffer(){
-  const pc = state.callState.peerConnection;
-  if(!pc) {
-    console.warn('No peer connection to create offer');
-    return;
-  }
-
-  // نضيف تأخير صغير للتأكد من أن الـ PC جاهز
-  await new Promise(r => setTimeout(r, 200));
-
-  try {
-    const offer = await pc.createOffer({
-      offerToReceiveAudio: true,
-      offerToReceiveVideo: false
-    });
-    await pc.setLocalDescription(offer);
-    console.log('📤 Sending offer...');
-
-    const { db, rtdb } = fb;
-    await rtdb.update(rtdb.ref(db, `calls/${state.callState.partnerUid}`), {
-      offer: { type: offer.type, sdp: offer.sdp }
-    });
-    
-    // نضيف الـ ICE Queue بعد إرسال الـ offer
-    setTimeout(drainIceQueue, 500);
-  } catch(e){
-    console.error('Create offer failed:', e);
-    showToast('فشل إنشاء الاتصال','error');
-    // نحاول مرة تانية
-    if(state.callState.connectionAttempts < state.callState.maxConnectionAttempts) {
-      state.callState.connectionAttempts++;
-      setTimeout(createAndSendOffer, 1500);
-    }
-  }
-}
-
-async function handleOffer(offer){
-  const pc = state.callState.peerConnection;
-  if(!pc) {
-    console.warn('No peer connection to handle offer');
-    return;
-  }
-
-  try {
-    await pc.setRemoteDescription(new RTCSessionDescription(offer));
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-    console.log('📤 Sending answer...');
-
-    const { db, rtdb } = fb;
-    await rtdb.update(rtdb.ref(db, `calls/${state.uid}`), {
-      answer: { type: answer.type, sdp: answer.sdp }
-    });
-    
-    // بعد إرسال الـ Answer، نضيف الـ ICE Queue
-    setTimeout(drainIceQueue, 300);
-  } catch(e){
-    console.error('Handle offer failed:', e);
-    showToast('فشل الرد على المكالمة','error');
-  }
-}
-
-async function handleAnswer(answer){
-  const pc = state.callState.peerConnection;
-  if(!pc) {
-    console.warn('No peer connection to handle answer');
-    return;
-  }
-  try {
-    await pc.setRemoteDescription(new RTCSessionDescription(answer));
-    // نضيف الـ ICE Queue
-    setTimeout(drainIceQueue, 300);
-  } catch(e){
-    console.error('Handle answer failed:', e);
-    // نحاول مرة تانية
-    setTimeout(async () => {
-      try {
-        await pc.setRemoteDescription(new RTCSessionDescription(answer));
-        setTimeout(drainIceQueue, 300);
-      } catch(e2) {
-        console.error('Retry handle answer failed:', e2);
-      }
-    }, 1000);
-  }
 }
 
 function endCall(skipRemoteUpdate){
   const { db, rtdb } = fb;
-
-  if(state.callState.peerConnection){
-    state.callState.peerConnection.close();
-    state.callState.peerConnection = null;
+  
+  if(state.callState.room) {
+    state.callState.room.disconnect().catch(()=>{});
+    state.callState.room = null;
   }
-
-  if(state.callState.localStream){
-    state.callState.localStream.getTracks().forEach(track => track.stop());
-    state.callState.localStream = null;
+  
+  if(state.callState.localTrack) {
+    state.callState.localTrack.stop();
+    state.callState.localTrack = null;
   }
-
-  const audioEl = document.querySelector('audio[data-peer="remote"]');
+  
+  const audioEl = document.querySelector('audio[data-livekit="remote"]');
   if(audioEl) audioEl.remove();
-
+  
   if(!skipRemoteUpdate && state.callState.partnerUid){
     rtdb.update(rtdb.ref(db, `calls/${state.callState.partnerUid}`), { status: 'ended' }).catch(()=>{});
   }
   if(state.uid){
     rtdb.remove(rtdb.ref(db, `calls/${state.uid}`)).catch(()=>{});
   }
-
-  cleanupCallListeners();
+  
+  if(state.unsubIncomingCall){
+    fb.rtdb.off(fb.rtdb.ref(fb.db, `calls/${state.uid}`));
+    state.unsubIncomingCall = null;
+  }
+  if(state.unsubOutgoingCall && state.callState.partnerUid){
+    fb.rtdb.off(fb.rtdb.ref(fb.db, `calls/${state.callState.partnerUid}`));
+    state.unsubOutgoingCall = null;
+  }
+  
   hideCallUI();
-  iceQueue = [];
-  resetCallState();
+  state.callState.active = false;
+  state.callState.type = null;
+  state.callState.partnerUid = null;
+  state.callState.partnerName = '';
+  state.callState.startTime = 0;
+  state.callState.callId = null;
+  state.incomingCallData = null;
 }
 
 function startCallTimer(){
@@ -1483,7 +1373,20 @@ async function saveCallLog(status, startTime){
 
 function formatCallDuration(sec){ const mm=Math.floor(sec/60); const ss=sec%60; return `${mm}:${ss.toString().padStart(2,'0')}`; }
 
+// ================================================================
+// ============ START/ACCEPT CALL WRAPPERS ============
+// ================================================================
+async function startCall(){
+  await startLiveKitCall();
+}
+
+async function acceptCall(){
+  await acceptLiveKitCall();
+}
+
+// ================================================================
 // ============ SETTINGS ============
+// ================================================================
 async function checkMicPermission(){
   const badge = document.getElementById('mic-perm-badge');
   const text = document.getElementById('mic-perm-text');
@@ -1631,7 +1534,9 @@ async function requestNotifPermission(){
   } catch(e){}
 }
 
+// ================================================================
 // ============ BOOT ============
+// ================================================================
 whenReady(async () => {
   const uid = getOrCreateLocalUid(); state.uid = uid;
   try {
@@ -1642,7 +1547,9 @@ whenReady(async () => {
   goTo('onboarding');
 });
 
+// ================================================================
 // ============ ONBOARDING ============
+// ================================================================
 document.getElementById('btn-start').addEventListener('click', ()=>{ goTo('name'); setTimeout(()=>document.getElementById('name-input').focus(),200); });
 document.getElementById('btn-back-name').addEventListener('click', ()=>goTo('onboarding'));
 
@@ -1682,6 +1589,12 @@ function enterApp(){
   document.getElementById('pc-date').textContent=new Date().toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric'});
   goTo('main'); setupOnlinePresence(); listenToOnlineUsers(); listenToChatList();
   listenForIncomingCalls();
+  
+  // Initialize LiveKit in background
+  setTimeout(async () => {
+    await initLiveKit();
+    await connectToLiveKit();
+  }, 3000);
 }
 
 function setupOnlinePresence(){ const {db,rtdb}=fb; const userStatusRef=rtdb.ref(db,`users/${state.uid}`); rtdb.onValue(rtdb.ref(db,'.info/connected'),(snap)=>{ if(snap.val()===true){ rtdb.update(userStatusRef,{online:true,lastSeen:new Date().toISOString()}); rtdb.onDisconnect(userStatusRef).update({online:false,lastSeen:new Date().toISOString()}); } }); }
@@ -1697,6 +1610,9 @@ function updateChatHeaderStatus(){
 function refreshChatListOnlineStatus(){ document.querySelectorAll('.chat-row').forEach(row=>{ const otherUid=row.dataset.uid, indicator=row.querySelector('.online-indicator'); if(indicator&&otherUid) indicator.classList.toggle('show', state.onlineUsers[otherUid]?.online); }); }
 function formatLastSeen(ts){ if(!ts) return 'غير معروف'; const d=new Date(ts), now=new Date(), diff=now-d; if(diff<60000) return 'الآن'; if(diff<3600000) return `منذ ${Math.floor(diff/60000)} دقيقة`; if(diff<86400000) return `منذ ${Math.floor(diff/3600000)} ساعة`; if(diff<172800000) return 'أمس'; return d.toLocaleDateString('ar-EG',{month:'short',day:'numeric'}); }
 
+// ================================================================
+// ============ SEARCH ============
+// ================================================================
 const searchInput=document.getElementById('search-input'), searchResults=document.getElementById('search-results'); let searchDebounce=null;
 searchInput.addEventListener('input',()=>{ clearTimeout(searchDebounce); const q=searchInput.value.trim(); if(q.length<2){ searchResults.classList.remove('show'); searchResults.innerHTML=''; return; } searchDebounce=setTimeout(()=>runSearch(q),300); });
 async function runSearch(qText){
@@ -1713,6 +1629,9 @@ function renderSearchResults(results){
 }
 document.addEventListener('click',(e)=>{ if(!e.target.closest('.search-shell')) searchResults.classList.remove('show'); });
 
+// ================================================================
+// ============ CHAT FUNCTIONS ============
+// ================================================================
 function chatIdFor(uidA,uidB){ return [uidA,uidB].sort().join('__'); }
 async function openChatWith(otherUser){
   const chatId=chatIdFor(state.uid,otherUser.id); state.currentChatId=chatId; state.currentChatUser=otherUser;
@@ -1726,6 +1645,9 @@ async function openChatWith(otherUser){
 }
 function listenToTyping(chatId){ if(state.unsubTyping){ fb.rtdb.off(fb.rtdb.ref(fb.db,`chats/${chatId}/typing`)); state.unsubTyping=null; } const {db,rtdb}=fb; state.unsubTyping=rtdb.onValue(rtdb.ref(db,`chats/${chatId}/typing`),(snap)=>{ state.typingUsers={}; if(snap.exists()){ const typingData=snap.val(); for(const[uid,isTyping]of Object.entries(typingData)){ if(uid!==state.uid&&isTyping) state.typingUsers[uid]=true; } } updateChatHeaderStatus(); }); }
 
+// ================================================================
+// ============ COMPOSER ============
+// ================================================================
 const composerInputEl = document.getElementById('composer-input');
 const sendBtnEl = document.getElementById('btn-send'); const sendBtnIcon = document.getElementById('btn-send-icon');
 const voiceRecordingBar = document.getElementById('voice-recording-bar'); const voiceRecTimer = document.getElementById('voice-rec-timer');
@@ -1742,6 +1664,9 @@ async function sendMessage(){
 }
 composerInputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
 
+// ================================================================
+// ============ VOICE RECORDING ============
+// ================================================================
 let voiceRecorder = null, voiceChunks = [], voiceStream = null, voiceStartTime = 0, voiceTimerInterval = null, voiceCancelled = false;
 let voiceUsingTouch = false, voiceIsBusy = false;
 function setRecordingUI(active){ sendBtnEl.classList.toggle('recording', active); voiceRecordingBar.classList.toggle('show', active); composerInputShell.style.display = active ? 'none' : 'flex'; }
@@ -1781,6 +1706,9 @@ sendBtnEl.addEventListener('click', ()=>{ if(sendBtnEl.dataset.mode==='send') se
 voiceRecCancelBtn.addEventListener('click', ()=>{ stopVoiceRecording(true); });
 document.addEventListener('visibilitychange', ()=>{ if(document.hidden&&voiceIsBusy&&voiceRecorder&&voiceRecorder.state==='recording') stopVoiceRecording(true); });
 
+// ================================================================
+// ============ VOICE PLAYBACK ============
+// ================================================================
 let currentPlayingAudio = null, currentPlayingBtn = null;
 function playVoiceMessage(url, btnEl){
   if(currentPlayingAudio && currentPlayingBtn === btnEl){ currentPlayingAudio.pause(); currentPlayingAudio=null; currentPlayingBtn=null; btnEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>'; return; }
@@ -1790,6 +1718,9 @@ function playVoiceMessage(url, btnEl){
   audio.play(); audio.onended = ()=>{ btnEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>'; currentPlayingAudio=null; currentPlayingBtn=null; };
 }
 
+// ================================================================
+// ============ MEDIA ATTACHMENTS ============
+// ================================================================
 const MAX_IMAGE_DIM = 1280;
 const IMAGE_QUALITY = 0.72;
 const MAX_VIDEO_BYTES = 8 * 1024 * 1024;
@@ -1931,6 +1862,9 @@ document.getElementById('media-viewer-close').addEventListener('click', ()=>{
   document.getElementById('media-viewer-content').innerHTML = '';
 });
 
+// ================================================================
+// ============ MESSAGES ============
+// ================================================================
 async function markMessagesAsRead(chatId){
   const {db,rtdb}=fb; const snap=await rtdb.get(rtdb.ref(db,`chats/${chatId}/messages`));
   if(!snap.exists()) return; const messages=snap.val(); const now=new Date().toISOString(); const updates={};
@@ -1975,6 +1909,9 @@ function listenToMessages(chatId){
   });
 }
 
+// ================================================================
+// ============ CONTEXT MENU ============
+// ================================================================
 const contextMenu = document.getElementById('context-menu'); const contextOverlay = document.getElementById('context-overlay');
 function showDeleteMenu(e, msgId, isMine){ if(!isMine) return; e.preventDefault(); state.selectedMsgId = msgId; const x = e.touches ? e.touches[0].clientX : e.clientX; const y = e.touches ? e.touches[0].clientY : e.clientY; contextMenu.style.left = Math.min(x, window.innerWidth - 200) + 'px'; contextMenu.style.top = Math.min(y, window.innerHeight - 120) + 'px'; contextMenu.classList.add('show'); contextOverlay.classList.add('show'); }
 function hideDeleteMenu(){ contextMenu.classList.remove('show'); contextOverlay.classList.remove('show'); state.selectedMsgId = null; }
@@ -1982,6 +1919,9 @@ contextOverlay.addEventListener('click', hideDeleteMenu);
 document.getElementById('delete-for-all').addEventListener('click', async ()=>{ if(!state.selectedMsgId||!state.currentChatId) return; hideDeleteMenu(); try { await fb.rtdb.remove(fb.rtdb.ref(fb.db,`chats/${state.currentChatId}/messages/${state.selectedMsgId}`)); showToast('🗑️ تم الحذف','success'); } catch(e){ showToast('مش قادرين نحذف','error'); } });
 document.getElementById('delete-for-me').addEventListener('click', async ()=>{ if(!state.selectedMsgId||!state.currentChatId) return; hideDeleteMenu(); try { await fb.rtdb.update(fb.rtdb.ref(fb.db,`chats/${state.currentChatId}/messages/${state.selectedMsgId}`),{[`deletedFor.${state.uid}`]:true}); showToast('🙈 تم الحذف','success'); } catch(e){ showToast('مش قادرين نحذف','error'); } });
 
+// ================================================================
+// ============ NAVIGATION ============
+// ================================================================
 document.getElementById('btn-back-chat').addEventListener('click',()=>{ if(state.unsubMessages){ fb.rtdb.off(fb.rtdb.ref(fb.db,`chats/${state.currentChatId}/messages`)); state.unsubMessages=null; } if(state.unsubTyping){ fb.rtdb.off(fb.rtdb.ref(fb.db,`chats/${state.currentChatId}/typing`)); state.unsubTyping=null; } state.currentChatUser=null; state.currentChatId=null; goTo('main'); });
 document.getElementById('my-avatar').addEventListener('click',()=>{ updateProfileStats(); goTo('profile'); });
 document.getElementById('btn-back-profile').addEventListener('click',()=>goTo('main'));
@@ -2004,6 +1944,9 @@ document.getElementById('btn-call').addEventListener('click', () => {
   startCall();
 });
 
+// ================================================================
+// ============ CHAT LIST ============
+// ================================================================
 function listenToChatList(){
   if(state.unsubChats){ fb.rtdb.off(fb.rtdb.ref(fb.db,'chats')); state.unsubChats=null; }
   const {db,rtdb}=fb; const listEl=document.getElementById('chat-list');
@@ -2027,44 +1970,33 @@ function updateProfileStats(){ document.getElementById('chat-count').textContent
 
 document.getElementById('btn-logout').addEventListener('click',()=>{ if(confirm('⚠️ متأكد؟')){ const {db,rtdb}=fb; rtdb.update(rtdb.ref(db,`users/${state.uid}`),{online:false,lastSeen:new Date().toISOString()}); localStorage.removeItem('heye_uid'); location.reload(); } });
 
-console.log('✅ Heye App - FIXED WebRTC Bidirectional Calls with Retry & Debug');
+console.log('✅ Heye App - LiveKit Voice Calls Enabled');
 
-// ===== FIX: إضافة إعادة محاولة مستمرة لـ ICE =====
-setInterval(() => {
-  if (state.callState.active && state.callState.peerConnection && iceQueue.length > 0) {
-    console.log('🔄 Periodic ICE drain, remaining:', iceQueue.length);
-    drainIceQueue();
+// ================================================================
+// ============ LIVEKIT STATUS CHECK ============
+// ================================================================
+setInterval(async () => {
+  if(state.liveKitRoom && state.liveKitRoom.state === 'connected') {
+    document.getElementById('livekit-dot').className = 'dot online';
+    document.getElementById('livekit-status-text').textContent = '✅ متصل بسيرفر المكالمات';
+  } else if(state.liveKitConnected && state.liveKitRoom) {
+    document.getElementById('livekit-dot').className = 'dot connecting';
+    document.getElementById('livekit-status-text').textContent = '🔄 جاري إعادة الاتصال...';
+    await connectToLiveKit();
+  } else if(!state.liveKitConnected && state.liveKitReady) {
+    document.getElementById('livekit-dot').className = 'dot offline';
+    document.getElementById('livekit-status-text').textContent = '❌ غير متصل - جاري المحاولة...';
+    await connectToLiveKit();
   }
-}, 3000);
+}, 10000);
 
-// ===== FIX: إعادة محاولة إرسال الـ Offer لو لسه ما اتبعتش =====
-setInterval(() => {
-  if (state.callState.active && state.callState.type === 'outgoing' && 
-      state.callState.offerSent && !state.callState.answerReceived &&
-      state.callState.connectionAttempts < state.callState.maxConnectionAttempts) {
-    console.log('🔄 Retrying offer...');
-    state.callState.connectionAttempts++;
-    createAndSendOffer();
-  }
-}, 5000);
-
-// ===== FIX: إعادة محاولة استقبال الـ Answer لو لسه موصلش =====
-setInterval(() => {
-  if (state.callState.active && state.callState.type === 'incoming' && 
-      state.callState.offerReceived && !state.callState.answerReceived &&
-      state.callState.connectionAttempts < state.callState.maxConnectionAttempts) {
-    console.log('🔄 Retrying answer...');
-    state.callState.connectionAttempts++;
-    // نعيد إرسال الـ answer
-    if (state.callState.peerConnection && state.callState.peerConnection.localDescription) {
-      const { db, rtdb } = fb;
-      rtdb.update(rtdb.ref(db, `calls/${state.uid}`), {
-        answer: { type: state.callState.peerConnection.localDescription.type, 
-                  sdp: state.callState.peerConnection.localDescription.sdp }
-      });
-    }
-  }
-}, 5000);
+// Initial LiveKit load
+(async function() {
+  await initLiveKit();
+  setTimeout(async () => {
+    await connectToLiveKit();
+  }, 5000);
+})();
 </script>
 </body>
 </html>
