@@ -1,9 +1,11 @@
 // firebase-messaging-sw.js
-// لازم يكون في جذر الموقع (نفس مكان index.html) عشان يشتغل صح
+// هذا الملف لازم يكون في نفس مجلد heye.html بالظبط (نفس المستوى)، وميتحطش جوا فولدر فرعي.
+// هو المسؤول عن إظهار الإشعارات لما التطبيق يكون مقفول أو التبويب مقفول خالص.
 
-importScripts("https://www.gstatic.com/firebasejs/12.15.0/firebase-app-compat.js");
-importScripts("https://www.gstatic.com/firebasejs/12.15.0/firebase-messaging-compat.js");
+importScripts('https://www.gstatic.com/firebasejs/12.15.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/12.15.0/firebase-messaging-compat.js');
 
+// ⚠️ لازم يكون نفس الإعدادات المستخدمة في heye.html بالظبط
 firebase.initializeApp({
   apiKey: "AIzaSyCsgyf5xsedwsemKeb_rIv7S-lwdPdhcbM",
   authDomain: "heye-ee886.firebaseapp.com",
@@ -16,43 +18,36 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// الإشعار وقت ما التطبيق يكون مقفول أو في الخلفية
+// بيشتغل لما تيجي رسالة والتطبيق مقفول أو في الخلفية
 messaging.onBackgroundMessage((payload) => {
-  const title = payload.notification?.title || "هيي";
-  const options = {
-    body: payload.notification?.body || "",
-    icon: "./icon-192.png",
-    badge: "./icon-192.png",
-    dir: "rtl",
-    lang: "ar",
-    data: payload.data || {},
-    vibrate: [200, 100, 200],
-    tag: payload.data?.chatId || "heye-msg",
-    renotify: true
+  const title = (payload.notification && payload.notification.title) || 'هيي - Heye';
+  const body = (payload.notification && payload.notification.body) || 'وصلتك رسالة جديدة';
+  const chatId = (payload.data && payload.data.chatId) || '';
+
+  const notificationOptions = {
+    body: body,
+    icon: './icon-192.png',
+    badge: './icon-192.png',
+    dir: 'rtl',
+    lang: 'ar',
+    tag: chatId || 'heye-message',
+    renotify: true,
+    data: { chatId, url: './' }
   };
-  self.registration.showNotification(title, options);
+
+  self.registration.showNotification(title, notificationOptions);
 });
 
-// لما المستخدم يدوس على الإشعار، يفتح التطبيق
+// لما المستخدم يدوس على الإشعار، يفتح/يركز التطبيق
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const chatId = event.notification.data?.chatId;
-  const urlToOpen = new URL('./', self.location.href).href;
-
+  const targetUrl = (event.notification.data && event.notification.data.url) || './';
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
-        if (client.url.includes(self.registration.scope) && 'focus' in client) {
-          if (chatId) client.postMessage({ type: 'OPEN_CHAT', chatId });
-          return client.focus();
-        }
+        if ('focus' in client) return client.focus();
       }
-      if (clients.openWindow) return clients.openWindow(urlToOpen);
+      if (clients.openWindow) return clients.openWindow(targetUrl);
     })
   );
-});
-
-// fetch handler بسيط (فاضي) - بعض المتصفحات بتشترط وجوده عشان تعتبر الموقع PWA قابل للتثبيت فعليًا
-self.addEventListener('fetch', (event) => {
-  // نسيب الطلبات تعدي عادي، مفيش تخزين مؤقت مخصص دلوقتي
 });
