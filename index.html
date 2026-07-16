@@ -91,6 +91,11 @@
   @keyframes float{0%,100%{transform:translateY(0px);}50%{transform:translateY(-6px);}}
   @keyframes storyPulse{0%,100%{box-shadow:0 0 0 0 rgba(201,162,75,0.5);}50%{box-shadow:0 0 0 8px rgba(201,162,75,0);}}
   @keyframes navItemPop{0%{transform:scale(1);}50%{transform:scale(1.15);}100%{transform:scale(1);}}
+  @keyframes waveAnimation{0%{transform:scaleY(0.4);}50%{transform:scaleY(1);}100%{transform:scaleY(0.4);}}
+  @keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(228,199,122,0.4);}50%{box-shadow:0 0 0 10px rgba(228,199,122,0);}}
+  @keyframes slideUpRecord{from{opacity:0;transform:translateY(20px) scale(0.95);}to{opacity:1;transform:translateY(0) scale(1);}}
+  @keyframes visualizerWave{0%{height:4px;}50%{height:18px;}100%{height:4px;}}
+  @keyframes voicePlayPulse{0%,100%{box-shadow:0 0 0 0 rgba(201,162,75,0.3);}50%{box-shadow:0 0 0 8px rgba(201,162,75,0);}}
 
   .glow-text{animation:glowPulse 3s ease-in-out infinite;}
   .float-anim{animation:float 3s ease-in-out infinite;}
@@ -173,19 +178,33 @@
   .mic-btn svg{width:19px;height:19px;}
   .mic-btn.recording{background:linear-gradient(160deg, var(--danger), #B54B39);animation:micPulse 1.4s ease-in-out infinite;}
   
-  .voice-recording-bar{display:none;align-items:center;gap:10px;flex:1;padding:8px 14px;background:var(--bg-panel);border:1.5px solid var(--danger);border-radius:24px;}
+  .voice-recording-bar{display:none;align-items:center;gap:10px;flex:1;padding:8px 14px;background:var(--bg-panel);border:1.5px solid var(--danger);border-radius:24px;animation:slideUpRecord 0.25s ease;}
   .voice-recording-bar.show{display:flex;}
   .voice-rec-dot{width:10px;height:10px;border-radius:50%;background:var(--danger);animation:recBlink 1s ease-in-out infinite;flex-shrink:0;}
   .voice-rec-timer{font-size:14px;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;flex-shrink:0;}
   .voice-rec-hint{flex:1;font-size:12.5px;color:var(--mute);text-align:center;}
   .voice-rec-cancel{flex-shrink:0;font-size:13px;color:var(--danger);font-weight:700;background:none;border:none;padding:4px 8px;}
   
-  .voice-msg{display:flex;align-items:center;gap:10px;min-width:190px;padding:4px 2px;}
-  .voice-msg-play-btn{width:36px;height:36px;border-radius:50%;background:rgba(201,162,75,.18);border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;}
-  .voice-msg-play-btn svg{width:16px;height:16px;}
-  .voice-msg-wave{flex:1;height:26px;display:flex;align-items:center;gap:2px;}
-  .voice-msg-wave span{width:2.5px;background:var(--gold);border-radius:2px;opacity:.5;flex-shrink:0;}
-  .voice-msg-duration{font-size:11px;color:var(--mute-2);flex-shrink:0;}
+  .voice-msg{display:flex;align-items:center;gap:12px;min-width:200px;padding:6px 4px;background:rgba(201,162,75,0.05);border-radius:12px;border:1px solid rgba(201,162,75,0.1);transition:all 0.3s ease;}
+  .voice-msg.playing{border-color:var(--gold);background:rgba(201,162,75,0.12);box-shadow:0 0 15px rgba(201,162,75,0.1);}
+  .voice-msg-play-btn{width:40px;height:40px;border-radius:50%;background:linear-gradient(160deg, var(--gold-soft), var(--gold));border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;box-shadow:0 2px 10px rgba(201,162,75,0.3);transition:all 0.2s ease;position:relative;}
+  .voice-msg-play-btn:active{transform:scale(0.9);}
+  .voice-msg-play-btn.playing{background:var(--bg-panel);border:1px solid var(--gold);box-shadow:0 2px 10px rgba(201,162,75,0.1);}
+  .voice-msg-play-btn .pulse-ring{position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--gold-soft);opacity:0;animation:voicePlayPulse 2s ease-in-out infinite;}
+  .voice-msg-play-btn.playing .pulse-ring{opacity:1;}
+  .voice-msg-play-btn svg{width:18px;height:18px;}
+  .voice-msg-play-btn.playing svg{color:var(--gold-soft);}
+  
+  .voice-msg-wave{flex:1;height:32px;display:flex;align-items:center;gap:2px;padding:0 4px;}
+  .voice-msg-wave span{width:3px;background:var(--mute-2);border-radius:2px;opacity:0.5;flex-shrink:0;animation:visualizerWave 0.8s ease-in-out infinite alternate;}
+  .voice-msg-wave span.active{background:var(--gold-soft);opacity:1;}
+  .voice-msg-wave span.active.play{animation-duration:0.4s;}
+  
+  .voice-msg-duration{font-size:11px;color:var(--mute);flex-shrink:0;font-variant-numeric:tabular-nums;min-width:32px;text-align:center;}
+  
+  .voice-msg .progress-track{position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--line-soft);border-radius:0 0 12px 12px;overflow:hidden;opacity:0;transition:opacity 0.3s ease;}
+  .voice-msg .progress-track.visible{opacity:1;}
+  .voice-msg .progress-track .fill{height:100%;background:linear-gradient(90deg, var(--gold), var(--gold-soft));border-radius:0 0 12px 12px;width:0%;transition:width 0.1s linear;}
   
   .attach-btn{width:38px;height:38px;border-radius:50%;border:none;flex-shrink:0;background:var(--bg-panel);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--mute);transition:all .2s ease;}
   .attach-btn:active{background:var(--bg-panel-2);transform:scale(.92);}
@@ -1509,7 +1528,14 @@ const state = {
   chatSearchIndex: 0,
   lastMessagesCache: {},
   selectedChatRowUid: null,
-  chatRowMenuChatId: null
+  chatRowMenuChatId: null,
+  voiceAudioContext: null,
+  voiceAnalyser: null,
+  voiceDataArray: null,
+  voiceAnimationFrame: null,
+  currentPlayingAudio: null,
+  currentPlayingBtn: null,
+  currentVoiceEl: null
 };
 
 let fb = null, fbReady = false;
@@ -2325,7 +2351,7 @@ function openViewersList(s){
   if(!entries.length){
     listEl.innerHTML = '<div style="text-align:center;color:var(--mute);padding:30px;font-size:13px;">محدش شاف الحالة دي لسه 👀</div>';
   } else {
-    listEl.innerHTML = entries.map(([uid,v])=>`<div class="svp-row"><div class="svp-avatar">${(v.name||'؟').charAt(0).toUpperCase()}</div><div class="svp-info"><div class="svp-name">${escapeHtml(v.name||'مستخدم')}</div><div class="svp-time">${formatLastSeen(v.viewedAt)}</div></div></div>`).join('');
+    listEl.innerHTML = entries.map(([uid,v]) => `<div class="svp-row"><div class="svp-avatar">${(v.name||'؟').charAt(0).toUpperCase()}</div><div class="svp-info"><div class="svp-name">${escapeHtml(v.name||'مستخدم')}</div><div class="svp-time">${formatLastSeen(v.viewedAt)}</div></div></div>`).join('');
   }
   document.getElementById('status-viewers-overlay').classList.add('show');
 }
@@ -2873,34 +2899,126 @@ composerInputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e
 
 let voiceRecorder = null, voiceChunks = [], voiceStream = null, voiceStartTime = 0, voiceTimerInterval = null, voiceCancelled = false;
 let voiceUsingTouch = false, voiceIsBusy = false;
-function setRecordingUI(active){ sendBtnEl.classList.toggle('recording', active); voiceRecordingBar.classList.toggle('show', active); composerInputShell.style.display = active ? 'none' : 'flex'; }
+
+// Enhanced voice recording UI
+function setRecordingUI(active){ 
+  sendBtnEl.classList.toggle('recording', active); 
+  voiceRecordingBar.classList.toggle('show', active); 
+  composerInputShell.style.display = active ? 'none' : 'flex';
+  if(active){
+    voiceRecordingBar.style.animation = 'none';
+    voiceRecordingBar.offsetHeight;
+    voiceRecordingBar.style.animation = 'slideUpRecord 0.25s ease';
+  }
+}
+
 async function startVoiceRecording(fromTouch){
-  if(!state.currentChatId){ showToast('افتح محادثة الأول','error'); return; } if(sendBtnEl.dataset.mode === 'send' || voiceIsBusy) return;
+  if(!state.currentChatId){ showToast('افتح محادثة الأول','error'); return; } 
+  if(sendBtnEl.dataset.mode === 'send' || voiceIsBusy) return;
   voiceUsingTouch = !!fromTouch; voiceIsBusy = true;
-  try { voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch(e){ voiceIsBusy = false; voiceStream = null; if(e.name === 'NotAllowedError') showMicPermissionModal(); else showToast('❌ فشل الوصول للمايك','error'); return; }
-  voiceChunks = []; voiceCancelled = false; voiceRecorder = new MediaRecorder(voiceStream);
+  try { 
+    voiceStream = await navigator.mediaDevices.getUserMedia({ audio: true }); 
+    // Create audio context for visualizer
+    if(!state.voiceAudioContext){
+      state.voiceAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+      state.voiceAnalyser = state.voiceAudioContext.createAnalyser();
+      state.voiceAnalyser.fftSize = 64;
+      state.voiceDataArray = new Uint8Array(state.voiceAnalyser.frequencyBinCount);
+    }
+    const source = state.voiceAudioContext.createMediaStreamSource(voiceStream);
+    source.connect(state.voiceAnalyser);
+    // Start visualizer
+    if(state.voiceAnimationFrame) cancelAnimationFrame(state.voiceAnimationFrame);
+    updateVoiceVisualizer();
+  } catch(e){ 
+    voiceIsBusy = false; voiceStream = null; 
+    if(e.name === 'NotAllowedError') showMicPermissionModal(); 
+    else showToast('❌ فشل الوصول للمايك','error'); 
+    return; 
+  }
+  voiceChunks = []; voiceCancelled = false; 
+  voiceRecorder = new MediaRecorder(voiceStream);
   voiceRecorder.ondataavailable = (e) => { if(e.data.size>0) voiceChunks.push(e.data); };
-  voiceRecorder.onstop = () => { if(!voiceCancelled) processAndSendVoice(); };
-  voiceRecorder.start(); voiceStartTime = Date.now(); setRecordingUI(true);
-  voiceTimerInterval = setInterval(()=>{ const elapsed = Math.floor((Date.now() - voiceStartTime) / 1000); voiceRecTimer.textContent = `${Math.floor(elapsed/60)}:${(elapsed%60).toString().padStart(2,'0')}`; }, 200);
+  voiceRecorder.onstop = () => { 
+    if(state.voiceAnimationFrame) cancelAnimationFrame(state.voiceAnimationFrame);
+    if(!voiceCancelled) processAndSendVoice(); 
+    // Clean up visualizer
+    const waveBars = document.querySelectorAll('.voice-recording-bar .voice-wave-bar');
+    waveBars.forEach(bar => { bar.style.height = '4px'; });
+  };
+  voiceRecorder.start(); 
+  voiceStartTime = Date.now(); 
+  setRecordingUI(true);
+  voiceTimerInterval = setInterval(()=>{ 
+    const elapsed = Math.floor((Date.now() - voiceStartTime) / 1000); 
+    const mins = Math.floor(elapsed/60);
+    const secs = elapsed%60;
+    voiceRecTimer.textContent = `${mins}:${secs.toString().padStart(2,'0')}`; 
+  }, 200);
 }
+
+function updateVoiceVisualizer(){
+  if(!state.voiceAnalyser || !state.voiceDataArray) return;
+  state.voiceAnalyser.getByteFrequencyData(state.voiceDataArray);
+  const bars = document.querySelectorAll('.voice-wave-bar');
+  bars.forEach((bar, i) => {
+    const value = state.voiceDataArray[i] || 0;
+    const height = Math.max(3, (value / 255) * 32);
+    bar.style.height = height + 'px';
+    bar.style.background = value > 150 ? 'var(--gold)' : value > 80 ? 'var(--gold-soft)' : 'var(--mute)';
+  });
+  state.voiceAnimationFrame = requestAnimationFrame(updateVoiceVisualizer);
+}
+
 async function stopVoiceRecording(cancel){
-  if(!voiceIsBusy) return; voiceCancelled = !!cancel; clearInterval(voiceTimerInterval);
-  if(voiceRecorder && voiceRecorder.state === 'recording'){ try { voiceRecorder.requestData(); } catch(e){} voiceRecorder.stop(); }
+  if(!voiceIsBusy) return; 
+  voiceCancelled = !!cancel; 
+  clearInterval(voiceTimerInterval);
+  if(state.voiceAnimationFrame) cancelAnimationFrame(state.voiceAnimationFrame);
+  if(voiceRecorder && voiceRecorder.state === 'recording'){ 
+    try { voiceRecorder.requestData(); } catch(e){} 
+    voiceRecorder.stop(); 
+  }
   if(voiceStream){ voiceStream.getTracks().forEach(t=>t.stop()); voiceStream=null; }
-  setRecordingUI(false); voiceIsBusy = false; if(voiceCancelled) voiceChunks=[];
+  setRecordingUI(false); 
+  voiceIsBusy = false; 
+  if(voiceCancelled) voiceChunks=[];
 }
+
 async function processAndSendVoice(){
   if(voiceCancelled || voiceChunks.length===0) return;
   const durationSec = Math.max(1, Math.floor((Date.now() - voiceStartTime) / 1000));
   if(durationSec < 1){ voiceChunks=[]; return; }
-  const blob = new Blob(voiceChunks, { type: 'audio/webm' }); const reader = new FileReader();
+  const blob = new Blob(voiceChunks, { type: 'audio/webm' }); 
+  const reader = new FileReader();
   reader.onload = async () => {
     const base64Audio = reader.result;
-    try { const { db, rtdb } = fb; const now = new Date().toISOString(); const newMsgRef = rtdb.push(rtdb.ref(db, `chats/${state.currentChatId}/messages`)); await rtdb.set(newMsgRef, { senderId: state.uid, senderName: state.displayName, type: 'voice', audioBase64: base64Audio, duration: durationSec, createdAt: now, deliveredAt: now }); await rtdb.update(rtdb.ref(db, `chats/${state.currentChatId}`), { lastMessage: '🎤 رسالة صوتية', lastMessageAt: now, lastSenderId: state.uid }); state.msgCount++; updateProfileStats(); } catch(e) { showToast('فشل الإرسال','error'); }
+    try { 
+      const { db, rtdb } = fb; 
+      const now = new Date().toISOString(); 
+      const newMsgRef = rtdb.push(rtdb.ref(db, `chats/${state.currentChatId}/messages`)); 
+      await rtdb.set(newMsgRef, { 
+        senderId: state.uid, 
+        senderName: state.displayName, 
+        type: 'voice', 
+        audioBase64: base64Audio, 
+        duration: durationSec, 
+        createdAt: now, 
+        deliveredAt: now 
+      }); 
+      await rtdb.update(rtdb.ref(db, `chats/${state.currentChatId}`), { 
+        lastMessage: '🎤 رسالة صوتية', 
+        lastMessageAt: now, 
+        lastSenderId: state.uid 
+      }); 
+      state.msgCount++; 
+      updateProfileStats(); 
+    } catch(e) { showToast('فشل الإرسال','error'); }
     voiceChunks = [];
-  }; reader.readAsDataURL(blob);
+  }; 
+  reader.readAsDataURL(blob);
 }
+
 sendBtnEl.addEventListener('touchstart', (e)=>{ if(sendBtnEl.dataset.mode!=='mic') return; e.preventDefault(); startVoiceRecording(true); }, {passive: false});
 sendBtnEl.addEventListener('touchend', (e)=>{ if(!voiceUsingTouch) return; e.preventDefault(); stopVoiceRecording(false); }, {passive: false});
 sendBtnEl.addEventListener('touchcancel', ()=>{ if(voiceUsingTouch) stopVoiceRecording(true); });
@@ -2910,14 +3028,136 @@ sendBtnEl.addEventListener('click', ()=>{ if(sendBtnEl.dataset.mode==='send') se
 voiceRecCancelBtn.addEventListener('click', ()=>{ stopVoiceRecording(true); });
 document.addEventListener('visibilitychange', ()=>{ if(document.hidden&&voiceIsBusy&&voiceRecorder&&voiceRecorder.state==='recording') stopVoiceRecording(true); });
 
-let currentPlayingAudio = null, currentPlayingBtn = null;
-function playVoiceMessage(url, btnEl){
-  if(currentPlayingAudio && currentPlayingBtn === btnEl){ currentPlayingAudio.pause(); currentPlayingAudio=null; currentPlayingBtn=null; btnEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>'; return; }
-  if(currentPlayingAudio){ currentPlayingAudio.pause(); if(currentPlayingBtn) currentPlayingBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>'; }
-  const audio = new Audio(url); currentPlayingAudio=audio; currentPlayingBtn=btnEl;
-  btnEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><rect x="6" y="5" width="4" height="14" fill="currentColor"/><rect x="14" y="5" width="4" height="14" fill="currentColor"/></svg>';
-  audio.play(); audio.onended = ()=>{ btnEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>'; currentPlayingAudio=null; currentPlayingBtn=null; };
+// Enhanced voice message playback with progress bar and wave animation
+function playVoiceMessageWithProgress(audioSrc, btnEl, msgContainer){
+  if(state.currentPlayingAudio && state.currentPlayingBtn === btnEl){
+    state.currentPlayingAudio.pause();
+    state.currentPlayingAudio = null;
+    state.currentPlayingBtn = null;
+    btnEl.classList.remove('playing');
+    btnEl.querySelector('svg').innerHTML = '<path d="M8 5v14l11-7z" fill="currentColor"/>';
+    const progressTrack = msgContainer.querySelector('.voice-msg-progress');
+    if(progressTrack) progressTrack.style.display = 'none';
+    return;
+  }
+  
+  if(state.currentPlayingAudio){
+    state.currentPlayingAudio.pause();
+    if(state.currentPlayingBtn){
+      state.currentPlayingBtn.classList.remove('playing');
+      state.currentPlayingBtn.querySelector('svg').innerHTML = '<path d="M8 5v14l11-7z" fill="currentColor"/>';
+    }
+  }
+  
+  const audio = new Audio(audioSrc);
+  state.currentPlayingAudio = audio;
+  state.currentPlayingBtn = btnEl;
+  btnEl.classList.add('playing');
+  btnEl.querySelector('svg').innerHTML = '<rect x="6" y="5" width="4" height="14" fill="currentColor"/><rect x="14" y="5" width="4" height="14" fill="currentColor"/>';
+  
+  // Show progress bar
+  let progressTrack = msgContainer.querySelector('.voice-msg-progress');
+  if(!progressTrack){
+    progressTrack = document.createElement('div');
+    progressTrack.className = 'voice-msg-progress';
+    progressTrack.innerHTML = '<div class="fill" style="width:0%"></div>';
+    msgContainer.style.position = 'relative';
+    msgContainer.appendChild(progressTrack);
+  }
+  progressTrack.style.display = 'block';
+  const fill = progressTrack.querySelector('.fill');
+  fill.style.width = '0%';
+  
+  // Animate wave bars
+  const waveBars = msgContainer.querySelectorAll('.voice-msg-wave span');
+  waveBars.forEach(bar => bar.classList.add('active', 'play'));
+  
+  audio.play();
+  audio.ontimeupdate = () => {
+    if(audio.duration){
+      const pct = (audio.currentTime / audio.duration) * 100;
+      fill.style.width = pct + '%';
+    }
+  };
+  audio.onended = () => {
+    btnEl.classList.remove('playing');
+    btnEl.querySelector('svg').innerHTML = '<path d="M8 5v14l11-7z" fill="currentColor"/>';
+    state.currentPlayingAudio = null;
+    state.currentPlayingBtn = null;
+    fill.style.width = '100%';
+    setTimeout(() => { progressTrack.style.display = 'none'; }, 500);
+    waveBars.forEach(bar => bar.classList.remove('play'));
+  };
+  audio.onerror = () => {
+    btnEl.classList.remove('playing');
+    btnEl.querySelector('svg').innerHTML = '<path d="M8 5v14l11-7z" fill="currentColor"/>';
+    state.currentPlayingAudio = null;
+    state.currentPlayingBtn = null;
+    progressTrack.style.display = 'none';
+    showToast('❌ فشل تشغيل الصوت','error');
+  };
 }
+
+function buildVoiceMessageHTML(audioSrc, duration, msgId){
+  const mm = Math.floor(duration/60), ss = duration%60;
+  const bars = Array.from({length: 28}).map((_,i) => {
+    const h = 4 + Math.round(Math.abs(Math.sin(i*1.7 + 0.3)) * 12);
+    const delay = (i * 0.02).toFixed(2);
+    return `<span style="height:${h}px;animation-delay:${delay}s;"></span>`;
+  }).join('');
+  return `<div class="voice-msg" data-msgid="${msgId}">
+    <button class="voice-msg-play-btn" data-url="${escapeAttr(audioSrc)}">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+    </button>
+    <div class="voice-msg-wave">${bars}</div>
+    <div class="voice-msg-duration">${mm}:${ss.toString().padStart(2,'0')}</div>
+    <div class="voice-msg-progress" style="display:none;"><div class="fill" style="width:0%"></div></div>
+  </div>`;
+}
+
+let currentPlayingAudio = null, currentPlayingBtn = null;
+
+function initVoicePlaybackHandlers(container){
+  container.querySelectorAll('.voice-msg').forEach(msgContainer => {
+    const btn = msgContainer.querySelector('.voice-msg-play-btn');
+    if(btn && !btn.dataset.listener){
+      btn.dataset.listener = 'true';
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const audioSrc = btn.dataset.url;
+        if(audioSrc) playVoiceMessageWithProgress(audioSrc, btn, msgContainer);
+      });
+    }
+  });
+}
+
+// Override the original playVoiceMessage function with enhanced version
+function playVoiceMessage(url, btnEl){
+  // Find parent voice-msg container
+  const msgContainer = btnEl.closest('.voice-msg');
+  if(msgContainer) {
+    playVoiceMessageWithProgress(url, btnEl, msgContainer);
+  } else {
+    // Fallback to simple version
+    if(currentPlayingAudio && currentPlayingBtn === btnEl){
+      currentPlayingAudio.pause();
+      currentPlayingAudio = null;
+      currentPlayingBtn = null;
+      btnEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>';
+      return;
+    }
+    if(currentPlayingAudio){ currentPlayingAudio.pause(); if(currentPlayingBtn) currentPlayingBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>'; }
+    const audio = new Audio(url);
+    currentPlayingAudio = audio;
+    currentPlayingBtn = btnEl;
+    btnEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><rect x="6" y="5" width="4" height="14" fill="currentColor"/><rect x="14" y="5" width="4" height="14" fill="currentColor"/></svg>';
+    audio.play();
+    audio.onended = ()=>{ btnEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>'; currentPlayingAudio=null; currentPlayingBtn=null; };
+  }
+}
+
+// ============ REST OF CODE (media upload, search, etc.) ============
+// ... (keep all other existing functions: handleMediaFileChosen, downloadMedia, openMediaViewer, etc.)
 
 const MAX_IMAGE_DIM = 1280;
 const IMAGE_QUALITY = 0.72;
@@ -3135,7 +3375,13 @@ function buildBubbleContent(m, msgId){
   if(m.forwarded){ replyHtml = `<div style="font-size:11px;color:var(--mute-2);margin-bottom:4px;display:flex;align-items:center;gap:4px;">↪️ رسالة معاد توجيهها</div>` + replyHtml; }
   const reactionsHtml = buildReactionsHtml(m, msgId);
   if(m.type === 'call'){ const isMissed = m.callStatus === 'missed'; return replyHtml + `<div class="call-bubble"><span class="call-bubble-icon">${isMissed?'📞❌':'📞'}</span><div><div>${isMissed?'مكالمة فائتة':(m.duration?`مكالمة ${formatCallDuration(m.duration)}`:'مكالمة')}</div><div class="call-bubble-duration">${m.duration?formatCallDuration(m.duration):''}</div></div></div>` + reactionsHtml; }
-  if(m.type === 'voice'){ const audioSrc = m.audioUrl || m.audioBase64 || ''; if(audioSrc){ const dur = m.duration || 0; const mm = Math.floor(dur/60), ss = dur%60; const bars = Array.from({length: 24}).map((_,i)=>{ const h = 6 + Math.round(Math.abs(Math.sin(i*1.7))*16); return `<span style="height:${h}px;"></span>`; }).join(''); return replyHtml + `<div class="voice-msg"><button class="voice-msg-play-btn" data-url="${escapeAttr(audioSrc)}"><svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></button><div class="voice-msg-wave">${bars}</div><div class="voice-msg-duration">${mm}:${ss.toString().padStart(2,'0')}</div></div>` + reactionsHtml; } }
+  if(m.type === 'voice'){ 
+    const audioSrc = m.audioUrl || m.audioBase64 || ''; 
+    if(audioSrc){ 
+      const dur = m.duration || 0; 
+      return replyHtml + buildVoiceMessageHTML(audioSrc, dur, msgId) + reactionsHtml; 
+    } 
+  }
   if(m.type === 'image'){ const src = m.mediaBase64 || ''; const cap = m.caption ? `<div class="msg-media-caption">${escapeHtml(m.caption)}</div>` : ''; const fileName = m.fileName || `image_${Date.now()}.jpg`; return replyHtml + `<div class="msg-image-bubble" data-media-url="${escapeAttr(src)}" data-media-type="image" data-media-caption="${escapeAttr(m.caption||'')}" data-file-name="${escapeAttr(fileName)}"><img src="${escapeAttr(src)}" alt="صورة" loading="lazy"><div class="image-download-overlay"><button class="download-btn" onclick="event.stopPropagation(); window.downloadMediaFromMsg('${escapeAttr(src)}','${escapeAttr(fileName)}','image')">📥 تحميل</button></div></div>${cap}` + reactionsHtml; }
   if(m.type === 'video'){ const src = m.mediaBase64 || ''; const cap = m.caption ? `<div class="msg-media-caption">${escapeHtml(m.caption)}</div>` : ''; const fileName = m.fileName || `video_${Date.now()}.mp4`; return replyHtml + `<div class="msg-video-bubble" data-media-url="${escapeAttr(src)}" data-media-type="video" data-media-caption="${escapeAttr(m.caption||'')}" data-file-name="${escapeAttr(fileName)}"><video src="${escapeAttr(src)}" muted playsinline preload="metadata"></video><div class="msg-video-play-badge"><svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="#fff"/></svg></div><div class="video-download-overlay"><button class="download-btn" onclick="event.stopPropagation(); window.downloadMediaFromMsg('${escapeAttr(src)}','${escapeAttr(fileName)}','video')">📥 تحميل</button></div></div>${cap}` + reactionsHtml; }
   return replyHtml + `<span class="msg-text-content">${escapeHtml(m.text || '')}</span>` + reactionsHtml;
@@ -3173,7 +3419,10 @@ function listenToMessages(chatId){
       html+=`<div class="bubble-row ${mine?'me':'them'}"><div class="bubble ${mine?'me':'them'} ${msgClass}" data-msgid="${msgId}" data-mine="${mine}">${buildBubbleContent(m, msgId)}<div class="msg-footer"><span class="msg-time">${time}</span>${mine?getMessageStatusIcon(m):''}</div></div></div>`;
     });
     container.innerHTML=html; container.scrollTop=container.scrollHeight;
-    container.querySelectorAll('.voice-msg-play-btn').forEach(btn=>{ btn.addEventListener('click', (e)=>{ e.stopPropagation(); playVoiceMessage(btn.dataset.url, btn); }); });
+    
+    // Initialize voice playback handlers
+    initVoicePlaybackHandlers(container);
+    
     container.querySelectorAll('.msg-image-bubble, .msg-video-bubble').forEach(el=>{ el.addEventListener('click', (e)=>{ e.stopPropagation(); openMediaViewer(el.dataset.mediaUrl, el.dataset.mediaType, el.dataset.mediaCaption, el.dataset.fileName); }); });
     container.querySelectorAll('.msg-reaction-pill').forEach(pill=>{ pill.addEventListener('click', (e)=>{ e.stopPropagation(); toggleQuickReaction(pill.dataset.msgid, pill.dataset.emoji); }); });
     container.querySelectorAll('.bubble').forEach(el=>{
@@ -3495,7 +3744,7 @@ document.getElementById('confirm-cancel-btn').addEventListener('click', ()=>{ co
 document.getElementById('confirm-ok-btn').addEventListener('click', async ()=>{ const cb = confirmCallback; confirmOverlay.classList.remove('show'); confirmCallback = null; if(cb) await cb(); });
 confirmOverlay.addEventListener('click', (e)=>{ if(e.target === confirmOverlay){ confirmOverlay.classList.remove('show'); confirmCallback = null; } });
 
-console.log('✅ Heye App v2.4 - حالات حقيقية مع تتبع المشاهدات');
+console.log('✅ Heye App v3.2 - Enhanced Voice Recording & Playback');
 </script>
 </body>
 </html>
